@@ -76,17 +76,20 @@
 
 \begin{document}
 
-\title{TEXT}
+\title{phydra V1 - a flexible open-source marine ecosystem modeling python package}
 
 
 % \Author[affil]{given_name}{surname}
 
-\Author[]{}{}
-\Author[]{}{}
-\Author[]{}{}
+\Author[1]{Benjamin}{Post}
 
-\affil[]{ADDRESS}
-\affil[]{ADDRESS}
+\Author[1]{alphabetical order (for now): Ago}{}
+\Author[2]{Andrew }{}
+\Author[1]{Esteban}{}
+
+
+\affil[1]{Leibniz Centre for Tropical Marine Research (ZMT), Bremen, Germany}
+\affil[2]{Scripps Institution of Oceanography, La Jolla, CA, United States}
 
 %% The [] brackets identify the author with the corresponding affiliation. 1, 2, 3, etc. should be inserted.
 
@@ -95,7 +98,7 @@
 %% If authors contributed equally, please mark the respective author names with an asterisk, e.g. "\Author[2,*]{Anton}{Aman}" and "\Author[3,*]{Bradley}{Bman}" and add a further affiliation: "\affil[*]{These authors contributed equally to this work.}".
 
 
-\correspondence{NAME (EMAIL)}
+\correspondence{Benjamin Post (benjamin.post@leibniz-zmt.de)}
 
 \runningtitle{TEXT}
 
@@ -125,27 +128,61 @@ TEXT
 \end{abstract}
 
 
-\copyrightstatement{TEXT}
+\copyrightstatement{CC BY 4.0}
 
 
 \introduction  %% \introduction[modified heading if necessary]
+
+- ocean ecosystem, understanding important, global change (important part of climate models)
+
+- lots of models, in lots of (often old) programming languages, varying implementations
+
+- all different, hidden (+very complex) codebase, not easy to adapt & modify
+
+- phydra: easy to use, open source, easy to modify, toolbox
+
+Here, we demonstrate the usage of the phydra v1 package in a simple NPZD setting and to showcase the flexibility, in a more complex size based trophic structure model. Both in slab physics.
+
+The package can be used for any model setting, so far only slab physics are hard-coded in package.
+
+Ultility of phydra v1 is showcased in a parameter fitting for Use Case I
+
+Flexibility is showcased in Use Case II, where physical setting is kept the same, but multiple FTs added.
+
+Finally, the relevance of this work and potential next steps are discussed.
+
+\section{Package Description}
+TEXT
+
+\section{Use Cases}
+TEXT
+
+\subsection{Use Case I: NPZD}
+% I could try to create one jupyter notebook for each of the results and examples
+% these leverage the package! and provide clear usage examples, well documented
+TEXT
+
+\subsubsection{Model Structure: NPZD}
 TEXT
 
 
-\section{HEADING}
+\subsection{Use Case II: Size-based trophic structure}
 TEXT
 
 
-\subsection{HEADING}
-TEXT
-
-
-\subsubsection{HEADING}
+\subsubsection{Model Structure: Size-based trophic structure}
 TEXT
 
 
 \conclusions  %% \conclusions[modified heading if necessary]
-TEXT
+
+- This is a first step in the direction
+
+- package architecture should be merged with other open-source python efforts (xsimlab, veros-bgcm)
+
+- want to make the first step, hoping that people will adopt and contribute
+
+- clearly: should add 1D -> 3D capabilities in the future
 
 %% The following commands are for the statements about the availability of data sets and/or software code corresponding to the manuscript.
 %% It is strongly recommended to make use of these sections in case data sets and/or software code have been part of your research the article is based on.
@@ -206,21 +243,21 @@ TEXT
 
 %% The reference list is compiled as follows:
 
-\begin{thebibliography}{}
+%% \begin{thebibliography}{}
 
-\bibitem[AUTHOR(YEAR)]{LABEL1}
-REFERENCE 1
+%% \bibitem[AUTHOR(YEAR)]{LABEL1}
+%% REFERENCE 1
 
-\bibitem[AUTHOR(YEAR)]{LABEL2}
-REFERENCE 2
+%% \bibitem[AUTHOR(YEAR)]{LABEL2}
+%% REFERENCE 2
 
-\end{thebibliography}
+%% \end{thebibliography}
 
 %% Since the Copernicus LaTeX package includes the BibTeX style file copernicus.bst,
 %% authors experienced with BibTeX only have to include the following two lines:
 %%
-%% \bibliographystyle{copernicus}
-%% \bibliography{example.bib}
+\bibliographystyle{copernicus}
+\bibliography{references.bib}
 %%
 %% URLs and DOIs can be entered in your BibTeX file as:
 %%
