@@ -9,7 +9,7 @@
 %% Please use the following documentclass and journal abbreviations for discussion papers and final revised papers.
 
 %% 2-column papers and discussion papers
-\documentclass[journal abbreviation, manuscript]{copernicus}
+\documentclass[journal abbreviations, manuscript]{copernicus}
 
 
 
@@ -76,7 +76,7 @@
 
 \begin{document}
 
-\title{phydra V1 - a flexible open-source marine ecosystem modeling python package}
+\title{phydra V1 - an object-oriented python package for reproducible and flexible marine ecosystem modeling}
 
 
 % \Author[affil]{given_name}{surname}
@@ -86,6 +86,8 @@
 \Author[1]{alphabetical order (for now): Ago}{}
 \Author[2]{Andrew }{}
 \Author[1]{Esteban}{}
+
+\Author[3]{Benoît}{}
 
 
 \affil[1]{Leibniz Centre for Tropical Marine Research (ZMT), Bremen, Germany}
@@ -123,66 +125,147 @@
 
 
 
-\begin{abstract}
-TEXT
+\begin{abstract} [Just collecting ideas:] 
+phydra is an open-source object-oriented python package for modeling marine ecosystems, based on the xarray-simlab framework, with the goal to support efficient, open and easily reproducible model development. 
+
+The library provides pre-built model components that can be used to assemble complex marine ecosystem models. All basic processes can be adapted and modified using python to describe different and more complex ecosystems. 
+
+By being embedded within the xarray-simlab framework, phydra benefits from compatibilities with other scientific python packages, such as dask for parallel computing, xarray and zarr for handling large datasets, and further plotting and data analysis functionalities. 
+
+Here, we demonstrate the usage of the phydra v1 package in a simple NPZD setting and to showcase the flexibility, in a more complex size based trophic structure model. Both in slab physics.
+//
+The utility of the phydra package is here shown via three model implementations. Two models from literature are recreated, and the flexible nature of this package allows a combination of as a third example. 
 \end{abstract}
 
 
 \copyrightstatement{CC BY 4.0}
 
 
+
+
+
+
+ %% \ INTRO
 \introduction  %% \introduction[modified heading if necessary]
 
+\subsection{Marine ecosystem modeling}
+
+\subsubsection{Biogeochemical role of phytoplankton}
 - ocean ecosystem, understanding important, global change (important part of climate models)
 
-- lots of models, in lots of (often old) programming languages, varying implementations
+\subsubsection{From NPZD to DARWIN}
+quote Gentleman history of marine ecosystem modeling
 
+
+\subsection{Open science means open source}
+- lots of models, in lots of (often old) programming languages, varying implementations
 - all different, hidden (+very complex) codebase, not easy to adapt & modify
 
+- but development in data science & other computer science areas, towards reproducible tools, towards shared frameworks and capabilities (like Benoît said in his blog post)
+"easy to use, open source, easy to modify, toolbox"
+- python Pangeo software ecosystem (jupyter, xarray, zarr)
+
+\subsubsection{Xarray-simlab: object-oriented modeling framework}
+- Further detail on the xarray-simlab framework used for phydra!
+
+\subsubsection{phydra package}
 - phydra: easy to use, open source, easy to modify, toolbox
 
+quick intro, and set aim!
+
 Here, we demonstrate the usage of the phydra v1 package in a simple NPZD setting and to showcase the flexibility, in a more complex size based trophic structure model. Both in slab physics.
-
 The package can be used for any model setting, so far only slab physics are hard-coded in package.
-
 Ultility of phydra v1 is showcased in a parameter fitting for Use Case I
-
 Flexibility is showcased in Use Case II, where physical setting is kept the same, but multiple FTs added.
-
 Finally, the relevance of this work and potential next steps are discussed.
 
-\section{Package Description}
+Here, we demonstrate the usage of the phydra v1 package in a simple NPZD setting and to showcase the flexibility, in a more complex size based trophic structure model. Both in slab physics.
+//
+The utility of the phydra package is here shown via three model implementations. Two models from literature are recreated, and the flexible nature of this package allows a combination of as a third example. 
+
+
+
+
+
+
+
+
+ %% \ SECTION 2
+\section{The phydra package: structure \& features}
+
+now explain in detail what the package is \& can do, what the structure is like
+
+\subsection{Processes}
+in xarray-simlab, (almost) everything is a process
+
+\subsubsection{Components}
+\subsubsection{Flows}
+\subsubsection{Forcing & Physical Environment}
+
+\subsection{Model development workflow}
+show FIGURE 1 here, package schematic.
+
+general explanation, and then go into detail below
+
+% Everything below here is optional, it depends on what I can actually do in the package
+\subsubsection{Dimensionality}
 TEXT
 
-\section{Use Cases}
+\subsubsection{Runtime}
 TEXT
 
-\subsection{Use Case I: NPZD}
-% I could try to create one jupyter notebook for each of the results and examples
-% these leverage the package! and provide clear usage examples, well documented
-TEXT
+\subsubsection{Model Diagnostics}
+this is a relevant section, if Benoît can help me with creating the ODE visualization & model diagnostics.
+
+\subsubsection{Parameter fitting}
+this is a relevant section, if i manage to get some decent parameter fitting results for the example 1 and 3.. either only 3 or both, is my feeling. 
+
+
+
+
+
+
+
+
+ %% \ SECTION 3
+\section{Example model implementations}
+- jupyter notebook for each example
+
+\subsection{Methods}
+%  quickly explain overview, explain methods for all of them shortly, with schematics, and put full system of equations & parameter tables in the Appendix!
 
 \subsubsection{Model Structure: NPZD}
-TEXT
+
+\subsubsection{Model Structure: Size-structured chemostat}
+
+\subsubsection{Model Structure: Size-structured slab}
+
+% then move on to Results:
+\subsection{Results}
+
+\subsubsection{NPZD slab model}
+
+\subsubsection{Size-structured NP40Z40 chemostat model}
+
+\subsection{Size-structured NP20Z20D slab model}
 
 
-\subsection{Use Case II: Size-based trophic structure}
-TEXT
 
 
-\subsubsection{Model Structure: Size-based trophic structure}
-TEXT
+
 
 
 \conclusions  %% \conclusions[modified heading if necessary]
 
 - This is a first step in the direction
 
-- package architecture should be merged with other open-source python efforts (xsimlab, veros-bgcm)
+- package architecture should be merged with other open-source python efforts (veros-bgcm, BGC-val)
+
+- xsimlab is a powerful framework that is actively developed further, more added compabilities
 
 - want to make the first step, hoping that people will adopt and contribute
 
-- clearly: should add 1D -> 3D capabilities in the future
+- clearly: should add 1D -> 3D example models in the future
 
 %% The following commands are for the statements about the availability of data sets and/or software code corresponding to the manuscript.
 %% It is strongly recommended to make use of these sections in case data sets and/or software code have been part of your research the article is based on.
