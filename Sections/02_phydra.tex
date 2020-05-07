@@ -4,6 +4,11 @@
 
  %% \ SECTION 2
 \section{The phydra package: structure \& features}
+Andrew's comments: (THIS IS METHODS)
+- describe modeling framework and details how you built everything
+- 
+
+
 
 - now explain in detail what the package is \& can do, what the structure is like
 
@@ -30,7 +35,7 @@ in xarray-simlab, (almost) everything is a process.
 %%f
 \begin{figure*}[t]
 \includegraphics[width=12cm]{Figures/firstdraft_schematics/01__schematics_phydra.pdf}
-\caption{Note by Andrew: You will need a much more illuminating figure caption here that describes each step (1, 2, etc) as well as the acronyms/terms (xarray-simlab) and variables (P, Z, D, etc)}
+\caption{The phydra package is embedded within the xarray-simlab framework. phydra contains a library of physical settings (1), components (i.e. state variables) (2), fluxes (3) and forcing variables (4), that can be combined and reused to create an xarray-simlab model instance. Xarray-simlab provides the functionality to define the model (5) from processes in the phydra library, supply parameters and create an xarray input (6), then run the model (7) and the resulting output is dynamically stored in another xarray, with fully labeled dimensions and containing all parameters.}
 \label{phydraschematics}
 \end{figure*}
 
