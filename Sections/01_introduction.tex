@@ -2,31 +2,25 @@
 
 \begin{document}
 \introduction  %% \introduction[modified heading if necessary]
-
 % introduction should be adundantly clear with no unecessary details!
-ANdrew notes:
-- P1: why phytoplankton important?
-- P2: why people model phytoplankton? (what are the types of model we use? npzd, pft, size, darwin, etc.)
-- P3: all these different models, what is the problem? [Motivation for a better toolkit]
-- P4: Here's my solution! Here I present flexible model framework. explain basic structure and function
-"In this paper, we (a) describe modeling approach, (b) apply modeling approach in 3 examples"
+% can also mention open source, but just high-level summaries, same on phydra details, no detail in intro
+% establish, why what you make is different from everything done before. why it is important! (2 sentences)
 
-can also mention open source, but just high-level summaries, same on phydra details, no detail in intro
-
-establish, why what you make is different from everything done before. why it is important! (2 sentences)
-
-2nd Section:
-Background, theoretical framework. Specifics here!
+% 2nd Section:
+% Background, theoretical framework. Specifics here!
 
 
 \subsection{Biogeochemical role of phytoplankton}
+%- P1: why phytoplankton important?
 - ocean ecosystem, understanding important, global change (important part of climate models)
 
-\subsection{From NPZD to DARWIN}
+\subsection{Phytoplankton modeling: From NPZD to DARWIN}
+%- P2: why people model phytoplankton? (what are the types of model we use? npzd, pft, size, darwin, etc.)
 quote Gentleman history of marine ecosystem modeling
 
+\subsection{Running against walls}
+%- P3: all these different models, what is the problem? [Motivation for a better toolkit]
 
-\subsection{Open science means open source}
 - lots of models, in lots of (often old) programming languages, varying implementations
 - all different, hidden (+very complex) codebase, not easy to adapt \& modify
 
@@ -35,11 +29,9 @@ quote Gentleman history of marine ecosystem modeling
 "easy to use, open source, easy to modify, toolbox"
 - python Pangeo software ecosystem (jupyter, xarray, zarr)
 
-\subsubsection{Xarray-simlab: object-oriented modeling framework}
-- Further detail on the xarray-simlab framework used for phydra!
+\subsection{the phydra package}
+%- P4: Here's my solution! Here I present flexible model framework. explain basic structure and function
 
-\subsubsection{phydra package}
-- phydra: easy to use, open source, easy to modify, toolbox
 
 quick intro, and set aim!
 
@@ -52,6 +44,14 @@ Finally, the relevance of this work and potential next steps are discussed.
 Here, we demonstrate the usage of the phydra v1 package in a simple NPZD setting and to showcase the flexibility, in a more complex size based trophic structure model. Both in slab physics.
 //
 The utility of the phydra package is here shown via three model implementations. Two models from literature are recreated, and the flexible nature of this package allows a combination of as a third example. 
+
+
+"In this paper, we (a) describe modeling approach, (b) apply modeling approach in 3 examples"
+
+can also mention open source, but just high-level summaries, same on phydra details, no detail in intro
+
+establish, why what you make is different from everything done before. why it is important! (2 sentences)
+
 
 \end{document}
 

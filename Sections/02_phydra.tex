@@ -4,17 +4,22 @@
 
  %% \ SECTION 2
 \section{The phydra package: structure \& features}
+% 2nd Section:
+% Background, theoretical framework. Specifics here!
+
 Andrew's comments: (THIS IS METHODS)
 - describe modeling framework and details how you built everything
-- 
-
-
-
 - now explain in detail what the package is \& can do, what the structure is like
-
 - clarify that it is situated in complexity between custom scripts and modeling tools with graphical interfaces. It would be possible to design a graphical interface for this later on, but that is not the target audience.
 
-\subsection{Processes}
+
+\subsection{Xarray-simlab: object-oriented modeling framework}
+- Further detail on the xarray-simlab framework used for phydra!
+
+\subsection{phydra package}
+- phydra: easy to use, open source, easy to modify, toolbox
+
+\subsubsection{Processes}
 in xarray-simlab, (almost) everything is a process.
 - in the following sections, introduce the specific implementation of xarray-simlab processes within phydra, what is actually implemented in v1 and how it can be modified and used.
 
@@ -48,7 +53,7 @@ general explanation, and then go into detail below (see Figure \ref{phydraschema
 
 \subsubsection{Runtime}
 - explain what the options are to run the model, depends on if a time implicit method will be added to solve, or if it will just remain with the time explicit steps of xarray-simlab
-- mention that xarray-simlab is general enought to support IBMs! But not developed here.
+- mention that xarray-simlab is general enough to support IBMs! But not developed here.
 
 \subsubsection{Model Diagnostics}
 - this is a relevant section, *if* Benoît can help me with creating the ODE visualization & model diagnostics.

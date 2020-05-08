@@ -1,0 +1,66 @@
+\documentclass[journal abbreviation, manuscript]{copernicus}
+
+
+\begin{document}
+
+\begin{table*}[t]
+\caption{Symbols used in model equations}
+\begin{tabular}{c c c}
+Symbol & Meaning & Unit\\
+\tophline
+$K$ & material exchange between mixed and bottom layer & $\unit{d^{-1}}$ \\
+$N_0$ & nutrient concentration right below mixed layer & $\unit{µM N}$ \\
+% TODO: change all square brackets to \unit{  }
+$\beta$ & absorption efficiency of zooplankton grazing &  \\
+$k_{NZ}$ & net production efficiency of zooplankton grazing &  \\
+$G_P$ & total biomass of phytoplankton grazed by zooplankton & $[µM N]$ \\
+$G_D$ & total biomass of detritus grazed by zooplankton & $[µM N]$ \\
+$m_D$ & remineralisation rate of detritus & $[d^{-1}]$ \\
+$\mu_{max}(T)$ & temperature-dependent max. growth rate of phytoplankton & $[d^{-1}]$ \\
+$\gamma_I$ & light limitation of phytoplankton growth &  \\
+$\gamma_N$ & nutrient limitation of phytoplankton growth &  \\
+$m_P$ & linear mortality of phytoplankton & $[d^{-1}]$ \\
+$m_{P2}$ & quadratic mortality of phytoplankton & $[d^{-1}]$ \\
+$m_Z$ & linear mortality of zooplankton & $[d^{-1}]$ \\
+$m_{Z2}$ & quadratic mortality of zooplankton & $[d^{-1}]$ \\
+$v$ & sinking rate of detritus & $[m \cdot d^{-1}]$\\
+%\middlehline
+%\bottomhline
+\end{tabular}
+%\belowtable{This is a test} % Table Footnotes
+\end{table*}
+
+
+
+\begin{table*}[t]
+\caption{Model Parameters}
+\begin{tabular}{c c c c c}
+Parameter & Meaning & Unit & Temperate & Tropical \\
+\tophline
+$V^{max}_P$ & max photosynthesis rate & $[g \ C (g \ chl)^{−1} h^{−1}]$ & 2.5  &  \\
+$\alpha$ & initial slope of P-I curve & $[g \ C (g \ chl)^{−1} h^{−1} (µE \ m^{-2} \ s^{-1})^{-1}]$ & 0.034 & \\
+$k_N$ & half-sat. const: N uptake & $[µM \ N]$ & 0.85 & \\
+$m_P$ & linear P mortality & $[d^{−1}]$ & 0.015 & \\
+$m_{P2}$ & quadratic P mortality & $[(µM \ N)^{-1} d^{−1}]$ & 0.025 & \\
+$I_{max}$ & Z max. ingestion rate & $[d^{−1}]$ & 1.0 & \\
+$k_Z$ & Z half-saturation for intake & $[µM \ N]$ & 0.6 & \\
+$\phi_P$ & grazing preference: P & 0.67 & & \\
+$\phi_D$ & grazing preference: D & & 0.33 & \\
+$\beta_Z$ & Z absorption efficiency & 0.69 & & \\
+$k_{NZ}$ & Z net production efficiency & 0.75 & & \\
+$m_Z$ & linear Z mortality  & $[d^{−1}]$ & 0.02 & \\
+$m_{Z2}$ & quadratic Z mortality & $[(µM \ N)^{-1} d^{−1}]$ & 0.34 & \\
+$v_D$ & D sinking rate & $[m \ d^{−1}]$ & 6.43 & \\
+$m_D$ & D remineralisation rate & $[d^{−1}]$ & 0.06 & \\
+$\kappa$ & constant mixing parameter & $[m \ d^{−1}]$ & 0.13 & \\
+$\theta_{chla}$ & C to chlorophyll ratio & $[g \ g^{-1}]$ & 75 & \\
+\middlehline
+
+\bottomhline
+\end{tabular}
+\belowtable{The units for light harvesting are not final! I will most likely use mol photons, or whatever unit is SI and you all like.} % Table Footnotes
+\label{table:params}
+\end{table*}
+%
+
+\end{document}
