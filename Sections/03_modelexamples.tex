@@ -30,15 +30,16 @@ This will make the whole story come together nicely!
 \end{comment}
 
 % PARAGRAPH STARTS HERE:
-To showcase the utility of the phydra package for modelling marine ecosystems, we present three model implementations of varying complexity.
+To showcase the utility of the phydra package for modelling marine ecosystems, we demonstrate three model implementations of varying complexity.
 
 The phydra package was designed specifically to allow for the implementation of flexible dimensionality, as described in Section 2. For the following use cases we focus on varying food web complexity in relatively simple zero-dimensional physical settings. 
 
-All model structures present highly idealised versions of marine plankton assemblages. Use case 1 is a canonical NPZD ecosystem model embedded in slab physics. The ecosystem is embedded in an upper mixed layer that is affected by variable mixing with an inert deeper layer driven by the mixed layer depth (MLD) forcing. The model contains only four state variables, namely a nutrient  (nitrate), phytoplankton, zooplankton and detritus, but has more complicated treatments of light-limitation and water column dynamics. The specific implementation is adapted from Anderson et al. 2015. 
+All presented models could be run in one, two or three-dimensional physical schemes, by providing the appropriate setup grid and processes defining physical interactions between grid points. Our choice of zero-dimensional implementations was motivated by the fact that such physical schemes are much easier to set up and analyse.  The online documentation of the phydra package provides simple examples of multi-dimensional marine ecosystem models.
 
-The second use case is an example of a more complex size-structured food web, implemented in the minimalistic physical setting of a flow-through system. This specific system could be described as a chemostat, where constant nutrient addition drives the growth of multiple state variables of phytoplankton and zooplankton. Each plankton state variable is assigned a size measured as the equivalent spherical diameter (ESD). The ESD determines the nutrient uptake parameters, growth rates and grazing susceptibility via size-based allometries taken from meta-analysis of laboratory data. This specific implementation is adapted from Banas, 2011.
+All model structures present highly idealised versions of marine plankton assemblages. Use case 1 is a canonical NPZD ecosystem model embedded in slab physics. The specific implementation is adapted from Anderson et al. 2015. 
 
-All presented models can be run in one, two or three-dimensional physical schemes, by providing the appropriate setup grid and processes defining physical interactions between grid points. For simplicity, this is not presented here. The online documentation provides simple examples of implementing multi-dimensional marine ecosystem models.
+The second use case is an example of a more complex size-structured food web, implemented in the minimalistic physical setting of a flow-through system. This specific implementation is adapted from Banas, 2011.
+
 
 
 % in final version, present: - jupyter notebook for each example, add links in text
@@ -51,7 +52,9 @@ some text here on forcing and verification, where it's from, how it's done
 \subsection{Use case 1: NPZD slab model}
 %  quickly explain overview, explain methods for all of them shortly, with schematics, and put full system of equations & parameter tables in the Appendix!
 
-explain, what is the NPZD model here
+Use case 1 is a canonical NPZD ecosystem model embedded in slab physics. The ecosystem is embedded in an upper mixed layer that is affected by variable mixing with an inert deeper layer driven by the mixed layer depth (MLD) forcing. The model contains only four state variables, namely a nutrient  (nitrate), phytoplankton, zooplankton and detritus, but has more complicated treatments of light-limitation and water column dynamics. The specific implementation is adapted from the elegant EMPOWER model by Anderson et al. 2015. 
+
+One benefit of the implementation in phydra is the added flexibility and speed, that object-oriented code offers over procedural scripts and hard-coded for loops as time steps containing the model calculations. (I should only say this if my model is faster than EMPOWER). The package is particularly well suited for model testing and prototyping in the interactive jupyter notebook environments. 
 
 \subsusection{Model Structure: NPZD}
 explain model structure in words, reference equations in appendix
@@ -67,6 +70,7 @@ show and explain results, as simple as possible, full parameters/sensitivity ana
 
 \subsection{Use Case 2: Size-structured chemostat model}
 
+This specific system could be described as a chemostat, where constant nutrient addition drives the growth of multiple state variables of phytoplankton and zooplankton. Each plankton state variable is assigned a size measured as the equivalent spherical diameter (ESD). The ESD determines the nutrient uptake parameters, growth rates and grazing susceptibility via size-based allometries taken from meta-analysis of laboratory data.
 
 \subsection{Model Structure: size-structured NPZ}
 
