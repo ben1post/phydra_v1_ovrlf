@@ -1,4 +1,5 @@
 \documentclass[journal abbreviation, manuscript]{copernicus}
+\usepackage{comment} 
 
 \begin{document}
 
@@ -6,14 +7,21 @@
 \section{The phydra package: structure \& features}
 % 2nd Section:
 % Background, theoretical framework. Specifics here!
-
+\begin{comment}
 Andrew's comments: (THIS IS METHODS)
-- describe modeling framework and details how you built everything
+- describe modelling framework and details how you built everything
 - now explain in detail what the package is \& can do, what the structure is like
-- clarify that it is situated in complexity between custom scripts and modeling tools with graphical interfaces. It would be possible to design a graphical interface for this later on, but that is not the target audience.
+- clarify that it is situated in complexity between custom scripts and modelling tools with graphical interfaces. It would be possible to design a graphical interface for this later on, but that is not the target audience.
 
 
-\subsection{Xarray-simlab: object-oriented modeling framework}
+"Python is a high-level programming language well suited to rapid development and prototyping, as well as being more accessible to domain scientists than low-level languages such as FORTRAN or C++." - Mobius GMD paper
+
+- clearly state limitations (scope) of phydra 
+- mention that xarray-simlab is general enough to support IBMs! But not developed here.
+\end{comment}
+
+
+\subsection{Xarray-simlab: object-oriented modelling framework}
 - Further detail on the xarray-simlab framework used for phydra!
 
 \subsection{phydra package}
@@ -53,10 +61,9 @@ general explanation, and then go into detail below (see Figure \ref{phydraschema
 
 \subsubsection{Runtime}
 - explain what the options are to run the model, depends on if a time implicit method will be added to solve, or if it will just remain with the time explicit steps of xarray-simlab
-- mention that xarray-simlab is general enough to support IBMs! But not developed here.
 
 \subsubsection{Model Diagnostics}
-- this is a relevant section, *if* Benoît can help me with creating the ODE visualization & model diagnostics.
+- this is a relevant section, *if* Benoît can help me with creating the ODE visualisation & model diagnostics.
 
 \subsubsection{Parameter fitting}
 - this is a relevant section, if i manage to get some decent parameter fitting results for the example 1 and 3.. either only 3 or both, is my feeling. 
