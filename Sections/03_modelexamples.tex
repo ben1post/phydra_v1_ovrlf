@@ -16,29 +16,22 @@ go through it from front to back, explain what an NPZD model is.
 
 My Comments:
 Notes from Banas, 2011 (reading it now):
-- "NPZ-model" 
-- "mechanistically simple"
-- "resolves one level of trophic interaction in detail"
+
 - he says dis thing goes stable in a cycle after 10 - 20 years?! well it is the NPZ, without light, etc. so makes sense
 - should i do a chemostat instead? this could be the slight modification, that makes sense to include
 
-keep in mind, this would mean, that I have both a slightly different version of EMPOWER
-and a slightly different version of ASTroCAT
-but still a very similar version of example 3.
-
-This will make the whole story come together nicely!
 \end{comment}
 
 % PARAGRAPH STARTS HERE:
 To showcase the utility of the phydra package for modelling marine ecosystems, we demonstrate three model implementations of varying complexity.
 
-The phydra package was designed specifically to allow for the implementation of flexible dimensionality, as described in Section 2. For the following use cases we focus on varying food web complexity in relatively simple zero-dimensional physical settings. 
 
-All presented models could be run in one, two or three-dimensional physical schemes, by providing the appropriate setup grid and processes defining physical interactions between grid points. Our choice of zero-dimensional implementations was motivated by the fact that such physical schemes are much easier to set up and analyse.  The online documentation of the phydra package provides simple examples of multi-dimensional marine ecosystem models.
+All model structures present highly idealised versions of marine ecosystems. 
+Use case 1 is a canonical NPZD ecosystem model embedded in a 'slab' physical setting. The specific implementation is adapted from the elegant EMPOWER model \citep{Anderson2015c}, with simplifications to the formulation of light-limited growth of phytoplankton. 
+Use case 2 is a more complex size-structured food web embedded in a simple flow-through (chemostat) setting. It is a NPZ model that resolves many size-classes of phytoplankton and zooplankton and their complex trophic interaction. The model structure was inspired and adapted from \citet{Banas2011b}. 
+use case 3 embeds the complex food web of the second use case within the 'slab' physical setting of the first. Components and processes of each previous model instance are easily combined within the xarray-simlab framework, creating a completely different model, that shows oscillatory inter-annual fluctuations reminiscent of natural plankton populations. 
 
-All model structures present highly idealised versions of marine plankton assemblages. Use case 1 is a canonical NPZD ecosystem model embedded in slab physics. The specific implementation is adapted from Anderson et al. 2015. 
-
-The second use case is an example of a more complex size-structured food web, implemented in the minimalistic physical setting of a flow-through system. This specific implementation is adapted from Banas, 2011.
+The phydra package was designed specifically to create models of flexible dimensionality, as described in Section 2. For the presented use cases we focus on the dimension of ecosystem complexity in relatively simple zero-dimensional physical settings. Models can be run in one, two or three-dimensional physical schemes, by providing the appropriate setup grid and processes defining physical interactions between grid points. Our choice of zero-dimensional implementations was motivated by the fact that such physical schemes are much easier to set up and analyse. The online documentation of the phydra package provides simple examples of multi-dimensional marine ecosystem models.
 
 
 
