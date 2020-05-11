@@ -14,24 +14,22 @@ Structure: just go through it, Use Case I, Use Case II, Use Case II. No Methods 
 go through it from front to back, explain what an NPZD model is.
 "We recreate the NPZD model formulation by Anderson, in the model there is one .." describe equations in words. Then say See Anderson et al. or appendix X for full equations
 
-My Comments:
-Notes from Banas, 2011 (reading it now):
 
-- he says dis thing goes stable in a cycle after 10 - 20 years?! well it is the NPZ, without light, etc. so makes sense
-- should i do a chemostat instead? this could be the slight modification, that makes sense to include
-
+%  quickly explain overview, explain methods for all of them shortly, with schematics, and put full system of equations & parameter tables in the Appendix!
 \end{comment}
 
 % PARAGRAPH STARTS HERE:
 To showcase the utility of the phydra package for modelling marine ecosystems, we demonstrate three model implementations of varying complexity.
+All model structures present highly idealised versions of marine ecosystems.\\
+
+Use case 1 is a canonical NPZD ecosystem model embedded in a 'slab' physical setting. The specific implementation is adapted from the elegant EMPOWER model \citep{Anderson2015c}, with simplifications to the formulation of light-limited growth of phytoplankton.
+
+Use case 2 presents a more complex size-structured food web embedded in a simple flow-through (chemostat) setting. It is a NPZ model that resolves many size-classes of phytoplankton and zooplankton and their trophic interaction. The model structure was inspired and adapted from \citet{Banas2011b}. 
+
+Use case 3 embeds the complex food web of the second use case within the 'slab' physical setting of the first. Components and processes of each previous model instance are easily combined within the xarray-simlab framework, creating a completely different model, that shows oscillatory inter-annual fluctuations reminiscent of natural plankton populations. \\
 
 
-All model structures present highly idealised versions of marine ecosystems. 
-Use case 1 is a canonical NPZD ecosystem model embedded in a 'slab' physical setting. The specific implementation is adapted from the elegant EMPOWER model \citep{Anderson2015c}, with simplifications to the formulation of light-limited growth of phytoplankton. 
-Use case 2 is a more complex size-structured food web embedded in a simple flow-through (chemostat) setting. It is a NPZ model that resolves many size-classes of phytoplankton and zooplankton and their complex trophic interaction. The model structure was inspired and adapted from \citet{Banas2011b}. 
-use case 3 embeds the complex food web of the second use case within the 'slab' physical setting of the first. Components and processes of each previous model instance are easily combined within the xarray-simlab framework, creating a completely different model, that shows oscillatory inter-annual fluctuations reminiscent of natural plankton populations. 
-
-The phydra package was designed specifically to create models of flexible dimensionality, as described in Section 2. For the presented use cases we focus on the dimension of ecosystem complexity in relatively simple zero-dimensional physical settings. Models can be run in one, two or three-dimensional physical schemes, by providing the appropriate setup grid and processes defining physical interactions between grid points. Our choice of zero-dimensional implementations was motivated by the fact that such physical schemes are much easier to set up and analyse. The online documentation of the phydra package provides simple examples of multi-dimensional marine ecosystem models.
+The phydra package was designed specifically to create models of flexible dimensionality, as described in Section 2. For the presented use cases we focus on the dimension of ecosystem complexity in relatively simple zero-dimensional physical settings. Models can be run in one, two or three-dimensional physical schemes, by providing the appropriate setup grid and processes defining physical interactions between grid points. Our choice of zero-dimensional implementations was motivated by the fact that such physical schemes are much easier to set up and analyse. The online documentation of the phydra package provides simple examples of multi-dimensional marine ecosystem models.\\
 
 
 
@@ -39,13 +37,52 @@ The phydra package was designed specifically to create models of flexible dimens
 
 \subsection{Forcing and verification data}
 
-some text here on forcing and verification, where it's from, how it's done
+To simplify models of complex systems larger processes are not mechanistically implemented, but instead empirically represented as an external forcing. In two of the following use cases, we adapt a slab representation of ocean physics as defined by \citet{Evans1985ACycles}. The multi-dimensional ocean is reduced to two layers, where the upper layer provides a zero dimensional setting for our ecosystem model. The bottom layer is often assumed to contain a fixed concentration of nutrients (usually nitrate), but this can also vary with depth or time. There is constant exchange between the layers. Nutrients are usually mixing up into the upper layer, where they are consumed by phytoplankton. 
+
+The fraction of all ecosystem components sinking to the bottom layer are lost from the system. These exchanges of water masses within this two-layered model ocean are driven by the empirically derived mixed layer depth (MLD). Additional common forcings that are used in slab models modify phytoplankton growth, e.g. metabolic rates and light harvesting via temperature and irradiance respectively. Such forcing can situate a slab model in a theoretical or any location in the global ocean. Compared to the natural habitat of marine plankton, the slab model is a radical simplification, however the resulting simulations can yield meaningful results that can be compared with bulk properties of the marine ecosystem. 
+
+\subsubsection{Global nutrient, light and temperature climatologies as slab model forcing}
+In line with the concept of phydra as a tool for rapid prototyping of marine ecosystem models, we provide with the package a set of global climatological model forcings. These forcings are derived from satellite data, World Ocean Atlas (WOA) 2018 data and a global MLD climatology kindly provided by Clément de Boyer Montégut.
+
+WOA data provides objectively analyzed climatological mean depth profiles of nutrients (nitrate, phosphate \& silicate) and temperature on a one-degree longitude/latitude grid \cite{Garcia2019WORLDSilicate}. The values have been interpolated from data collected in the World Ocean Database and provide an empirical estimate of the biogeochemical conditions in areas of the global ocean throughout the year.\\
+
+The MLD climatology is an updated version of the original climatology presented in  \citet{deBoyerMontegut2004MixedClimatology}, collecting data up until 2014 and with a modified criterion for MLD. Spatial resolution of the climotology is on a two-degree longitude/latitude grid. The analysis of profile data combines a fixed threshold criterion for temperature (0.2 \unit{°C}) and a variable threshold criterion in density (equivalent to a 0.2 \unit{°C} decrease). MLD is diagnosed as the minimum calculated depth of both criterion for each station. This ensures that both temperature and salinity are homogeneous within the mixed layer, and compensated or barrier layers do not skew the values of MLD. This combined MLD criterion corresponds to a proxy of overturning extent depth over a few days, which lends this MLD value very well as the forcing that drives the upwelling of deeper nutrients into the upper mixed layer in slab physics (Clément de Boyer Montégut, personal communication).\\
+
+In addition to the oceanographic and biogeochemical parameters, the provided set of global forcings includes a global climatology of irradiance from satellite data. The NASA satellite MODIS-aqua provides the most up-to-date global climatologies of photosynthetically active radiation (PAR) \cite{MODIS-Aqua2018NASAGroup}. The data product estimates incident PAR at the ocean surface using ..., which can be used to calculate light-availability to phytoplankton within the modelled upper layer.\\
+
+By combining satellite PAR, MLD climatology and WOA data, we can experimentally run a slab model built in phydra in (almost) any location of the ocean. MLD can be used as an empirical forcing for mixing in our slab models. Average nutrient concentration below the mixed layer, extracted from the WOA 2018 climatologies, can be used to provide a more realistic estimate of nutrient supply at certain locations throughout the year. This was done using ... and taking into account 50 \unit{m} below closest available climatological MLD value. The final 1 \unit{°} gridded data product can be accessed via Github [provide link] and is easily integrated with models build using the phydra package. 
+
+From this global dataset, we chose two representative contrasting locations in the Atlantic ocean (see Figure \ref{phydraforcing}). \\
+
+
+\subsubsection{Satellite chlorophyll and nutrient climatologies as verification data}
+Model verification is a very difficult process
+- it usually takes specific tailoring of the model to the data, or vice versa \cite{Schartau2017}
+- a good fit, does not mean a correct model \cite{RykielJr1996}\\
+
+BUT, still is a basic test of model function, and for demonstration purposes.
+We chose to use the Nutrient data from the WOA climatologies for nutrient concentration in the upper layer.
+
+Additionally, we use chlorophyll climatologies from MODIS-aqua (cite!) and 
+
+carbon-based phytoplankton size classes calculated from ocean color estimates of the particle size distribution \cite{Kostadinov2016Carbon-basedDistribution}.\\
+
+The provided dataset provides an easy way to compare model output to empirical data. 
+
+The data are highly aggregated climatologies, of poor temporal resolution (monthly). We follow this path to provide a universally useful, simple tool for marine ecosystem model development. For more specific model implementation and hypothesis testing it would be highly recommended to use local data.\\
 
 
 \subsection{Use case 1: NPZD slab model}
-%  quickly explain overview, explain methods for all of them shortly, with schematics, and put full system of equations & parameter tables in the Appendix!
 
-Use case 1 is a canonical NPZD ecosystem model embedded in slab physics. The ecosystem is embedded in an upper mixed layer that is affected by variable mixing with an inert deeper layer driven by the mixed layer depth (MLD) forcing. The model contains only four state variables, namely a nutrient  (nitrate), phytoplankton, zooplankton and detritus, but has more complicated treatments of light-limitation and water column dynamics. The specific implementation is adapted from the elegant EMPOWER model by Anderson et al. 2015. 
+The specific NPZD slab model implementation for our Use Case 1 was adapted from \citet{Anderson2015c}. For a schematic of the model structure, see figure \ref{phydraschematics_1} (a). For the full set of equations, please see the Appendix.
+
+The model contains the name-defining four state variables: Nutrient, phytoplankton, zooplankton and detritus.
+The only resolved nutrient in this system is nitrate, therefore the biomass of all other state variables is measured in the common model currency \unit{µM N}. The external forcing of nitrate below the upper mixed layer ($N_0$) determines the possible nutrient supply
+- taken from 
+
+The ecosystem is embedded in slab physics,
+
+an upper mixed layer that is affected by variable mixing with an inert deeper layer driven by the mixed layer depth (MLD) forcing. The model contains only four state variables, namely a nutrient  (nitrate), phytoplankton, zooplankton and detritus, but has more complicated treatments of light-limitation and water column dynamics. The specific implementation is adapted from the elegant EMPOWER model by Anderson et al. 2015. 
 
 One benefit of the implementation in phydra is the added flexibility and speed, that object-oriented code offers over procedural scripts and hard-coded for loops as time steps containing the model calculations. (I should only say this if my model is faster than EMPOWER). The package is particularly well suited for model testing and prototyping in the interactive jupyter notebook environments. 
 
@@ -134,5 +171,10 @@ Photosynthetically Active Radiation (PAR) and temperature averaged across the Mi
 \label{ASTroCAT_plot}
 \end{figure*}
 % Tables
+
+
+% needs to be added to render sections
+\bibliographystyle{copernicus}
+\bibliography{references.bib}
 
 \end{document}
