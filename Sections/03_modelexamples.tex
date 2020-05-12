@@ -35,7 +35,7 @@ The phydra package was designed specifically to create models of flexible dimens
 
 % in final version, present: - jupyter notebook for each example, add links in text
 
-\subsection{Forcing and verification data}
+\subsection{Forcing and verification data} \label{ForcingSection}
 
 To simplify models of complex systems larger processes are not mechanistically implemented, but instead empirically represented as an external forcing. In two of the following use cases, we adapt a slab representation of ocean physics as defined by \citet{Evans1985ACycles}. The multi-dimensional ocean is reduced to two layers, where the upper layer provides a zero dimensional setting for our ecosystem model. The bottom layer is often assumed to contain a fixed concentration of nutrients (usually nitrate), but this can also vary with depth or time. There is constant exchange between the layers. Nutrients are usually mixing up into the upper layer, where they are consumed by phytoplankton. 
 
@@ -46,13 +46,13 @@ In line with the concept of phydra as a tool for rapid prototyping of marine eco
 
 WOA data provides objectively analyzed climatological mean depth profiles of nutrients (nitrate, phosphate \& silicate) and temperature on a one-degree longitude/latitude grid \cite{Garcia2019WORLDSilicate}. The values have been interpolated from data collected in the World Ocean Database and provide an empirical estimate of the biogeochemical conditions in areas of the global ocean throughout the year.\\
 
-The MLD climatology is an updated version of the original climatology presented in  \citet{deBoyerMontegut2004MixedClimatology}, collecting data up until 2014 and with a modified criterion for MLD. Spatial resolution of the climotology is on a two-degree longitude/latitude grid. The analysis of profile data combines a fixed threshold criterion for temperature (0.2 \unit{°C}) and a variable threshold criterion in density (equivalent to a 0.2 \unit{°C} decrease). MLD is diagnosed as the minimum calculated depth of both criterion for each station. This ensures that both temperature and salinity are homogeneous within the mixed layer, and compensated or barrier layers do not skew the values of MLD. This combined MLD criterion corresponds to a proxy of overturning extent depth over a few days, which lends this MLD value very well as the forcing that drives the upwelling of deeper nutrients into the upper mixed layer in slab physics (Clément de Boyer Montégut, personal communication).\\
+The MLD climatology is an updated version of the original climatology presented in  \citet{deBoyerMontegut2004MixedClimatology}, collecting data up until 2014 and with a modified criterion for MLD. Spatial resolution of the climotology is on a 2 \unit{°} longitude/latitude grid. The analysis of profile data combines a fixed threshold criterion for temperature (0.2 \unit{°C}) and a variable threshold criterion in density (equivalent to a 0.2 \unit{°C} decrease). MLD is diagnosed as the minimum calculated depth of both criterion for each station. This ensures that both temperature and salinity are homogeneous within the mixed layer, and compensated or barrier layers do not skew the values of MLD. This combined MLD criterion corresponds to a proxy of overturning extent depth over a few days, which lends this MLD value very well as the forcing that drives the upwelling of deeper nutrients into the upper mixed layer in slab physics (Clément de Boyer Montégut, personal communication).\\
 
 In addition to the oceanographic and biogeochemical parameters, the provided set of global forcings includes a global climatology of irradiance from satellite data. The NASA satellite MODIS-aqua provides the most up-to-date global climatologies of photosynthetically active radiation (PAR) \cite{MODIS-Aqua2018NASAGroup}. The data product estimates incident PAR at the ocean surface using ..., which can be used to calculate light-availability to phytoplankton within the modelled upper layer.\\
 
 By combining satellite PAR, MLD climatology and WOA data, we can experimentally run a slab model built in phydra in (almost) any location of the ocean. MLD can be used as an empirical forcing for mixing in our slab models. Average nutrient concentration below the mixed layer, extracted from the WOA 2018 climatologies, can be used to provide a more realistic estimate of nutrient supply at certain locations throughout the year. This was done using ... and taking into account 50 \unit{m} below closest available climatological MLD value. The final 1 \unit{°} gridded data product can be accessed via Github [provide link] and is easily integrated with models build using the phydra package. 
 
-From this global dataset, we chose two representative contrasting locations in the Atlantic ocean (see Figure \ref{phydraforcing}). \\
+From this global forcing dataset, we chose two representative locations in the Atlantic ocean (see Figure \ref{phydraforcing}). These two locations were chosen for their contrasting environment. Temperate with deep MLD in winter, light and temperature variable. Tropical relatively stable conditions throughout the year, lower nutrient supply through mixing. \\
 
 
 \subsubsection{Satellite chlorophyll and nutrient climatologies as verification data}
@@ -74,17 +74,41 @@ The data are highly aggregated climatologies, of poor temporal resolution (month
 
 \subsection{Use case 1: NPZD slab model}
 
-The specific NPZD slab model implementation for our Use Case 1 was adapted from \citet{Anderson2015c}. For a schematic of the model structure, see figure \ref{phydraschematics_1} (a). For the full set of equations, please see the Appendix.
+The specific NPZD slab model implementation for our Use Case 1 was adapted from \citet{Anderson2015c}. For a schematic of the model structure, see figure \ref{phydraschematics_1} (a).
 
-The model contains the name-defining four state variables: Nutrient, phytoplankton, zooplankton and detritus.
-The only resolved nutrient in this system is nitrate, therefore the biomass of all other state variables is measured in the common model currency \unit{µM N}. The external forcing of nitrate below the upper mixed layer ($N_0$) determines the possible nutrient supply
-- taken from 
+The model contains the name-defining four ecosystem components: Nutrient, phytoplankton, zooplankton and detritus. The only resolved nutrient in this system is nitrate. The biomass of all other state variables is measured in the common model currency \unit{µM} of Nitrogen. Four forcings affect the model dynamics: nitrate below the mixed layer ($N_0$), depth of the mixed layer ($MLD$), photosynthetically active incident radiation ($PAR$), average temperature above the mixed layer depth ($T_{MLD}$). The forcings are interpolated monthly climatologies as described in section \ref{ForcingSection}. See figure \ref{phydraforcing} for the two locations and specific forcings applied here.
+For the full set of equations, please see the Appendix.\\
 
-The ecosystem is embedded in slab physics,
+% Nutrient dynamics
+$N_0$ determines the possible nutrient supply to the ecosystem. Mixing of nutrients is a function of a constant mixing parameter, $N_0$, $N$ and the value and derivative of $MLD$, following \citet{Evans1985ACycles}. In contrast to other components, mixing affecting the nutrient is a positive term adding to $N$ along the gradient between $N_0$and $N$. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth.
 
-an upper mixed layer that is affected by variable mixing with an inert deeper layer driven by the mixed layer depth (MLD) forcing. The model contains only four state variables, namely a nutrient  (nitrate), phytoplankton, zooplankton and detritus, but has more complicated treatments of light-limitation and water column dynamics. The specific implementation is adapted from the elegant EMPOWER model by Anderson et al. 2015. 
+In slab models, the concentration of nutrient in the bottom layer $N_0$ is often assumed to be fixed. In reality there is quite often a gradient of concentration over depth, and this can be represented using functions of nutrient over depth \citep{Frost1987GrazingSpp.}. In this study ...
 
-One benefit of the implementation in phydra is the added flexibility and speed, that object-oriented code offers over procedural scripts and hard-coded for loops as time steps containing the model calculations. (I should only say this if my model is faster than EMPOWER). The package is particularly well suited for model testing and prototyping in the interactive jupyter notebook environments. 
+
+
+% Phytoplankton dynamics
+
+% Zooplankton dynamics
+
+% Detritus dynamics
+
+
+A complete description of model mechanisms and equations is given in Appendix 1.\\
+
+
+differences from EMPOWER: \\
+Very simple model,
+irradiance from satellite, not trigonometric equations. we treat light in much less detail, so say that for a more detailed treatment of light in a slab model, see \cite{Anderson2015c}
+
+Our modifications to phytoplankton grwoth formulation, zooplankton mixing, as well as the treatment of forcing were adapted from the PhytoSFDM model \cite{Acevedo-Trejos2016}.
+% can I say that Esteban? it is true
+
+EMPOWER was inspired by \cite{Fasham1990a}, we stand in a long line of models. 
+
+We hope that this simple NPZD slab model can be used as a teaching model in a similar vein to EMPOWER. The modular structure of phydra processes allows for accessible experimentation with parameterisation and model setup. 
+
+
+% In EMPOWER i noticed a problem with the shape model output presented in the paper and too large model time steps (due to for loop code structure, not odeint adaptive solving).. is that something I should mention, or simply forget?
 
 \subsusection{Model Structure: NPZD}
 explain model structure in words, reference equations in appendix
@@ -127,8 +151,7 @@ This specific system could be described as a chemostat, where constant nutrient 
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_plots/01_forcing_labeled.pdf}
-\caption{(a) Map shows locations of the two comparative model runs. Each square is of side length 4° centered on 47°N ,-20°E and 0°N,-20°E respectively. Environmental forcings are averaged across area. (b) Forcing is shown: Mixed Layer Depth (MLD), Nitrate below the Mixed Layer (N0),
-Photosynthetically Active Radiation (PAR) and temperature averaged across the Mixed Layer (TMLD)}
+\caption{(a) Map shows locations of the two comparative model runs. Each square is of side length 4° centered on 47°N ,-20°E and 0°N,-20°E respectively. Environmental forcings are averaged across area. (b) Forcing is shown: Mixed Layer Depth (MLD), Nitrate below the Mixed Layer (N_0), Photosynthetically Active Radiation (PAR) and temperature averaged across the Mixed Layer (T_{MLD})}
 \label{phydraforcing}
 \end{figure*}
 
@@ -137,7 +160,9 @@ Photosynthetically Active Radiation (PAR) and temperature averaged across the Mi
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_schematics/02__schematics_NPZDandChemostat.pdf}
-\caption{TEXT}
+\caption{(a) Model schematic of NPZD slab model for example 1. Model structure and parametrisation is adapted
+from \citet{Anderson2015c} (b) Model schematic of size-structured NP_{40}Z_{40} trophic model for use case 2.
+Model structure and parameterisation is adapted from \citet{Banas2011b}.}
 \label{phydraschematics_1}
 \end{figure*}
 
@@ -145,20 +170,20 @@ Photosynthetically Active Radiation (PAR) and temperature averaged across the Mi
 %%f
 \begin{figure}[t]
 \includegraphics[width=6cm]{Figures/firstdraft_plots/02_NPZDslab.pdf}
-\caption{TEXT}
+\caption{Model output for the two locations of the NPZD slab model is shown between the two sites.}
 \end{figure}
 
 %%f
 \begin{figure}[t]
 \includegraphics[width=6cm]{Figures/firstdraft_plots/03_chemostat.pdf}
-\caption{TEXT}
+\caption{Model output for the size-structure chemostat model. Plot is a recreation (same model setup & parameters) of a plot in \citet{Banas2011b}}
 \label{ASTroCAT_plot}
 \end{figure}
 
 %%f
 \begin{figure*}[t]
 \includegraphics[width=10cm]{Figures/firstdraft_schematics/03__schematics_SizeStructSlab.pdf}
-\caption{TEXT}
+\caption{Model schematic of size-structured NP20Z20 slab model for use case 3.}
 \label{phydraschematics_3}
 \end{figure*}
 
@@ -167,7 +192,7 @@ Photosynthetically Active Radiation (PAR) and temperature averaged across the Mi
 %%f
 \begin{figure*}[t]
 \includegraphics[width=12cm]{Figures/firstdraft_plots/04_sizestruct_slab.pdf}
-\caption{TEXT}
+\caption{Model output for the two locations of the size-structured NP_{20}Z_{20}D slab model}
 \label{ASTroCAT_plot}
 \end{figure*}
 % Tables
