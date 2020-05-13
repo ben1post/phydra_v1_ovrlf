@@ -9,13 +9,17 @@
 \begin{comment}
 Andrew Comments:
 
-Structure: just go through it, Use Case I, Use Case II, Use Case II. No Methods & Results section
+Structure: just go through it, Use Case I, Use Case II, Use Case II. No Methods & Results Section
 
 go through it from front to back, explain what an NPZD model is.
 "We recreate the NPZD model formulation by Anderson, in the model there is one .." describe equations in words. Then say See Anderson et al. or appendix X for full equations
 
 
 %  quickly explain overview, explain methods for all of them shortly, with schematics, and put full system of equations & parameter tables in the Appendix!
+
+TODO b4 handing in 2 esteban:
+- fix the legend missing in NPZDslab Figure
+
 \end{comment}
 
 % PARAGRAPH STARTS HERE:
@@ -50,7 +54,7 @@ The MLD climatology is an updated version of the original climatology presented 
 
 In addition to the oceanographic and biogeochemical parameters, the provided set of global forcings includes a global climatology of irradiance from satellite data. The NASA satellite MODIS-aqua provides the most up-to-date global climatologies of photosynthetically active radiation (PAR) \cite{MODIS-Aqua2018NASAGroup}. The data product estimates incident PAR at the ocean surface using ..., which can be used to calculate light-availability to phytoplankton within the modelled upper layer.\\
 
-By combining satellite PAR, MLD climatology and WOA data, we can experimentally run a slab model built in phydra in (almost) any location of the ocean. MLD can be used as an empirical forcing for mixing in our slab models. Average nutrient concentration below the mixed layer, extracted from the WOA 2018 climatologies, can be used to provide a more realistic estimate of nutrient supply at certain locations throughout the year. This was done using ... and taking into account 50 \unit{m} below closest available climatological MLD value. The final 1 \unit{°} gridded data product can be accessed via Github [provide link] and is easily integrated with models build using the phydra package. 
+By combining satellite PAR, MLD climatology and WOA data, we can experimentally run a slab model built in phydra in (almost) any location of the ocean. MLD can be used as an empirical forcing for mixing in our slab models. Average nutrient concentration below the mixed layer, extracted from the WOA 2018 climatologies, can be used to provide a more realistic estimate of nutrient supply at certain locations throughout the year. This was done using ... and taking into account 50 \unit{m} below closest available climatological MLD value. The final 1 \unit{°} gridded data product can be accessed via Github [provide link] and is easily integrated with models built using the phydra package. 
 
 From this global forcing dataset, we chose two representative locations in the Atlantic ocean (see Figure \ref{phydraforcing}). These two locations were chosen for their contrasting environment. Temperate with deep MLD in winter, light and temperature variable. Tropical relatively stable conditions throughout the year, lower nutrient supply through mixing. \\
 
@@ -71,50 +75,50 @@ The provided dataset provides an easy way to compare model output to empirical d
 
 The data are highly aggregated climatologies, of poor temporal resolution (monthly). We follow this path to provide a universally useful, simple tool for marine ecosystem model development. For more specific model implementation and hypothesis testing it would be highly recommended to use local data.\\
 
-
 \subsection{Use case 1: NPZD slab model}
 
-The specific NPZD slab model implementation for our Use Case 1 was adapted from \citet{Anderson2015c}. For a schematic of the model structure, see figure \ref{phydraschematics_1} (a).
+The specific NPZD slab model implementation for our Use Case 1 was adapted from \citet{Anderson2015c}. For a schematic of the model structure, see Figure \ref{phydraschematics_1} (a).
 
-The model contains the name-defining four ecosystem components: Nutrient, phytoplankton, zooplankton and detritus. The only resolved nutrient in this system is nitrate. The biomass of all other state variables is measured in the common model currency \unit{µM} of Nitrogen. Four forcings affect the model dynamics: nitrate below the mixed layer ($N_0$), depth of the mixed layer ($MLD$), photosynthetically active incident radiation ($PAR$), average temperature above the mixed layer depth ($T_{MLD}$). The forcings are interpolated monthly climatologies as described in section \ref{ForcingSection}. See figure \ref{phydraforcing} for the two locations and specific forcings applied here.
+\subsubsection{Model Description: NPZD slab model}
+The model contains the name-defining four ecosystem components: Nutrient, phytoplankton, zooplankton and detritus. The only resolved nutrient in this system is nitrate. The biomass of all other state variables is measured in the common model currency \unit{µM} of Nitrogen. Four forcings affect the model dynamics: nitrate below the mixed layer ($N_0$), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR), average temperature above the mixed layer depth (\unit{T_{MLD}}). The forcings are interpolated monthly climatologies as described in Section \ref{ForcingSection}. See Figure \ref{phydraforcing} for the two locations and specific forcings applied here.
 For the full set of equations, please see the Appendix.\\
 
 % Nutrient dynamics
 $N_0$ determines the possible nutrient supply to the ecosystem. Mixing of nutrients is a function of a constant mixing parameter, $N_0$, $N$ and the value and derivative of $MLD$, following \citet{Evans1985ACycles}. In contrast to other components, mixing affecting the nutrient is a positive term adding to $N$ along the gradient between $N_0$and $N$. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth.
 
-In slab models, the concentration of nutrient in the bottom layer $N_0$ is often assumed to be fixed. In reality there is quite often a gradient of concentration over depth, and this can be represented using functions of nutrient over depth \citep{Frost1987GrazingSpp.}. In this study we use an empirical climatology as the forcing $N_0$, that is the result of combining WOA 2018 data with MLD climatology (see section \ref{forcingdatasect}). The specific variable used is Nitrate+Nitrite. This data provides the contrasting seasonal dynamics for the temperate and tropical location (see figure \ref{phydraforcing}).
+In slab models, the concentration of nutrient in the bottom layer $N_0$ is often assumed to be fixed. In the ocean there is usually a gradient of concentration over depth and this can be represented using functions of nutrient over depth \citep{Frost1987GrazingSpp., Fasham1995VariationsAnalysis}. In this study we use an empirical climatology as the forcing $N_0$, that is the result of combining WOA 2018 data with MLD climatology (see Section \ref{ForcingSection}). The specific variable used is Nitrate+Nitrite. This data provides the contrasting seasonal dynamics for the temperate and tropical location (see Figure \ref{phydraforcing}).
 
-The derivative of $MLD$ affects mixing only when the mixed layer depth is increasing, as 
-The change in depth of the mixed layer, described by the derivative of $MLD$, provides an estimate of mixing intensity. When $MLD$ is shallowing (negative), the loss of component concentration is balanced with the increasing concentration due to a decreasing model volume. A deepening $MLD$ dilutes all components and drives the mixing of nutrient into the upper layer. 
+The derivative of MLD affects mixing only when the mixed layer depth is increasing, as 
+The change in depth of the mixed layer, described by the derivative of MLD, provides an estimate of mixing intensity. When MLD is shallowing (negative), the loss of component concentration is balanced with the increasing concentration due to a decreasing model volume. A deepening MLD dilutes all components and drives the mixing of nutrient into the upper layer. \\
 
 % Phytoplankton dynamics
-The only condition where mixing can bring the nutrient concentration $N$ to approach $N_0$ is when phytoplankton growth is severely limited. In the model, growth of $P$ is modified by three factors: Temperature, nutrient uptake and light harvesting. Multiplied by the maximum intrinsic growth rate $\mu_P$ and the current $P$ biomass, the growth flux is computed. Temperature dependence of phytoplankton growth is calculated as the Eppley constant \citep{Eppley1972TemperatureSea}, with an exponential equivalent to a $Q_{10}$ of 1.895.
-In slab model simulations with a seasonally deep mixed layer, the most limiting factor during these events is often the light-dependence of phytoplankton growth. The light-limiting term is calculated via Steele's formulation \ref{Steele1962EnvironmentalSea}. Incident irradiance is supplied by the $PAR$ climatological forcing. Integrated light availability in the upper layer is calculated via Beer's law, dependent on $MLD$ and the sum of extinction coefficients of water and $P$ biomass. Phytoplankton light limitation is further defined by a n$I_{opt}$ parameter, that describes where the available light saturates photosynthesis, which equals phytoplankton growth in this simplified model.
-When sufficient light is available, phytoplankton will consume nutrients. All nutrients consumed are directly incorporated into biomass. This uptake/growth rate is defined by a Monod (or Michaelis-Menten) function, showing a saturating behaviour at high nutrient availability. The maximum rate is defined by a parameter, $k_N$ the half-saturation constant for $N$ uptake. 
+The only condition where mixing can bring the nutrient concentration $N$ to approach $N_0$ is when phytoplankton growth is severely limited. In the model, growth of phytoplankton is modified by three factors: Temperature, nutrient uptake and light harvesting. Multiplied by the maximum intrinsic growth rate $\mu_P$ and the current phytoplankton biomass, the growth flux is computed. Temperature dependence of phytoplankton growth is calculated as the Eppley constant \citep{Eppley1972TemperatureSea}, with an exponential equivalent to a $Q_{10}$ of 1.895.
+In slab model simulations with a seasonally deep mixed layer, the most limiting factor during these events is often the light-dependence of phytoplankton growth. The light-limiting term is calculated via Steele's formulation \citep{Steele1962EnvironmentalSea}. Incident irradiance is supplied by the PAR climatological forcing. Integrated light availability in the upper layer is calculated via Beer's law, dependent on MLD and the sum of extinction coefficients of water and phytoplankton biomass. Phytoplankton light limitation is further defined by an $I_{opt}$ parameter, that describes what amount of available light saturates photosynthesis, which equals phytoplankton growth in this simplified model.
+When sufficient light is available, phytoplankton will consume nutrients. All nutrients consumed are directly incorporated into biomass. This uptake/growth rate is defined by a Monod (or Michaelis-Menten) function, showing a saturating behaviour at high nutrient availability. The maximum rate is defined by the half-saturation constant $k_N$. 
 % here phytoplankton mortalities
+Phytoplankton mortality is usually implemented as a linear rate, but we follow the EMPOWER model in resolving an additional non-linear term. A linear term describes the effects of natural mortality and metabolic loss. The added quadratic mortality represents density-dependent loss processes, such as virus induced mortalities \citep{Anderson2015c}.  
+% note: EMPOWER goes into much greater detail, and cites more publications to support this.
+All phytoplankton non-grazing losses contribute to detritus.\\
 
 % Zooplankton dynamics
-In this simple model zooplankton $Z$ is not affected by environmental factors, such as light or temperature. We assume that zooplankton can actively maintain in the upper mixed layer and only compute diluting effects of $MLD$ deepening, but no other mixing terms.  
-So unaffected, the only task awarded to zooplankton is to graze phytoplankton (well, and to die). 
-% here zooplankton grazing!
-% here zooplankton mortalities
+In this simple model, zooplankton is not affected by environmental factors such as light or temperature. We assume that zooplankton can actively maintain themselves in the upper mixed layer and only compute diluting effects of MLD deepening, but no other mixing terms. 
+Zooplankton grazing is the main top-down control of the phytoplankton population in our model. We follow the EMPOWER model in the choice of implementing a multiple-prey grazing formulation acting on both phytoplankton and detritus. In contrast to the grazing formulations employed by e.g. \cite{Fasham1990a}, \citeauthor{Anderson2015c} used a passive switching response, also described as a sigmoidal or Holling type 3 grazing function. The benefit of this type of grazing function over active-switching formulations is that grazing is generally proportional to food availability and the density dependence of prey preference is directly related to single prey responses \citep{Gentleman2003a}.
+The specific preferences for phytoplankton and detritus are set at 0.67 for phytoplankton and 0.33 for detritus. This dimensionless prey preference results in a specific half-saturation constant for each prey item, after scaling by the parameter $k_Z$. The actual prey preference during the simulation is dependent on these half-saturation constants and the current biomass of the prey. Passive switching between prey sources describes that with an increase in detritus less phytoplankton will be consumed, but overall intake still increases with any increase in total prey biomass. 
+Only a fraction of the biomass grazed by zooplankton is assimilated to zooplankton biomass. Growth efficiency is a product of the absorption efficiency $\beta$ and net production efficiency $k_{NZ}$. Using these two parameters, grazed biomass is split three ways into the fraction actually assimilated to zooplankton, a fraction that is egested to detritus (e.g. faecal pellets) and another that is directly excreted as nutrient. 
 
+Similar to phytoplankton, zooplankton mortality is split into a linear term and a quadratic term. The linear term describes the natural mortality of zooplankton, that is added to the pool of detritus. The quadratic term represents the influence of higher trophic levels that are not further resolved in our zero-dimensional model. This predation-related mortality of zooplankton is assumed to be exported and lost from the system.
+This term is also know as the "closure" term, since it stabilises ecosystem dynamics due to the quadratic exponent acting on the highest trophic level.\\
 
 % Detritus dynamics
-% here how grazing and mortality add to detriuts
-% and remineralisation
-In addition to mixing loss, detritus is affected by a sinking flux. 
+Detritus is composed of a range of organic material including faecal pellets and aggregates of marine snow of various sizes. In our model we describe an average particle of detrital matter, of which a fraction is remineralised as another fraction is sinking out of the euphotic zone and lost from the system. The processes adding to the pool of detritus are phytoplankton mortality, egested grazing and linear zooplankton mortality. The fraction of detritus that is remineralised each day is given by the parameter $m_D$. In addition to being affected by mixing in the same way as phytoplankton, detritus experiences additional sinking at a rate of $v_D$ (\unit{m \ d^{-1}}).\\
 
-
-
-A complete description of model mechanisms and presentation of equations is given in Appendix 1.\\
-
+A complete presentation of equations is given in Appendix 1.\\
 
 differences from EMPOWER: \\
 Very simple model,
 irradiance from satellite, not trigonometric equations. we treat light in much less detail, so say that for a more detailed treatment of light in a slab model, see \cite{Anderson2015c}
 
-Our modifications to phytoplankton grwoth formulation, zooplankton mixing, as well as the treatment of forcing were adapted from the PhytoSFDM model \cite{Acevedo-Trejos2016}.
+Our modifications to phytoplankton growth formulation, zooplankton mixing, as well as the treatment of forcing were adapted from the PhytoSFDM model \cite{Acevedo-Trejos2016}.
 % can I say that Esteban? it is true
 
 EMPOWER was inspired by \cite{Fasham1990a}, we stand in a long line of models. 
@@ -124,21 +128,52 @@ We hope that this simple NPZD slab model can be used as a teaching model in a si
 
 % In EMPOWER i noticed a problem with the shape model output presented in the paper and too large model time steps (due to for loop code structure, not odeint adaptive solving).. is that something I should mention, or simply forget?
 
-\subsusection{Model Structure: NPZD}
-explain model structure in words, reference equations in appendix
+\subsubsection{Model Results: NPZD slab model}
 
-\subsubsection{Physical setting: slab}
-explain slab physics, equations in appendix
+Employing the model structure, forcing and parameters presented in the previous sections, exemplary runs were conducted in two contrasting locations. See Figure \ref{NPZDslab_results} for the temporal evolution of the four state variables for the final year of a 5 year run using repeated climatological forcing. 
+The two locations show markedly different dynamics. The temperate location shows a pronounced seasonal cycle in nutrient concentration in the upper mixed layer of our model. WOA 2018 monthly climatology data of this property agrees well with the model output. Despite the relatively strong agreement between nutrient data and model output for nutrients, phytoplankton model output and a climatology of chlorophyll concentration from satellite do agree, but show a markedly different dynamic. During winter months phytoplankton biomass is reduced almost to zero in the model output. In spring, the shallowing of MLD produces a pronounced bloom, overshooting the climatological data for a short period, before it returns to levels below the data for the rest of the year. 
+
+Satellites can only estimate chlorophyll concentration to visual depths, possibly extrapolated using algorithms. MLD in winter is much deeper, model output represents not concentration at surface, but concentration averaged across entire mixed layer.
+The estimated chlorophyll from satellite data is converted to be compared to model output, via a constant chlorophyll-to-carbon ratio and the Redfield ratio of 16:1 (C:N), both of which are rough estimates and variable in nature. 
+An ecological explanation of the observed results is that the single phytoplankton state variable represents a large diversity of organisms and can not simultaneously describe a slow-growing smaller species that survive in the winter months, as well as a larger fast-growing bloom-forming species. The model output seems to represent the latter, with it's pronounced spring bloom. 
+
+Zooplankton and detritus state variables follow the phytoplankton biomass as would be expected from their mathematical formulation. Detritus accumulates during the phytoplankton bloom, but is otherwise readily sinking out of the mixed layer. Zooplankton only starts growing once phytoplankton biomass reaches a certain level, most likely dependent on the half-saturation constant for grazing. At lower levels, zooplankton mortality outpaces growth due to assimilated grazing. 
+In realistic setting, there would always be some zooplankton and detritus within the mixed layer, but our simple model...
+
+The tropical location shows almost no change in nutrient concentration over the year, which is not surprising giving the forcing we supply. 
+Overall, the phytoplankton biomass matches satellite climatology very well 
+Nutrients are depleted throughout most of the year.
+Limited nutrient supply and the low phytoplankton biomass do not support much, if any, zooplankton growth and only small accumulation of detritus.
+
+Keep in mind that these are exemplary model test runs, we do no attempt to explain the specific dynamics in these locations, just show that the model setup produces reasonable results using different forcing. Goal is not realism, but general applicability and simplicity. 
 
 
 
-\subsubsection{NPZD slab model results}
-show and explain results, as simple as possible, full parameters/sensitivity analysis in appendix?
 
 
 \subsection{Use Case 2: Size-structured chemostat model}
+From an oceanic slab model, we move to a more theoretical setting.
+In comparison to our first use case this model only contains three types of components (namely a nutrient, phytoplankton and zooplankton), but a much larger number of state variables (81 vs 4). 
+40 phytoplankton and 40 zooplankton size classes
 
-This specific system could be described as a chemostat, where constant nutrient addition drives the growth of multiple state variables of phytoplankton and zooplankton. Each plankton state variable is assigned a size measured as the equivalent spherical diameter (ESD). The ESD determines the nutrient uptake parameters, growth rates and grazing susceptibility via size-based allometries taken from meta-analysis of laboratory data.
+Each plankton state variable is assigned a size measured as the equivalent spherical diameter (ESD). The ESD determines the nutrient uptake parameters, growth rates and grazing susceptibility via size-based allometries taken from meta-analysis of laboratory data.
+
+The model is basically a copy of BANAS ASTroCAT, but with slight modifications to physical environment. A 
+
+The physical environment can be described as a chemostat, where constant nutrient addition drives the growth of multiple state variables of phytoplankton and zooplankton. The model currency is \unit{\mu M} of Nitrogen.
+
+%physical env
+A chemostat is a simple flow-through system often used in labs for phytoplankton growth experiments. A population of phytoplankton is inoculated in a bottle, where a constant inflow of nutrients (e.g. nitrate) supports their growth. As the volume is kept constant, what flows in must flow out, so a fraction of the volume containing both nutrients and phytoplankton is lost from the system continuously. The balance of nutrient supply, phytoplankton mortality and growth, as well as flow rate defines the trajectory of the system. Too fast flow rates dilute the phytoplankton population out of existence, whilst with smaller flow rates nutrients are quickly used up. The model is very likely to reach a steady-state.
+
+% Nutrient dynamics
+The simple physical setting describes two forcing processes, that can be described using a single variable. The chemostat provides an inflow of a nutrient solution, and at the same rate all components are flowing out of the system.
+Temperature and light are assumed to have no limiting effect on phytoplankton, and are therefore neglected. Only nutrient uptake is considered in computing phytoplankton growth.
+
+% Phytoplankton dynamics
+
+% Zooplankton dynamics
+
+
 
 \subsection{Model Structure: size-structured NPZ}
 
@@ -153,7 +188,6 @@ This specific system could be described as a chemostat, where constant nutrient 
 \subsection{Model Structure: size-structured NPZD}
 
 
-
 \subsubsection{Physical setting: slab}
 
 \subsubsection{Model results}
@@ -165,18 +199,15 @@ This specific system could be described as a chemostat, where constant nutrient 
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_plots/01_forcing_labeled.pdf}
-\caption{(a) Map shows locations of the two comparative model runs. Each square is of side length 4° centered on 47°N ,-20°E and 0°N,-20°E respectively. Environmental forcings are averaged across area. (b) Forcing is shown: Mixed Layer Depth (MLD), Nitrate below the Mixed Layer (N_0), Photosynthetically Active Radiation (PAR) and temperature averaged across the Mixed Layer (T_{MLD})}
+\caption{(a) Map shows locations of the two comparative model runs. Each square is of side length 4° centred on 47°N ,-20°E and 0°N,-20°E respectively. Environmental forcings are averaged across area. (b) Forcing is shown: Mixed Layer Depth (MLD), Nitrate below the Mixed Layer ($N_0$), Photosynthetically Active Radiation (PAR) and temperature averaged across the Mixed Layer ($T_{MLD}$)}
 \label{phydraforcing}
 \end{figure*}
-
-
 
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_schematics/02__schematics_NPZDandChemostat.pdf}
 \caption{(a) Model schematic of NPZD slab model for example 1. Model structure and parametrisation is adapted
-from \citet{Anderson2015c} (b) Model schematic of size-structured NP_{40}Z_{40} trophic model for use case 2.
-Model structure and parameterisation is adapted from \citet{Banas2011b}.}
+from \citet{Anderson2015c} (b) Model schematic of size-structured $NP_{40}Z_{40}$ trophic model for use case 2. Model structure and parameterisation is adapted from \citet{Banas2011b}.}
 \label{phydraschematics_1}
 \end{figure*}
 
@@ -184,14 +215,15 @@ Model structure and parameterisation is adapted from \citet{Banas2011b}.}
 %%f
 \begin{figure}[t]
 \includegraphics[width=6cm]{Figures/firstdraft_plots/02_NPZDslab.pdf}
-\caption{Model output for the two locations of the NPZD slab model is shown between the two sites.}
+\caption{Dynamics of NPZD slab model (i.e. use case 1) in the two exemplary locations. Output is the last year of a 5 year simulation with repeated climatological forcing. Forcing used is shown in Figure \ref{phydraforcing}. Grey dots are verification data from WOA 2018 and satellite climatology (see Section \ref{ForcingSection} for details).}
+\label{NPZDslab_results}
 \end{figure}
 
 %%f
 \begin{figure}[t]
 \includegraphics[width=6cm]{Figures/firstdraft_plots/03_chemostat.pdf}
 \caption{Model output for the size-structure chemostat model. Plot is a recreation (same model setup & parameters) of a plot in \citet{Banas2011b}}
-\label{ASTroCAT_plot}
+\label{chemostat_plot}
 \end{figure}
 
 %%f
@@ -207,7 +239,7 @@ Model structure and parameterisation is adapted from \citet{Banas2011b}.}
 \begin{figure*}[t]
 \includegraphics[width=12cm]{Figures/firstdraft_plots/04_sizestruct_slab.pdf}
 \caption{Model output for the two locations of the size-structured NP_{20}Z_{20}D slab model}
-\label{ASTroCAT_plot}
+\label{SizeStructuredSlab_results}
 \end{figure*}
 % Tables
 
