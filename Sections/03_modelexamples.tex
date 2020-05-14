@@ -61,8 +61,8 @@ From this global forcing dataset, we chose two representative locations in the A
 
 \subsubsection{Satellite chlorophyll and nutrient climatologies as verification data}
 Model verification is a very difficult process
-- it usually takes specific tailoring of the model to the data, or vice versa \cite{Schartau2017}
-- a good fit, does not mean a correct model \cite{RykielJr1996}\\
+- it usually takes specific tailoring of the model to the data, or vice versa \citep{Schartau2017}
+- a good fit, does not mean a correct model \citep{RykielJr1996}\\
 
 BUT, still is a basic test of model function, and for demonstration purposes.
 We chose to use the Nutrient data from the WOA climatologies for nutrient concentration in the upper layer.
@@ -77,11 +77,11 @@ The data are highly aggregated climatologies, of poor temporal resolution (month
 
 \subsection{Use case 1: NPZD slab model}
 
-The specific NPZD slab model implementation for our Use Case 1 was adapted from \citet{Anderson2015c}. For a schematic of the model structure, see Figure \ref{phydraschematics_1} (a).
+The specific NPZD slab model implementation for our Use Case 1 was adapted from \citet{Anderson2015c}. For a schematic of the model structure, see Figure \ref{phydraschematics_1} (a). 
+For the full set of equations, please see the Appendix.
 
 \subsubsection{Model Description: NPZD slab model}
-The model contains the name-defining four ecosystem components: Nutrient, phytoplankton, zooplankton and detritus. The only resolved nutrient in this system is nitrate. The biomass of all other state variables is measured in the common model currency \unit{µM} of Nitrogen. Four forcings affect the model dynamics: nitrate below the mixed layer ($N_0$), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR), average temperature above the mixed layer depth (\unit{T_{MLD}}). The forcings are interpolated monthly climatologies as described in Section \ref{ForcingSection}. See Figure \ref{phydraforcing} for the two locations and specific forcings applied here.
-For the full set of equations, please see the Appendix.\\
+The model contains the name-defining four ecosystem components: Nutrient, phytoplankton, zooplankton and detritus. The only resolved nutrient in this system is nitrate. The biomass of all other state variables is measured in the common model currency \unit{µM} of Nitrogen. Four forcings affect the model dynamics: nitrate below the mixed layer ($N_0$), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR), average temperature above the mixed layer depth (\unit{T_{MLD}}). The forcings are interpolated monthly climatologies as described in Section \ref{ForcingSection}. See Figure \ref{phydraforcing} for the two locations and specific forcings applied here.\\
 
 % Nutrient dynamics
 $N_0$ determines the possible nutrient supply to the ecosystem. Mixing of nutrients is a function of a constant mixing parameter, $N_0$, $N$ and the value and derivative of $MLD$, following \citet{Evans1985ACycles}. In contrast to other components, mixing affecting the nutrient is a positive term adding to $N$ along the gradient between $N_0$and $N$. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth.
@@ -151,46 +151,117 @@ Keep in mind that these are exemplary model test runs, we do no attempt to expla
 
 
 
-\subsection{Use Case 2: Size-structured chemostat model}
-From an oceanic slab model, we move to a more theoretical setting.
-In comparison to our first use case this model only contains three types of components (namely a nutrient, phytoplankton and zooplankton), but a much larger number of state variables (81 vs 4). 
-40 phytoplankton and 40 zooplankton size classes
+\subsection{Use Case 2}
 
-Each plankton state variable is assigned a size measured as the equivalent spherical diameter (ESD). The ESD determines the nutrient uptake parameters, growth rates and grazing susceptibility via size-based allometries taken from meta-analysis of laboratory data.
+From an attempt at describing an oceanic physical setting with a highly simplified ecosystem, we move to a simplified laboratory setting with a complex description of a size-structured ecosystem. This model structure was adapted from \cite{Banas2011b}, with the modification that we explicitly describe the physical setting as a flow-through chemostat. See Figure \ref{phydraschematics_1} (b) for a schematic of the model structure. See Appendix 1.2 for the full system of equations. 
 
-The model is basically a copy of BANAS ASTroCAT, but with slight modifications to physical environment. A 
+Size is called a "master-trait" in the trait-based description of plankton ecology, allowing modellers and ecologist to describe the diverse plankton community along one continuous axis. (This is of course an oversimplification, and it takes careful consideration of the choice of allometries and often a combination of functional properties and size classes to achieve a more realistic representation of natural phytoplankton assemblages.)
 
-The physical environment can be described as a chemostat, where constant nutrient addition drives the growth of multiple state variables of phytoplankton and zooplankton. The model currency is \unit{\mu M} of Nitrogen.
+\subsubsection{Size-structured NPZ chemostat model}
 
-%physical env
-A chemostat is a simple flow-through system often used in labs for phytoplankton growth experiments. A population of phytoplankton is inoculated in a bottle, where a constant inflow of nutrients (e.g. nitrate) supports their growth. As the volume is kept constant, what flows in must flow out, so a fraction of the volume containing both nutrients and phytoplankton is lost from the system continuously. The balance of nutrient supply, phytoplankton mortality and growth, as well as flow rate defines the trajectory of the system. Too fast flow rates dilute the phytoplankton population out of existence, whilst with smaller flow rates nutrients are quickly used up. The model is very likely to reach a steady-state.
+In comparison to our first use case this model contains only three types of components (namely a nutrient, phytoplankton and zooplankton), but a much larger number of state variables (81 versus 4). The model currency is \unit{\mu M} of Nitrogen, with the only resolved nutrient being dissolved inorganic nitrogen. Additional state variables are 40 size classes of phytoplankton and 40 size classes of zooplankton. These size classes are initialised via a range of equivalent spherical diameters (ESD). For phytoplankton state variables, the ESD determines the nutrient uptake parameters, growth rates and grazing susceptibility, while for zooplankton it sets the prey range, ingestion rates and half-saturation constants of grazing. The specific size-based allometries are taken from meta-analysis of laboratory data (!refs Hansen et al 1997, Hansen et al 1994, Tang 1995, Eppley 1969). 
+
+Thus we can initialise our model with a range of size classes. The size classes are initialised in such a way, that each phytoplankton size class is efficiently grazed by a corresponding zooplankton size class.
+
+Mention how this means:
+- there is a "type" or class of component, that uses the same functions, but with varying parameters. This technically corresponds to an array and vectorized computations in python.
+- this is what phydra excels at, flexible initialisation of component classes.
+
+%physicalenv
+A chemostat is a flow-through system that is often used in laboratories for phytoplankton growth experiments. A population of phytoplankton is inoculated in a bottle, where a constant inflow of nutrients supports their growth. As the volume is kept constant, what flows in must flow out, so a fraction of the volume containing both nutrients and phytoplankton is lost from the system continuously. The balance of nutrient supply, phytoplankton mortality and growth, as well as flow rate defines the trajectory of the system, often towards a steady state at constant flow rates. 
+In this model instance, the chemostat provides the zero-dimensional setting for an NPZ ecosystem model. For mechanistic simplicity the detrital pool is not tracked and all detritus is assumed to flow out of the system before being remineralised or grazed upon.
 
 % Nutrient dynamics
-The simple physical setting describes two forcing processes, that can be described using a single variable. The chemostat provides an inflow of a nutrient solution, and at the same rate all components are flowing out of the system.
-Temperature and light are assumed to have no limiting effect on phytoplankton, and are therefore neglected. Only nutrient uptake is considered in computing phytoplankton growth.
+The simple physical setting describes two forcing processes, that can be described using a single variable. The chemostat provides an inflow of a nutrient solution, and at the same rate all components are flowing out of the system. The concentration of the external nutrient supply $N_0$ and the flow rate determine the amount of nutrient entering the system over time. The only additional process adding to the nutrient pool within the chemostat is excretion by zooplankton. Other fluxes, such as phytoplankton mortality and zooplankton egestion and mortality, are assumed to be removed from the system.
 
 % Phytoplankton dynamics
+Temperature and light are assumed to have no limiting effect on phytoplankton, and therefore dependent processes are not resolved in the model. Phytoplankton growth is only limited by the supply of nutrients. Similar to use case 1, nutrient uptake is instantaneously assimilated to biomass. The growth function for the phytoplankton components is made up of a size-dependent maximum growth rate and a Monod (or Michaelis-Menten) nutrient limiting-term with a size-dependent half-saturation constant multiplied by phytoplankton biomass. 
+Phytoplankton losses are the constant outflux, grazing by zooplankton and a general mortality rate, that is a fraction by the size-dependent maximum growth rate $\mu^i_0$. (!ref Moloney and Field, 1991)
 
 % Zooplankton dynamics
+Zooplankton grows via assimilating ingested phytoplankton, defined as the product of growth efficiency $\epsilon$ and total ingested phytoplankton. Ingestion of each zooplankton type is a size-dependent process defined by the size of the phytoplankton prey, a half saturation constant $K_s$, the zooplankton type's specific size preference and a size-dependent maximum ingestion rate. [perhaps show a figure visualising the size-dependent allometries?]
+The size preference of zooplankton types is assumed to vary with prey size in a log-Gaussian distribution around an optimal prey size for each grazer.
+Width of the Gaussian distribution is controlled by the shared prey size tolerance parameter with logarithmic units.
+Loss processes of zooplankton are the linear outflux and a quadratic mortality.The quadratic mortality term acts as a closure term, implicitly assuming that the rate of mortality is proportional to total zooplankton biomass (!ref Edwards and Yool, 2000). 
+A fraction of grazed phytoplankton biomass, not allocated to assimilation via $\epsilon$ and egestion via $f_{eg}$, is remineralised immediately back into the nutrient state variable.
 
-
-
-\subsection{Model Structure: size-structured NPZ}
-
-\subsubsection{Physical setting: chemostat}
+% allometric parameterisation
+The allometric parameterisation follows \cite{Banas2011b}. Values of $\mu^i_0$, $I^j_0$, etc. are determined from power-law functions based on the plankton types ESD taken from review studies [add same table as BANAS 2011?].
+- note caveats of allometries
+- note the experimental goals of this study
 
 
 \subsubsection{Model results}
+% here explain the ASTroCAT model results
+% note that current plot shows ASTroCAT model copy, not the chemostat modification that I have thought up (needs to be implemented and updated)
+
+We present here the results of a 10 year model run using constant forcing in the described chemostat physical setting with one nutrient and 40 size classes of phytoplankton and zooplankton resolved. This corresponds to the base model case presented by \cite{Banas2011b} The major modification is that we moved the model system into a more explicitly theoretical chemostat setting with a constant outflow of model components. Similarly to the results discussed by \cite{Banas2011b} we see a strong non-monotonicity of the planktonic ecosystem, even in such a simple environment under constant forcing. A stable size spectrum of plankton biomass appears to be reached after ~5 years of simulation, which show strong oscillatory behaviour. 
+- this can be compared to natural systems
+- Banas goes much deeper in analysis
+- we show this as an example model ecosystem of higher complexity
+
+Such model experiments show that the inclusion of well-resolved diversity in ecosystem models and inclusion of physiological diversity can fundamentally alter the simulated dynamics. This has repercussion far beyond theoretical systems ecology and places limits on the predictability of ecosystem dynamics (!ref Baird, 2010).
 
 
-\subsection{Use Case 2: Size-structured chemostat model}
+\subsection{Use Case 3}
+In the previous two use cases we presented (1) a NPZD slab model containing 4 state variables within a simplified oceanic physical setting and (2) a NPZ chemostat model containing 81 state variables within a highly simplified laboratory setting. 
+In the third use case we want to showcase the highly modular and flexible nature of phydra model components and processes, by placing the highly resolved trophic web of use case 2 within the more realistic physical setting of use case 1.
 
-\subsection{Model Structure: size-structured NPZD}
+The resulting model structure is a size-structured NPZD slab model.
+- this is already quite a complex model, but there are examples of much more complex models run in global 3D settings in the literature \citep{Ward2012}
+- we will compare the model output to size-fractionated phytoplankton biomass (3 size fractions: pico, nano, micro) we group phytoplankton state variables into the three size fractions (See section FORCING for more details)
+- for model to data comparison, we need to adjust parameters, do parameter fitting (ideally I'll also do a sensitivity analysis with this model! should be simple using batch dims)
 
+\subsection{Size-structured NPZD slab model}
 
-\subsubsection{Physical setting: slab}
+[This entire section is mostly copied together from the other two, and is quite rough! Still needs some work]\\
+
+For schematic of model structure, see Figure \ref{phydraschematics_3}. Please check appendix for the system of equations. 
+Since use case 3 presents no new components or processes from the previous two use case, we will not discuss mechanisms in detail, but highlight from which use case they were adapted where a more detailed description can be found. 
+
+The model contains four ecosystem components: Nutrient, phytoplankton, zooplankton and detritus. The nutrient and detritus component are represented by a single state variable each. Planktonic components of the ecosystem are size-spectrally resolved as in use case 2.
+The ecosystem is embedded in a slab physical setting as presented in use case 1. The only resolved nutrient in this system is nitrate. The concentration of all state variables is measured in the common model currency \unit{µM} of Nitrogen. Four external forcings affect the model dynamics: nitrate below the mixed layer ($N_0$), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR), average temperature above the mixed layer depth (\unit{T_{MLD}}). 
+
+The forcings are the same interpolated monthly climatologies used for use case 1, as described in Section \ref{ForcingSection}. See Figure \ref{phydraforcing} for the two locations and specific forcings applied here.\\
+
+% Phytoplankton dynamics
+Growth of phytoplankton is modified by three factors: Temperature, nutrient uptake and light harvesting. Multiplied by the maximum intrinsic growth rate $\mu_P$ and the current phytoplankton biomass, the growth flux is computed. Temperature dependence of phytoplankton growth is calculated as the Eppley constant \citep{Eppley1972TemperatureSea}, with an exponential equivalent to a $Q_{10}$ of 1.895.
+The light-limiting term is calculated via Steele's formulation \citep{Steele1962EnvironmentalSea}. Incident irradiance is supplied by the PAR climatological forcing. Integrated light availability in the upper layer is calculated via Beer's law, dependent on MLD and the sum of extinction coefficients of water and phytoplankton biomass. Phytoplankton light limitation is further defined by an $I_{opt}$ parameter, that describes what amount of available light saturates photosynthesis.
+The uptake rate of nutrients is defined by a Monod (or Michaelis-Menten) function. The maximum rate is defined by the size-dependent half-saturation constant $k^i_N$. 
+% here phytoplankton mortalities
+Phytoplankton mortality is implemented as a linear rate, scaled by the size-dependent maximum growth rate. 
+All phytoplankton non-grazing losses contribute to detritus.\\
+
+% Zooplankton dynamics
+We assume that zooplankton can actively maintain themselves in the upper mixed layer and only compute diluting effects of MLD deepening, but no other mixing terms.
+Zooplankton grazing is implemented with the same function described in use case 2 (see Section !3.2!) 
+
+Zooplankton grows via assimilating ingested phytoplankton, defined as the product of growth efficiency $\epsilon$ and total ingested phytoplankton. Ingestion of each zooplankton type is a size-dependent process defined by the size of the phytoplankton prey, a half saturation constant $K_s$, the zooplankton type's specific size preference and a size-dependent maximum ingestion rate. [perhaps show a figure visualising the size-dependent allometries?]
+The size preference of zooplankton types is assumed to vary with prey size in a log-Gaussian distribution around an optimal prey size for each grazer.
+Width of the Gaussian distribution is controlled by the shared prey size tolerance parameter with logarithmic units.
+Loss processes of zooplankton are the linear outflux and a quadratic mortality.The quadratic mortality term acts as a closure term, implicitly assuming that the rate of mortality is proportional to total zooplankton biomass (!ref Edwards and Yool, 2000). 
+Only a fraction of the biomass grazed by zooplankton is assimilated to zooplankton biomass. Growth efficiency is a product of the absorption efficiency $\beta$ and net production efficiency $k_{NZ}$. Using these two parameters, grazed biomass is split three ways into the fraction actually assimilated to zooplankton, a fraction that is egested to detritus (e.g. faecal pellets) and another that is directly excreted as nutrient. 
+
+Zooplankton mortality is split into a linear term and a quadratic term. The linear term describes the natural mortality of zooplankton, that is added to the pool of detritus. The quadratic term is assumed to be exported and lost from the system.\\
+
+% Detritus dynamics
+The processes adding to the pool of detritus are phytoplankton mortality, egested grazing and linear zooplankton mortality. The fraction of detritus that is remineralised each day is given by the parameter $m_D$. In addition to being affected by mixing in the same way as phytoplankton, detritus experiences additional sinking at a rate of $v_D$ (\unit{m \ d^{-1}}).\\
+
+A complete presentation of equations is given in Appendix 1.\\
 
 \subsubsection{Model results}
+
+Using this new complex model structure, and the same forcing used for use case 1, exemplary simulations were performed in two contrasting locations. 
+See Figure \ref{SizeStructuredSlab_results} for the average temporal evolution of the aggregated size-classes of \\
+
+
+- explain here how the runs are set up\\
+
+- explain how the size class comparison works! how do i aggregate the model size classes in the plot\\
+
+The two locations show markedly different dynamics. The temperate location shows a pronounced seasonal cycle in nutrient concentration in the upper mixed layer of our model. \\
+
+- these results will most likely change a lot, once the model & package are recoded!\\
 
 
 \clearpage
@@ -206,8 +277,8 @@ Temperature and light are assumed to have no limiting effect on phytoplankton, a
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_schematics/02__schematics_NPZDandChemostat.pdf}
-\caption{(a) Model schematic of NPZD slab model for example 1. Model structure and parametrisation is adapted
-from \citet{Anderson2015c} (b) Model schematic of size-structured $NP_{40}Z_{40}$ trophic model for use case 2. Model structure and parameterisation is adapted from \citet{Banas2011b}.}
+\caption{(a) Model schematic of NPZD slab model for example 1. Model structure and parameterisation is adapted
+from \citet{Anderson2015c} (b) Model schematic of size-structured $NP_{40}Z_{40}$ trophic model for use case 2. Model structure and parameterisation is adapted from \citet{Banas2011b}. [NOTE: these need to be updated, in particular with how egestion and excretion are visualised. Either both originate from grazing flux, or both are originating from "Z".. not this mixture]}
 \label{phydraschematics_1}
 \end{figure*}
 
@@ -222,14 +293,14 @@ from \citet{Anderson2015c} (b) Model schematic of size-structured $NP_{40}Z_{40}
 %%f
 \begin{figure}[t]
 \includegraphics[width=6cm]{Figures/firstdraft_plots/03_chemostat.pdf}
-\caption{Model output for the size-structure chemostat model. Plot is a recreation (same model setup & parameters) of a plot in \citet{Banas2011b}}
+\caption{Phytoplankton and zooplankton biomass per size class under steady chemostat flow-through forcing. Panel (a) shows a detailed view of the first 2 years of simulation. Panel (b) shows 10 years of model time evolution of the same run as the model output approaches a steady state. Panel (c) shows zooplankton biomass time evolution for the same model run. Plot is a recreation (same model setup & parameters) of a plot in \citet{Banas2011b}}
 \label{chemostat_plot}
 \end{figure}
 
 %%f
 \begin{figure*}[t]
 \includegraphics[width=10cm]{Figures/firstdraft_schematics/03__schematics_SizeStructSlab.pdf}
-\caption{Model schematic of size-structured NP20Z20 slab model for use case 3.}
+\caption{Model schematic of size-structured \unit{NP_{20}Z_{20}} slab model for use case 3. The model is a combination of the size-structured food web of use case 2 and the detritus component and slab physical setting of use case 1. The model ecosystem is contained in the light-blue area, all open errors represent loss processes that are lost from the system.}
 \label{phydraschematics_3}
 \end{figure*}
 
@@ -238,11 +309,12 @@ from \citet{Anderson2015c} (b) Model schematic of size-structured $NP_{40}Z_{40}
 %%f
 \begin{figure*}[t]
 \includegraphics[width=12cm]{Figures/firstdraft_plots/04_sizestruct_slab.pdf}
-\caption{Model output for the two locations of the size-structured NP_{20}Z_{20}D slab model}
+\caption{Dynamics of size-structured \unit{NP_{20}Z_{20}D} slab model (i.e. use case 3) in the two exemplary locations. Solid line represents the mean dynamics of the last 10 years of a 20 year run with repeated climatological forcing, shaded areas show the standard deviation. Forcing used is shown in Figure \ref{phydraforcing}. Grey dots are verification data from WOA 2018 and satellite climatology (see Section \ref{ForcingSection} for details). Size ranges are picoplankton 0.5 - 2 \unit{\mu m}, nanoplankton 2 - 20 \unit{\mu m}, microplankton 20 - 50 \unit{\mu m}. Zooplankton dynamics shown are the sum of all size classes.}
 \label{SizeStructuredSlab_results}
 \end{figure*}
 % Tables
 
+\clearpage
 
 % needs to be added to render sections
 \bibliographystyle{copernicus}
