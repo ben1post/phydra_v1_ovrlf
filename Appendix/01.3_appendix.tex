@@ -4,13 +4,13 @@
 \begin{document}
 
 
-\subsection{Use Case 2}
-The model setup is based on the ASTroCAT model \citep{Banas2011b}, with minor modifications to the physical environment. 
-Our model setup describes a size-structured community of phytoplankton and zooplankton, with a single nutrient resolved, embedded in a physical setting akin to a laboratory chemostat.
-A chemostat is a flow-through system, where organisms are grown in a bottle with a continuous influx of a nutrient solution. At the same rate all components of the bottle flow out of the bottle.
+\subsection{Use Case 3}
+The model setup is a combination of the previous two use cases. The size-structured phytoplankton and zooplankton components of use case 2 are placed within the physical slab setting of use case 1. Components and processes are adapted from both \citet{Banas2011b} and \citet{Anderson2015c}.
 
-The ecosystem component is a NPZ model, containing three components describing nutrients $N$, phytoplankton $P$, zooplankton $Z$. In addition this model describes multiple state variables of phytoplankton and zooplankton, with each state variable defined by their equivalent spherical diameter.
-In model runs presented in this paper, we used follow \citet{Banas2011b} in running simulations with 40 size classes of each planktonic component. 
+Model setup describes a size-structured community of phytoplankton and zooplankton, with a single nutrient resolved, embedded in a well-mixed upper layer.
+
+The ecosystem component is a NPZD model, containing three components describing nutrients $N$, phytoplankton $P$, zooplankton $Z$ and detritus $D$. In addition this model describes multiple state variables of phytoplankton and zooplankton, with each state variable defined by their equivalent spherical diameter (ESD).
+
 The technical implementation allows running the model with any number of size classes, therefore the mathematical description will be kept general in describing the number of size classes by the subscript $i$ for phytoplankton and $j$ for zooplankton. Note that the implementation of a size-spectral model by \citeauthor{Banas2011b} implicitly has the same number of phytoplankton and zooplankton state variables (i.e. $i = j$).
 
 
@@ -20,19 +20,51 @@ The rates of change of the state variables are described by the following set of
 
 \begin{equation}
     \frac{d N}{d t} = 
-    f \cdot N_0 % Nutrient mixing
+    K (N_0 - N) % Nutrient mixing
+    + \beta(1 - k_{NZ})(G_P + G_D) % Unassimilated grazing by Z
+    + m_D \cdot D % Remineralisation of D
+    - \mu_{max}(T) \  \gamma^{I} \ \gamma^{N} \cdot P % Phytoplankton gains
+    
+\end{equation}
+
+%PHYTOPLANKTON
+\begin{equation}
+    \frac{d P}{d t} =
+    \mu_{max}(T) \  \gamma^{I} \ \gamma^{N} \cdot P  % Phytoplankton gains
+    - m_P \cdot P % Linear mortality
+    - m_{P2} \cdot P^2 % Quadratic mortality
+    - G_P % Z grazing
+    - K \cdot P % Phytoplankton mixing
+    
+\end{equation}
+
+%ZOOPLANKTON
+\begin{equation}
+    \frac{d Z}{d t} =
+    \beta k_{NZ}(G_P + G_D) % Assimilated grazing
+    - m_Z \cdot Z % Linear mortality
+    - m_{Z2} \cdot Z^2 % Quadratic mortality
+    - K \cdot Z % Zooplankton mixing
+    
+\end{equation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{equation}
+    \frac{d N}{d t} = 
+    K (N_0 - N) % Nutrient mixing
     + (1 - \epsilon - \beta)\sum_{j} \sum_{i} G^{ij}_P % Unassimilated grazing by Z
-    - \sum_{i} ( \mu^i_{0} \cdot \gamma^i_N \cdot P_i) % Phytoplankton gains
-    - f \cdot N
+    - \sum_{i} ( \mu^i_{0} \cdot \gamma^{T} \cdot \gamma^{I} \cdot \gamma^i_N \cdot P_i) % Phytoplankton gains
 \end{equation}
 
 %PHYTOPLANKTON
 \begin{equation}
     \frac{d P_i}{d t} =
-    \mu^i_{0} \cdot  \gamma^i_N \cdot   P_i  % Phytoplankton gains
+    \mu^i_{0} \cdot \gamma^{T} \cdot \gamma^{I} \cdot \gamma^i_N \cdot   P_i  % Phytoplankton gains
     - m_P  \cdot \mu^i_{0} \cdot P_i % Linear mortality
     - \sum_{j} G^{ij}_P % Z grazing
-    - f \cdot P_i
+    - K \cdot P % Phytoplankton mixing
 \end{equation}
 
 %ZOOPLANKTON
@@ -40,9 +72,21 @@ The rates of change of the state variables are described by the following set of
     \frac{d Z_j}{d t} =
     \epsilon \cdot \sum_{i} G^{ij}_P % Assimilated grazing
     - m_{Z2} \cdot Z_j \cdot \sum_{j} Z_j  % Quadratic mortality
-    - f \cdot Z_j
+    - K \cdot Z_j % Phytoplankton mixing
 \end{equation}
 
+%DETRITUS
+\begin{equation}
+    \frac{d D}{d t} = 
+    m_P \cdot P % Linear mortality
+    + m_{P2} \cdot P^2 % Quadratic mortality
+    + m_Z \cdot Z % Linear mortality
+    + (1 - \beta)(G_P + G_D) % Unassimilated grazing by Z
+    - G_D % Z grazing on D
+    - m_D \cdot D % Remineralisation of D
+    - K \cdot D % Mixing of D
+    - \frac{v}{H(t)} \cdot D % Sinking of D
+\end{equation}
 
 
 \subsubsection{Environment}
