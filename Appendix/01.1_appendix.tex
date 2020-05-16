@@ -5,33 +5,24 @@
 
 %' \copyrightstatement{TEXT}
 \section{Use case model formulations}
-%%% EQUATIONS
-%
-%%% Single-row equation
-%
-%\begin{equation}
-%
-%\end{equation}
-%
-%%% Multi-line equation
-%
-%\begin{align}
-%& 3 + 5 = 8\\
-%& 3 + 5 = 8\\
-%& 3 + 5 = 8
-%\end{align}
-%
 
-%NUTRIENT
+Note: to allow for an intuitive depiction of multiple instances of each parameter and state variable, modifying subscripts in symbols are instead added as a superscript (e.g. $\gamma^{N}$ for the nutrient-limitation of phytoplankton growth) so that indices in the subscript signify the dimensionality of symbols (e.g. $\gamma^{N}_i$ for the term per individual phytoplankton state variable $i$). This finds no usage in use case 1, but in both 2 and 3.
+Overall I attempted to make the presentation of symbols and equations coherent between use cases.
+
+In this appendix the model use cases are described mathematically, independent of their specific implementation in the phydra package. For interactive notebook containing documented model implementations and the python code creating the results in Section \ref{usecases} please see the examples folder on the phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}).
+
+
 \subsection{Use Case 1}
-The current model setup is based on the EMPOWER model \citep{Anderson2015c}, with modifications to:\\ 
-- light harvesting\\ 
-- light & nutrient $N^\emptyset$ forcing\\ 
-- zooplankton mixing\\ 
+The current model setup is based on the EMPOWER model \citep{Anderson2015c}, with modifications to some processes aimed at simplifying the description of the physical environment and the parameterisation of phytoplankton growth. 
+Specifically our model formulation uses empirical forcing for irradiance ($PAR$) and nutrient concentration of the deep layer ($N^\emptyset$), and we chose to use Steele's formulation to represent light-limitation of phytoplankton growth in the mixed layer, as adapted from \cite{Acevedo-Trejos2016}. This approach is perhaps mechanistically less realistic than using a photosynthesis-irradiance curve, but we chose the simpler approach without parameters dependent on chlorophyll content. For a more elaborate treatment of light in phytoplankton growth and an illuminating historical description of slab models see \citet{Anderson2015c}.\\
+
+- light harvesting\\
+- light $PAR$ & nutrient $N^\emptyset$ forcing\\ 
 - temperature dependence of phytoplankton growth?.\\ 
 
 \\ 
-The physical environment of the model uses slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of a biologically inert deep ocean below a well mixed layer of seasonally variable depth that contains the ecosystem. The ecosystem component is a traditional NPZD model, containing four state variables describing nutrients $N$, phytoplankton $P$, zooplankton $Z$ and detritus $D$.
+The physical environment of the model uses slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of a biologically inert deep ocean below a well mixed layer of seasonally variable depth that contains the ecosystem. The ecosystem is described as a traditional NPZD model, containing four state variables describing a nutrient (in this case nitrate) $N$, phytoplankton $P$, zooplankton $Z$ and detritus $D$. 
+
 \subsubsection{Model Equations}
 The rates of change of the state variables are described by the following set of equations:
 
@@ -85,14 +76,13 @@ The mixing coefficient $K$ describes mixing across the bottom of the mixed layer
     K = \frac{1}{H(t)} \cdot \left(h^{+}(t) + \kappa\right)
 \end{equation}
 
-Constant diffusive mixing is parameterized by $\kappa$, which is further modified by the changes in MLD. The MLD at a certain time point is $H(t)$ and the change in MLD is its derivative $\frac{d}{d t} H(t)$. The function $h^{+}(t)$ gives the effects of entrainment and detrainment due to the changes in MLD.
+Constant diffusive mixing is parameterized by $\kappa$, which is further modified by the changes in mixed layer depth (MLD) forcing, provided in the unit \unit{m} (meters) of depth. The MLD at a certain time point is $H(t)$ and the change in MLD is its derivative $\frac{d}{d t} H(t)$. The function $h^{+}(t)$ gives the effects of entrainment and detrainment due to the changes in MLD.
 
 \begin{equation}
     h^{+}(t) = \max\left(0, \frac{d}{d t} H(t)\right)
 \end{equation}
 
 The derivative of MLD $\frac{d}{d t} H(t)$ is positive when the mixed layer deepens. Nutrients are entrained from below, while other components of the ecosystem (e.g. phytoplankton) are diluted. When the mixed layer shallows, $h^{+}(t)$ does not modify $K$ (i.e. returns 0 instead of a negative value). It is assumed that detrainment of mass and the increase in concentration due to the reduced volume of the mixed layer are balanced.
-\\ !ToDO: mixing of Z is different \\
 $K$ affects all state variables in the upper mixed layer. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate of $v$. This term is added to describe the fast export of larger detritus particles below the mixed layer. 
 
 \subsubsection{Phytoplankton}

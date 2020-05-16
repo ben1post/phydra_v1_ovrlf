@@ -3,7 +3,7 @@
 
 \begin{document}
 
- %% \ SECTION 3
+ %% \ SECTION 4
 \section{Discussion}
 
 \begin{comment}
@@ -11,15 +11,16 @@ This is where I can actually discuss the model results, this was my idea how to 
 
 \end{comment}
 
-% PARAGRAPH STARTS HERE:
-To showcase the utility of the phydra package for modelling marine ecosystems, we demonstrate three model implementations of varying complexity.
-All model structures present highly idealised versions of marine ecosystems.\\
+% Discussion stars here
 
-Use case 1 is a canonical NPZD ecosystem model embedded in a 'slab' physical setting. The specific implementation is adapted from the elegant EMPOWER model \citep{Anderson2015c}, with simplifications to the formulation of light-limited growth of phytoplankton.
+To showcase the utility of phydra for modelling marine ecosystems, we showed three model applications of varying complexity.\\
 
-Use case 2 presents a more complex size-structured food web embedded in a simple flow-through (chemostat) setting. It is a NPZ model that resolves many size-classes of phytoplankton and zooplankton and their trophic interaction. The model structure was inspired and adapted from \citet{Banas2011b}. 
+Use case 1 is a canonical NPZD ecosystem model embedded in a 'slab' physical setting. The specific implementation is adapted from the elegant EMPOWER model \citep{Anderson2015c}, with simplifications to the treatment of light.
 
-Use case 3 embeds the complex food web of the second use case within the 'slab' physical setting of the first. Components and processes of each previous model instance are easily combined within the xarray-simlab framework, creating a completely different model, that shows oscillatory inter-annual fluctuations reminiscent of natural plankton populations. \\
+Use case 2 presents a more complex size-structured food web embedded in a simple flow-through (chemostat) setting. It is a NPZ model that resolves many size-classes of phytoplankton and zooplankton and their trophic interaction. The model structure was inspired and adapted from \citet{Banas2011b}, with modifications to the flow-through forcing. 
+
+Use case 3 embeds the complex food web of the second use case within the 'slab' physical setting of the first. Components and processes of each previous model instance are easily combined within the phydra package, based on a common object-oriented structure. In contrast to use case 1 this model shows prolonged oscillatory inter-annual fluctuations reminiscent of natural plankton populations under periodical forcing.\\
+
 
 
 \subsection{Use case 1}
@@ -68,6 +69,11 @@ See Figure \ref{SizeStructuredSlab_results} for the average temporal evolution o
 The two locations show markedly different dynamics. The temperate location shows a pronounced seasonal cycle in nutrient concentration in the upper mixed layer of our model. \\
 
 - these results will most likely change a lot, once the model & package are recoded!\\
+
+
+\subsection{General Discussion}
+
+The phydra package was designed specifically to create models of flexible dimensionality, as described in Section 2. For the presented use cases we focus varying dimensions of ecosystem complexity in relatively simple zero-dimensional physical settings. Models can be run in one, two or three-dimensional physical schemes, by providing the appropriate setup grid and processes defining physical interactions between grid points. Our choice of zero-dimensional implementations was motivated by the fact that such physical schemes are much easier to set up and analyse. The online documentation of the phydra repository (\url{https://github.com/ben1post/phydra}) provides simple examples of multi-dimensional marine ecosystem models, on which more complex implementations could be based upon.\\
 
 
 \clearpage
