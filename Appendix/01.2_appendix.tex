@@ -20,26 +20,26 @@ The rates of change of the state variables are described by the following set of
 
 \begin{equation}
     \frac{d N}{d t} = 
-    f \cdot N_0 % Nutrient mixing
-    + (1 - \epsilon - \beta)\sum_{j} \sum_{i} G^{ij}_P % Unassimilated grazing by Z
-    - \sum_{i} ( \mu^i_{0} \cdot \gamma^i_N \cdot P_i) % Phytoplankton gains
+    f \cdot N^0 % Nutrient mixing
+    + (1 - \epsilon - \beta)\sum_{j} \sum_{i} G_{ij}^P % Unassimilated grazing by Z
+    - \sum_{i} ( \mu_i^{\emptyset} \cdot \gamma_i^N \cdot P_i) % Phytoplankton gains
     - f \cdot N
 \end{equation}
 
 %PHYTOPLANKTON
 \begin{equation}
     \frac{d P_i}{d t} =
-    \mu^i_{0} \cdot  \gamma^i_N \cdot   P_i  % Phytoplankton gains
-    - m_P  \cdot \mu^i_{0} \cdot P_i % Linear mortality
-    - \sum_{j} G^{ij}_P % Z grazing
+    \mu_i^{\emptyset} \cdot  \gamma_i^N \cdot   P_i  % Phytoplankton gains
+    - m^P  \cdot \mu_i^{0} \cdot P_i % Linear mortality
+    - \sum_{j} G_{ij}^P % Z grazing
     - f \cdot P_i
 \end{equation}
 
 %ZOOPLANKTON
 \begin{equation}
     \frac{d Z_j}{d t} =
-    \epsilon \cdot \sum_{i} G^{ij}_P % Assimilated grazing
-    - m_{Z2} \cdot Z_j \cdot \sum_{j} Z_j  % Quadratic mortality
+    \epsilon \cdot \sum_{i} G_{ij}^P % Assimilated grazing
+    - m^{Z2} \cdot Z_j \cdot \sum_{j} Z_j  % Quadratic mortality
     - f \cdot Z_j
 \end{equation}
 
@@ -47,35 +47,35 @@ The rates of change of the state variables are described by the following set of
 
 \subsubsection{Environment}
 
-Nutrient supply to the system is defined by a linear flow rate $f$ and the nutrient concentration in the supplied solution $N_0$. All components, including phytoplankton and zooplankton are lost from the system at the same rate $f$.
+Nutrient supply to the system is defined by a linear flow rate $f$ and the nutrient concentration in the supplied solution $N^0$. All components, including phytoplankton and zooplankton are lost from the system at the same rate $f$.
 
 \subsubsection{Phytoplankton}
 Phytoplankton biomass $P$ increases through  nutrient-limited growth. 
 
-Nutrient limitation of phytoplankton growth $\gamma^i_N$ is described by the Michaelis-Menten (or Monod) equation.
+Nutrient limitation of phytoplankton growth $\gamma_i^N$ is described by the Michaelis-Menten (or Monod) equation.
 
 \begin{equation}
     \gamma^i_N =  \frac{N}{k^i_N + N} 
 \end{equation}
 
-where $k^i_N$ is the size-dependent half-saturation constant. $N$ is nutrient concentration, in this case dissolved inorganic nitrogen (DIN).
+where $k_i^N$ is the size-dependent half-saturation constant. $N$ is nutrient concentration, in this case dissolved inorganic nitrogen (DIN).
 
 
-Non-grazing mortality of phytoplankton is described the factor $m_P$ that is scaled by the maximum intrinsic growth rate $\mu^i_{0}$. This accounts for natural mortality and excretion.
+Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_i^{0}$. This accounts for natural mortality and excretion.
 
 \subsubsection{Zooplankton}
 Zooplankton size class $j$ grazing on phytoplankton size class $i$ is calculated by
 \begin{equation}
-    G^{ij}_P = I^j_0 \ \frac{ \phi_{ij} \cdot P_i }{ k^j_Z + \sum_{i}(\phi_{ij} \cdot P_i) } \ Z_j
+    G_{ij}^P = I_j^0 \ \frac{ \phi_{ij} \cdot P_i }{ k_j^Z + \sum_{i}(\phi_{ij} \cdot P_i) } \ Z_j
 \end{equation}
-where $I^j_0$ is the size-dependent maximum ingestion rate, $k^j_Z$ is the prey half-saturation level and $\phi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.\\
+where $I_j^0$ is the size-dependent maximum ingestion rate, $k_j^Z$ is the prey half-saturation level and $\phi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.\\
 
-Prey preference is assumed to vary with phytoplankton size $size^i_{P}$ in a log-Gaussian distribution around an optimal prey size for each grazer $size^j_{opt}$.
+Prey preference is assumed to vary with phytoplankton size $size_i^{P}$ in a log-Gaussian distribution around an optimal prey size for each grazer $size_j^{opt}$.
 
 \begin{equation}
-    \phi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size^i_{P}) - log_{10}(size^i_{opt}) }{ \Delta size_{P} } \right) \right]
+    \phi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size_i^{P}) - log_{10}(size_j^{opt}) }{ \Delta size^{P} } \right) \right]
 \end{equation}
-Where $\Delta size_{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m)}, that controls the width of the Gaussian distribution.\\
+Where $\Delta size^{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m)}, that controls the width of the Gaussian distribution.\\
 
 \subsubsection{Model Parameters}
 The model parameters in table \ref{appendix:table:usecase2parameters}.
@@ -103,18 +103,18 @@ $N_0$ & nutrient concentration of source medium for chemostat & \unit{µM \ N} \
 % TODO: change all square brackets to \unit{  }
 $\beta$ & absorption efficiency of zooplankton grazing &  dimensionless \\
 $\epsilon$ & net production efficiency of zooplankton grazing & dimensionless \\
-$G^{ij}_P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{µM \ N} \\
-$\mu^i_{0}$ & size-dependent max. growth rate of phytoplankton & \unit{d^{-1}} \\
-$\gamma^i_N$ & nutrient-dependence of the growth of phytoplankton size class $i$ & dimensionless\\
-$m_P$ & fraction of $\mu^i_{0}$ that is phytoplankton mortality & dimensionless \\
-$m_{Z2}$ & quadratic mortality of zooplankton, dependent on total $Z$ biomass & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
-$k^i_N$ & Phytoplankton size class $i$ half-saturation constant for nutrient uptake & \unit{µM \ N} \\
-$I^j_0$ & maximum ingestion rate for zooplankton size class $j$ &  \unit{d^{-1}} \\
+$G_{ij}^P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{µM \ N} \\
+$\mu_i^{0}$ & size-dependent max. growth rate of phytoplankton & \unit{d^{-1}} \\
+$\gamma_i^N$ & nutrient-dependence of the growth of phytoplankton size class $i$ & dimensionless\\
+$m^P$ & fraction of $\mu_i^{0}$ that is phytoplankton mortality & dimensionless \\
+$m^{Z2}$ & quadratic mortality of zooplankton, dependent on total $Z$ biomass & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
+$k_i^N$ & Phytoplankton size class $i$ half-saturation constant for nutrient uptake & \unit{µM \ N} \\
+$I_j^0$ & maximum ingestion rate for zooplankton size class $j$ &  \unit{d^{-1}} \\
 $\phi_{ij}$ & Preference of grazer $Z_j$ for prey $P_i$ & dimensionless \\
-$k^j_Z$ & Prey half-saturation level for zooplankton class $j$ & \unit{µM \ N} \\
-$size^i_{P}$ & Individual size in phytoplankton (prey) class $i$ & \unit{\mu m} \\
-$size^j_{opt}$ & Optimal prey size for zooplankton size class $j$ & \unit{\mu m} \\
-$\Delta size_{P}$ & Prey size tolerance for grazers & \unit{log_{10}(\mu m)} \\
+$k_j^Z$ & Prey half-saturation level for zooplankton class $j$ & \unit{µM \ N} \\
+$size_i^{P}$ & Individual size in phytoplankton (prey) class $i$ & \unit{\mu m} \\
+$size_j^{opt}$ & Optimal prey size for zooplankton size class $j$ & \unit{\mu m} \\
+$\Delta size^{P}$ & Prey size tolerance for grazers & \unit{log_{10}(\mu m)} \\
 %\middlehline
 %\bottomhline
 \end{tabular}
@@ -125,19 +125,19 @@ $\Delta size_{P}$ & Prey size tolerance for grazers & \unit{log_{10}(\mu m)} \\
 
 
 \begin{table*}[t]
-\caption{Allometric parameterisations and empirical parameter values employed in use case 2, adapted from \citet{Banas2011b}}
+\caption{Allometric parameterisations and empirical parameter values employed in use case 2, adapted from \citet{Banas2011b}.}
 \begin{tabular}{l l l l l}
 Empirical fit & Applicability & Source \\
 \tophline
-$\mu^i_{0} = (2.6 \ d^{-1}) \left( \frac{size^i_{P}}{1\mu m} \right)^{-0.45}$ & Phytoplankton 1-100 ESD \unit{\mu m} & Tang(1995) \\
-$k^i_N = (0.1 \ \unit{µM \ N})\left( \frac{size^i_{P}}{1\mu m} \right)$ & Phytoplankton 1-100 ESD \unit{\mu m} & Eppley et al. (1969) \\
+$\mu_i^{0} = (2.6 \ d^{-1}) \left( \frac{size^i_{P}}{1\mu m} \right)^{-0.45}$ & Phytoplankton 1-100 ESD \unit{\mu m} & Tang(1995) \\
+$k_i^N = (0.1 \ \unit{µM \ N})\left( \frac{size^i_{P}}{1\mu m} \right)$ & Phytoplankton 1-100 ESD \unit{\mu m} & Eppley et al. (1969) \\
 
-$I^j_0 = (26 \ d^{-1})\left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
+$I_j^0 = (26 \ d^{-1})\left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
 
-$k^j_Z = 3 \ \unit{µM \ N} $ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
+$k_j^Z = 3 \ \unit{µM \ N} $ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
 
-$size^j_{opt} = (0.65 \ \unit{\mu m})\left( \frac{size^i_{P}}{1\mu m} \right)^{0.56}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1994) \\
-$\Delta size_{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994)  \\
+$size_j^{opt} = (0.65 \ \unit{\mu m})\left( \frac{size^i_{P}}{1\mu m} \right)^{0.56}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1994) \\
+$\Delta size^{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994)  \\
 \middlehline
 
 \bottomhline

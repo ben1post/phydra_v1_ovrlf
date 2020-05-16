@@ -13,77 +13,45 @@ The ecosystem component is a NPZD model, containing three components describing 
 
 The technical implementation allows running the model with any number of size classes, therefore the mathematical description will be kept general in describing the number of size classes by the subscript $i$ for phytoplankton and $j$ for zooplankton. Note that the implementation of a size-spectral model by \citeauthor{Banas2011b} implicitly has the same number of phytoplankton and zooplankton state variables (i.e. $i = j$).
 
+"The model implementation discussed here includes 40 equally log-spaced classes of P from 1 to 20 \unit{\mu m}, and 40 matching classes of Z from 2.1 to 460 \unit{\mu m}. The $size^{opt}_j$ power law is used to choose the zooplankton size classes, so that every Z class has its optimal prey size available. It is also important to insure that overall range of P and Z sizes match in this sense, to avoid creating classes of organisms at the small or large ends of the spectrum that are artificially released from grazing pressure or artificially suppressed."
 
 
 \subsubsection{Model Equations}
 The rates of change of the state variables are described by the following set of equations:
 
-\begin{equation}
-    \frac{d N}{d t} = 
-    K (N_0 - N) % Nutrient mixing
-    + \beta(1 - k_{NZ})(G_P + G_D) % Unassimilated grazing by Z
-    + m_D \cdot D % Remineralisation of D
-    - \mu_{max}(T) \  \gamma^{I} \ \gamma^{N} \cdot P % Phytoplankton gains
-    
-\end{equation}
-
-%PHYTOPLANKTON
-\begin{equation}
-    \frac{d P}{d t} =
-    \mu_{max}(T) \  \gamma^{I} \ \gamma^{N} \cdot P  % Phytoplankton gains
-    - m_P \cdot P % Linear mortality
-    - m_{P2} \cdot P^2 % Quadratic mortality
-    - G_P % Z grazing
-    - K \cdot P % Phytoplankton mixing
-    
-\end{equation}
-
-%ZOOPLANKTON
-\begin{equation}
-    \frac{d Z}{d t} =
-    \beta k_{NZ}(G_P + G_D) % Assimilated grazing
-    - m_Z \cdot Z % Linear mortality
-    - m_{Z2} \cdot Z^2 % Quadratic mortality
-    - K \cdot Z % Zooplankton mixing
-    
-\end{equation}
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{equation}
     \frac{d N}{d t} = 
-    K (N_0 - N) % Nutrient mixing
-    + (1 - \epsilon - \beta)\sum_{j} \sum_{i} G^{ij}_P % Unassimilated grazing by Z
-    - \sum_{i} ( \mu^i_{0} \cdot \gamma^{T} \cdot \gamma^{I} \cdot \gamma^i_N \cdot P_i) % Phytoplankton gains
+    K (N^0 - N) % Nutrient mixing
+    +  \beta(1 - \epsilon)\sum_{j} \sum_{i} G_{ij}^P % Unassimilated grazing by Z
+    +  m^D \cdot D % Remineralisation of D
+    - \sum_{i} ( \mu_i^{0} \  \gamma^{T} \ \gamma^{I} \ \gamma_i^N \cdot P_i) % Phytoplankton gains
 \end{equation}
 
 %PHYTOPLANKTON
 \begin{equation}
     \frac{d P_i}{d t} =
-    \mu^i_{0} \cdot \gamma^{T} \cdot \gamma^{I} \cdot \gamma^i_N \cdot   P_i  % Phytoplankton gains
-    - m_P  \cdot \mu^i_{0} \cdot P_i % Linear mortality
-    - \sum_{j} G^{ij}_P % Z grazing
-    - K \cdot P % Phytoplankton mixing
+    \mu_i^{0} \ \gamma^{T} \ \gamma^{I} \ \gamma_i^N \cdot   P_i  % Phytoplankton gains
+    - m^P  \ \mu_i^{0} \cdot P_i % Linear mortality
+    - \sum_{j} G_{ij}^P % Z grazing
+    - K \cdot P_i% Phytoplankton mixing
 \end{equation}
 
 %ZOOPLANKTON
 \begin{equation}
     \frac{d Z_j}{d t} =
-    \epsilon \cdot \sum_{i} G^{ij}_P % Assimilated grazing
-    - m_{Z2} \cdot Z_j \cdot \sum_{j} Z_j  % Quadratic mortality
+    \beta \ \epsilon \ \sum_{i} G_{ij}^P % Assimilated grazing
+    - m^{Z2} \cdot Z_j \cdot \sum_{j} Z_j  % Quadratic mortality
     - K \cdot Z_j % Phytoplankton mixing
 \end{equation}
 
 %DETRITUS
 \begin{equation}
     \frac{d D}{d t} = 
-    m_P \cdot P % Linear mortality
-    + m_{P2} \cdot P^2 % Quadratic mortality
-    + m_Z \cdot Z % Linear mortality
-    + (1 - \beta)(G_P + G_D) % Unassimilated grazing by Z
-    - G_D % Z grazing on D
-    - m_D \cdot D % Remineralisation of D
+    \sum_{i}( m^P  \ \mu_i^{0} \cdot P_i) % Linear mortality
+    + (1 - \beta) \sum_{j} \sum_{i} G_{ij}^P % Unassimilated grazing by Z
+    - m^D \cdot D % Remineralisation of D
     - K \cdot D % Mixing of D
     - \frac{v}{H(t)} \cdot D % Sinking of D
 \end{equation}
@@ -91,7 +59,7 @@ The rates of change of the state variables are described by the following set of
 
 \subsubsection{Environment}
 
-Nutrient supply to the system is defined by a linear flow rate $f$ and the nutrient concentration in the supplied solution $N_0$. All components, including phytoplankton and zooplankton are lost from the system at the same rate $f$.
+
 
 \subsubsection{Phytoplankton}
 Phytoplankton biomass $P$ increases through  nutrient-limited growth. 
@@ -99,7 +67,7 @@ Phytoplankton biomass $P$ increases through  nutrient-limited growth.
 Nutrient limitation of phytoplankton growth $\gamma^i_N$ is described by the Michaelis-Menten (or Monod) equation.
 
 \begin{equation}
-    \gamma^i_N =  \frac{N}{k^i_N + N} 
+    \gamma_i^N =  \frac{N}{k_i^N + N} 
 \end{equation}
 
 where $k^i_N$ is the size-dependent half-saturation constant. $N$ is nutrient concentration, in this case dissolved inorganic nitrogen (DIN).
@@ -110,16 +78,18 @@ Non-grazing mortality of phytoplankton is described the factor $m_P$ that is sca
 \subsubsection{Zooplankton}
 Zooplankton size class $j$ grazing on phytoplankton size class $i$ is calculated by
 \begin{equation}
-    G^{ij}_P = I^j_0 \ \frac{ \phi_{ij} \cdot P_i }{ k^j_Z + \sum_{i}(\phi_{ij} \cdot P_i) } \ Z_j
+    G_{ij}^P = I_j^0 \ \frac{ \phi_{ij} \cdot P_i }{ k_j^Z + \sum_{i}(\phi_{ij} \cdot P_i) } \ Z_j
 \end{equation}
-where $I^j_0$ is the size-dependent maximum ingestion rate, $k^j_Z$ is the prey half-saturation level and $\phi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.\\
+where $I_j^0$ is the size-dependent maximum ingestion rate, $k_j^Z$ is the prey half-saturation level and $\phi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.\\
 
-Prey preference is assumed to vary with phytoplankton size $size^i_{P}$ in a log-Gaussian distribution around an optimal prey size for each grazer $size^j_{opt}$.
+Prey preference is assumed to vary with phytoplankton size $size_i^{P}$ in a log-Gaussian distribution around an optimal prey size for each grazer $size_j^{opt}$.
 
 \begin{equation}
-    \phi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size^i_{P}) - log_{10}(size^i_{opt}) }{ \Delta size_{P} } \right) \right]
+    \phi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size_i^{P}) - log_{10}(size_i^{opt}) }{ \Delta size^{P} } \right) \right]
 \end{equation}
-Where $\Delta size_{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m)}, that controls the width of the Gaussian distribution.\\
+Where $\Delta size^{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m)}, that controls the width of the Gaussian distribution.\\
+
+Zooplankton ingestion of prey does not directly convert to biomass gained however. The total biomass grazed $G$ is split three ways between growth, excretion of dissolved nutrients and egestion of faecal matter \& particles. The parameters describing the contribution of each process are the absorption efficiency $\beta$ and net production efficiency $\epsilon$. Gross growth efficiency is the product of these two factors.  \\
 
 \subsubsection{Model Parameters}
 The model parameters in table \ref{appendix:table:usecase2parameters}.
@@ -147,8 +117,8 @@ $N_0$ & nutrient concentration of source medium for chemostat & \unit{µM \ N} \
 % TODO: change all square brackets to \unit{  }
 $\beta$ & absorption efficiency of zooplankton grazing &  dimensionless \\
 $\epsilon$ & net production efficiency of zooplankton grazing & dimensionless \\
-$G^{ij}_P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{µM \ N} \\
-$\mu^i_{0}$ & size-dependent max. growth rate of phytoplankton & \unit{d^{-1}} \\
+$G_{ij}^P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{µM \ N} \\
+$\mu_i^{\emptyset}$ & size-dependent max. growth rate of phytoplankton & \unit{d^{-1}} \\
 $\gamma^i_N$ & nutrient-dependence of the growth of phytoplankton size class $i$ & dimensionless\\
 $m_P$ & fraction of $\mu^i_{0}$ that is phytoplankton mortality & dimensionless \\
 $m_{Z2}$ & quadratic mortality of zooplankton, dependent on total $Z$ biomass & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\

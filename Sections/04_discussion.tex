@@ -1,0 +1,78 @@
+\documentclass[template.tex]{subfiles}
+\usepackage{comment} 
+
+\begin{document}
+
+ %% \ SECTION 3
+\section{Discussion}
+
+\begin{comment}
+This is where I can actually discuss the model results, this was my idea how to keep it separate from Section 3, for a clearer reading experience.
+
+\end{comment}
+
+% PARAGRAPH STARTS HERE:
+To showcase the utility of the phydra package for modelling marine ecosystems, we demonstrate three model implementations of varying complexity.
+All model structures present highly idealised versions of marine ecosystems.\\
+
+Use case 1 is a canonical NPZD ecosystem model embedded in a 'slab' physical setting. The specific implementation is adapted from the elegant EMPOWER model \citep{Anderson2015c}, with simplifications to the formulation of light-limited growth of phytoplankton.
+
+Use case 2 presents a more complex size-structured food web embedded in a simple flow-through (chemostat) setting. It is a NPZ model that resolves many size-classes of phytoplankton and zooplankton and their trophic interaction. The model structure was inspired and adapted from \citet{Banas2011b}. 
+
+Use case 3 embeds the complex food web of the second use case within the 'slab' physical setting of the first. Components and processes of each previous model instance are easily combined within the xarray-simlab framework, creating a completely different model, that shows oscillatory inter-annual fluctuations reminiscent of natural plankton populations. \\
+
+
+\subsection{Use case 1}
+
+Employing the model structure, forcing and parameters presented in the previous sections, exemplary runs were conducted in two contrasting locations. See Figure \ref{NPZDslab_results} for the temporal evolution of the four state variables for the final year of a 5 year run using repeated climatological forcing. 
+The two locations show markedly different dynamics. The temperate location shows a pronounced seasonal cycle in nutrient concentration in the upper mixed layer of our model. WOA 2018 monthly climatology data of this property agrees well with the model output. Despite the relatively strong agreement between nutrient data and model output for nutrients, phytoplankton model output and a climatology of chlorophyll concentration from satellite do agree, but show a markedly different dynamic. During winter months phytoplankton biomass is reduced almost to zero in the model output. In spring, the shallowing of MLD produces a pronounced bloom, overshooting the climatological data for a short period, before it returns to levels below the data for the rest of the year. 
+
+Satellites can only estimate chlorophyll concentration to visual depths, possibly extrapolated using algorithms. MLD in winter is much deeper, model output represents not concentration at surface, but concentration averaged across entire mixed layer.
+The estimated chlorophyll from satellite data is converted to be compared to model output, via a constant chlorophyll-to-carbon ratio and the Redfield ratio of 16:1 (C:N), both of which are rough estimates and variable in nature. 
+An ecological explanation of the observed results is that the single phytoplankton state variable represents a large diversity of organisms and can not simultaneously describe a slow-growing smaller species that survive in the winter months, as well as a larger fast-growing bloom-forming species. The model output seems to represent the latter, with it's pronounced spring bloom. 
+
+Zooplankton and detritus state variables follow the phytoplankton biomass as would be expected from their mathematical formulation. Detritus accumulates during the phytoplankton bloom, but is otherwise readily sinking out of the mixed layer. Zooplankton only starts growing once phytoplankton biomass reaches a certain level, most likely dependent on the half-saturation constant for grazing. At lower levels, zooplankton mortality outpaces growth due to assimilated grazing. 
+In realistic setting, there would always be some zooplankton and detritus within the mixed layer, but our simple model...
+
+The tropical location shows almost no change in nutrient concentration over the year, which is not surprising giving the forcing we supply. 
+Overall, the phytoplankton biomass matches satellite climatology very well 
+Nutrients are depleted throughout most of the year.
+Limited nutrient supply and the low phytoplankton biomass do not support much, if any, zooplankton growth and only small accumulation of detritus.
+
+Keep in mind that these are exemplary model test runs, we do no attempt to explain the specific dynamics in these locations, just show that the model setup produces reasonable results using different forcing. Goal is not realism, but general applicability and simplicity. 
+
+
+
+
+
+\subsection{Use Case 2}
+
+% here explain the ASTroCAT model results
+% note that current plot shows ASTroCAT model copy, not the chemostat modification that I have thought up (needs to be implemented and updated)
+
+We present here the results of a 10 year model run using constant forcing in the described chemostat physical setting with one nutrient and 40 size classes of phytoplankton and zooplankton resolved. This corresponds to the base model case presented by \cite{Banas2011b} The major modification is that we moved the model system into a more explicitly theoretical chemostat setting with a constant outflow of model components. Similarly to the results discussed by \cite{Banas2011b} we see a strong non-monotonicity of the planktonic ecosystem, even in such a simple environment under constant forcing. A stable size spectrum of plankton biomass appears to be reached after ~5 years of simulation, which show strong oscillatory behaviour. 
+- this can be compared to natural systems
+- Banas goes much deeper in analysis
+- we show this as an example model ecosystem of higher complexity
+
+Such model experiments show that the inclusion of well-resolved diversity in ecosystem models and inclusion of physiological diversity can fundamentally alter the simulated dynamics. This has repercussion far beyond theoretical systems ecology and places limits on the predictability of ecosystem dynamics (!ref Baird, 2010).
+
+
+\subsection{Use Case 3}
+In the previous two use cases we presented (1) a NPZD slab model containing 4 state variables within a simplified oceanic physical setting and (2) a NPZ chemostat model containing 81 state variables within a highly simplified laboratory setting. 
+In the third use case we want to showcase the highly modular and flexible nature of phydra model components and processes, by placing the highly resolved trophic web of use case 2 within the more realistic physical setting of use case 1.
+
+Using this new complex model structure, and the same forcing used for use case 1, exemplary simulations were performed in two contrasting locations. 
+See Figure \ref{SizeStructuredSlab_results} for the average temporal evolution of the aggregated size-classes of \\
+
+The two locations show markedly different dynamics. The temperate location shows a pronounced seasonal cycle in nutrient concentration in the upper mixed layer of our model. \\
+
+- these results will most likely change a lot, once the model & package are recoded!\\
+
+
+\clearpage
+
+% this is a custom function to be able to see references when rendering subfiles:
+\biblio
+
+\end{document}
