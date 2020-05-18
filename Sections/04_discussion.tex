@@ -12,21 +12,37 @@ This is where I can actually discuss the model results, this was my idea how to 
 \end{comment}
 
 % Discussion stars here
-
 To showcase the utility of phydra for modelling marine ecosystems, we showed three model applications of varying complexity.\\
 
-Use case 1 is a canonical NPZD ecosystem model embedded in a 'slab' physical setting. The specific implementation is adapted from the elegant EMPOWER model \citep{Anderson2015c}, with simplifications to the treatment of light.
+Use case 1 is a canonical NPZD ecosystem model embedded in a 'slab' physical setting. The specific implementation was adapted from the elegant EMPOWER model \citep{Anderson2015c}, with simplifications to the treatment of light.
 
 Use case 2 presents a more complex size-structured food web embedded in a simple flow-through (chemostat) setting. It is a NPZ model that resolves many size-classes of phytoplankton and zooplankton and their trophic interaction. The model structure was inspired and adapted from \citet{Banas2011b}, with modifications to the flow-through forcing. 
 
-Use case 3 embeds the complex food web of the second use case within the 'slab' physical setting of the first. Components and processes of each previous model instance are easily combined within the phydra package, based on a common object-oriented structure. In contrast to use case 1 this model shows prolonged oscillatory inter-annual fluctuations reminiscent of natural plankton populations under periodical forcing.\\
+Use case 3 embeds the complex food web of the second use case within the 'slab' physical setting of the first. Components and processes of each previous model instance are easily combined within the phydra package, based on a common object-oriented structure. In contrast to use case 1 this model shows prolonged oscillatory inter-annual fluctuations under periodical forcing reminiscent of natural plankton populations.\\
+
+
+\subsection{Satellite chlorophyll and nutrient climatologies as verification data}
+Model verification is a very difficult process
+- it usually takes specific tailoring of the model to the data, or vice versa \citep{Schartau2017}
+- a good fit, does not mean a correct model \citep{RykielJr1996}\\
+
+BUT, still is a basic test of model function, and for demonstration purposes.
+We chose to use the Nutrient data from the WOA climatologies for nutrient concentration in the upper layer.
+
+Additionally, we use chlorophyll climatologies from MODIS-aqua (cite!) and 
+
+carbon-based phytoplankton size classes calculated from ocean color estimates of the particle size distribution \cite{Kostadinov2016Carbon-basedDistribution}.\\
+
+The provided dataset provides an easy way to compare model output to empirical data. 
+
+The data are highly aggregated climatologies, of poor temporal resolution (monthly). We follow this path to provide a universally useful, simple tool for marine ecosystem model development. For more specific model implementation and hypothesis testing it would be highly recommended to use local data.\\
 
 
 
 \subsection{Use case 1}
 
-Employing the model structure, forcing and parameters presented in the previous sections, exemplary runs were conducted in two contrasting locations. See Figure \ref{NPZDslab_results} for the temporal evolution of the four state variables for the final year of a 5 year run using repeated climatological forcing. 
-The two locations show markedly different dynamics. The temperate location shows a pronounced seasonal cycle in nutrient concentration in the upper mixed layer of our model. WOA 2018 monthly climatology data of this property agrees well with the model output. Despite the relatively strong agreement between nutrient data and model output for nutrients, phytoplankton model output and a climatology of chlorophyll concentration from satellite do agree, but show a markedly different dynamic. During winter months phytoplankton biomass is reduced almost to zero in the model output. In spring, the shallowing of MLD produces a pronounced bloom, overshooting the climatological data for a short period, before it returns to levels below the data for the rest of the year. 
+This approach is perhaps mechanistically less realistic than using a photosynthesis-irradiance curve, but we chose the simpler approach without parameters dependent on chlorophyll content. For a more elaborate treatment of light in phytoplankton growth and an illuminating historical description of slab models see \citet{Anderson2015c}.
+
 
 Satellites can only estimate chlorophyll concentration to visual depths, possibly extrapolated using algorithms. MLD in winter is much deeper, model output represents not concentration at surface, but concentration averaged across entire mixed layer.
 The estimated chlorophyll from satellite data is converted to be compared to model output, via a constant chlorophyll-to-carbon ratio and the Redfield ratio of 16:1 (C:N), both of which are rough estimates and variable in nature. 
@@ -43,6 +59,20 @@ Limited nutrient supply and the low phytoplankton biomass do not support much, i
 Keep in mind that these are exemplary model test runs, we do no attempt to explain the specific dynamics in these locations, just show that the model setup produces reasonable results using different forcing. Goal is not realism, but general applicability and simplicity. 
 
 
+% In EMPOWER i noticed a problem with the shape model output presented in the paper and too large model time steps (due to for loop code structure, not odeint adaptive solving).. is that something I should mention, or simply forget?
+
+
+
+differences from EMPOWER: \\
+Very simple model,
+irradiance from satellite, not trigonometric equations. we treat light in much less detail, so say that for a more detailed treatment of light in a slab model, see \cite{Anderson2015c}
+
+Our modifications to phytoplankton growth formulation, zooplankton mixing, as well as the treatment of forcing were adapted from the PhytoSFDM model \cite{Acevedo-Trejos2016}.
+% can I say that Esteban? it is true
+
+EMPOWER was inspired by \cite{Fasham1990a}, we stand in a long line of models. 
+
+We hope that this simple NPZD slab model can be used as a teaching model in a similar vein to EMPOWER. The modular structure of phydra processes allows for accessible experimentation with parameterisation and model setup. 
 
 
 
