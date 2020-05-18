@@ -1,33 +1,36 @@
 \documentclass[template.tex]{subfiles}
 
+\usepackage{xr}
+% Add other subfiles below to import labels
+\externaldocument{../Sections/03_modelexamples} 
+%\myexternaldocument{../Sections/02_phydra} 
+
+
+\usepackage{comment}
 
 \begin{document}
 
 %' \copyrightstatement{TEXT}
 \section{Use case model formulations}
 
+\begin{comment}
 Note: to allow for an intuitive depiction of multiple instances of each parameter and state variable, modifying subscripts in symbols are instead added as a superscript (e.g. $\gamma^{N}$ for the nutrient-limitation of phytoplankton growth) so that indices in the subscript signify the dimensionality of symbols (e.g. $\gamma^{N}_i$ for the term per individual phytoplankton state variable $i$). This finds no usage in use case 1, but in both 2 and 3.
 Overall I attempted to make the presentation of symbols and equations coherent between use cases.
+\end{comment}
 
-In this appendix the model use cases are described mathematically, independent of their specific implementation in the phydra package. For interactive notebook containing documented model implementations and the python code creating the results in Section \ref{usecases} please see the examples folder on the phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}).
+In this appendix the model use cases are described mathematically, independent of their specific implementation in the phydra package. For documented model code, please see the examples folder on the phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}).
 
 
 \subsection{Use Case 1}
 
+% modifications of EMPOWER:
+%- light harvesting\\
+%- light $PAR$ & nutrient $N^\emptyset$ forcing\\ 
+%- temperature dependence of phytoplankton growth?.\\ 
 
-- light harvesting\\
-- light $PAR$ & nutrient $N^\emptyset$ forcing\\ 
-- temperature dependence of phytoplankton growth?.\\ 
-
-\\ 
 The physical environment of the model uses slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of a biologically inert deep ocean below a well mixed layer of seasonally variable depth that contains the ecosystem. The ecosystem is described as a traditional NPZD model, containing four state variables describing a nutrient (in this case nitrate) $N$, phytoplankton $P$, zooplankton $Z$ and detritus $D$. 
 
-In slab models, the concentration of nutrient in the bottom layer \unit{N^\emptyset} is often assumed to be fixed. In the ocean there is usually a gradient of concentration over depth and this can be represented using functions of nutrient over depth \citep{Frost1987GrazingSpp., Fasham1995VariationsAnalysis}. In this study we use an empirical climatology as the forcing \mathrm{N^\emptyset}, that is the result of combining WOA 2018 data with MLD climatology (see Section \ref{ForcingSection}). For this analysis we use the WOA 2018 nitrate dataset used is nitrate. 
-
-This data provides the contrasting seasonal dynamics for the temperate and tropical location (see Figure \ref{phydraforcing}).
-
-% Nutrient dynamics
-\unit{N^\emptyset} determines the possible nutrient supply to the ecosystem. Mixing of nutrients is a function of a constant mixing parameter, \mathrm{N^\emptyset}, N and the value and derivative of MLD, following \citet{Evans1985ACycles}. In contrast to other components, mixing affecting the nutrient is a positive term adding to N along the gradient between \mathrm{N^\emptyset} and N. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth.
+In slab models, the concentration of nutrient in the bottom layer \unit{N^\emptyset} is often assumed to be fixed. In the ocean there is usually a gradient of concentration over depth and this can be represented using functions of nutrient over depth \citep{Frost1987GrazingSpp., Fasham1995VariationsAnalysis}. In this study we use an empirical climatology as the forcing \unit{N^\emptyset}, that is the result of combining WOA 2018 data with MLD climatology (see Section \ref{Section:ForcingSection}). This data provides the contrasting seasonal dynamics for the temperate and tropical location (see Figure \ref{x1-Figure:phydraforcing}). For this analysis we use the WOA 2018 nitrate climatology as \unit{N^\emptyset} forcing. 
 
 \subsubsection{Model Equations}
 The rates of change of the state variables are described by the following set of equations:
@@ -76,7 +79,9 @@ The rates of change of the state variables are described by the following set of
 
 \subsubsection{Mixing}
 
-The mixing coefficient $K$ describes mixing across the bottom of the mixed layer.
+% Nutrient dynamics
+\unit{N^\emptyset} determines the possible nutrient supply to the ecosystem. Mixing of nutrients is a function of a constant mixing parameter, \unit{N^\emptyset}, N and the value and derivative of MLD, following \citet{Evans1985ACycles}. In contrast to other components, mixing affecting the nutrient is a positive term adding to N along the gradient between \unit{N^\emptyset} and N. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth.
+The magnitude of mixing is described by the coefficient $K$:
 
 \begin{equation}
     K = \frac{1}{H(t)} \cdot \left(h^{+}(t) + \kappa\right)
@@ -226,8 +231,8 @@ $V^{max}_P$ & max photosynthesis rate & \unit{g \ C (g \ chl)^{−1} h^{−1}} &
 $\alpha$ & initial slope of P-I curve & \unit{g \ C (g \ chl)^{−1} h^{−1} (µE \ m^{-2} \ s^{-1})^{-1}} & 0.034 & \\
 $k_N$ & half-sat. const: N uptake & \unit{µM \ N} & 0.85 & \\
 $m_P$ & linear P mortality & \unit{d^{−1}} & 0.015 & \\
-$m_{P2} & quadratic P mortality & \unit{(µM \ N)^{-1} d^{−1}} & 0.025 & \\
-$I_{max} & Z max. ingestion rate & \unit{d^{−1}} & 1.0 & \\
+$m_{P2}$ & quadratic P mortality & \unit{(µM \ N)^{-1} d^{−1}} & 0.025 & \\
+$I_{max}$ & Z max. ingestion rate & \unit{d^{−1}} & 1.0 & \\
 $k_Z$ & Z half-saturation for intake & \unit{µM \ N} & 0.6 & \\
 $\phi_P$ & grazing preference: P & & 0.67 & \\
 $\phi_D$ & grazing preference: D & & 0.33 & \\

@@ -74,6 +74,28 @@
 
 \usepackage{subfiles} % Best loaded last in the preamble
 
+%%%% HELPER CODE FOR DEALING WITH EXTERNAL REFERENCES
+% from https://www.overleaf.com/learn/how-to/Cross_referencing_with_the_xr_package_in_Overleaf
+%%%
+\usepackage{xr}
+\makeatletter
+\newcommand*{\addFileDependency}[1]{
+  \typeout{(#1)}
+  \@addtofilelist{#1}
+  \IfFileExists{#1}{}{\typeout{No file #1.}}
+}
+\makeatother
+
+\newcommand*{\myexternaldocument}[1]{
+    \externaldocument{#1}
+    \addFileDependency{#1.tex}
+    \addFileDependency{#1.aux}
+}
+%%% END HELPER CODE
+
+
+%%%%%%%%%%%%%%%%
+
 % This custom function allows context-dependent rendering of the bibliography in subfiles:
 \def\biblio{\bibliographystyle{copernicus}\bibliography{references.bib}}  % *Modification: added `\main/` to specify relative file location.
 
