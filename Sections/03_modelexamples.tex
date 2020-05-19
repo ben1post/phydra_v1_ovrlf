@@ -61,6 +61,7 @@ The physical environment of a phydra model (hereafter referred to simply as envi
 The environment of use cases 1 is a 'slab' description of an open ocean water column that is compatible with four types of external forcings: an external nutrient supply from below the mixed layer, (\unit{N^\emptyset}), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR) and average temperature above the mixed layer depth (\unit{T_{MLD}}).
 
 The specific forcings used here are derived from a compiled global dataset of WOA 2018 nutrient and temperature climatologies, a MLD climatology, and MODIS-aqua satellite data for irradiance and chlorophyll biomass verification data (see Section \ref{Section:ForcingSection} for a detailed description). Phydra contains functionality to spatially average the climatological data for a chosen latitude/longitude box from the supplied forcing dataset at model runtime. The resulting monthly climatologies are interpolated to daily values. See Figure \ref{Figure:phydraforcing} for the two locations and specific forcings used for the presented simulations. Within the phydra structure, the slab environment supplies these forcings to fluxes that are dependent on any of these forcings.
+
 % PE forcing 1: mixing
 In addition to supplying forcings, environments in phydra can calculate specific forcing coefficients and fluxes. These common environmental influences can efficiently be computed in the shared environment, before the effect on each model component is computed in detail. \\
 
@@ -79,7 +80,7 @@ See Table XXX for a presentation of the specific functions included in the gener
 
 \subsubsection{Model components}
 % b) components
-The model contains the name-defining four NPZD ecosystem components: Nutrient (N), phytoplankton (P), zooplankton (Z) and detritus (D). 
+Embedded with the slab environment the NPZD model contains the name-defining four ecosystem components: Nutrient (N), phytoplankton (P), zooplankton (Z) and detritus (D). 
 Each model component is resolved as a single state variable. The biomass of all state variables is measured in the common model currency \unit{\mu M} of Nitrogen.
 
 %Nutrient component

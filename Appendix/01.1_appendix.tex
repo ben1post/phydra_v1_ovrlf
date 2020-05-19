@@ -1,11 +1,5 @@
 \documentclass[template.tex]{subfiles}
 
-\usepackage{xr}
-% Add other subfiles below to import labels
-\externaldocument{../Sections/03_modelexamples} 
-%\myexternaldocument{../Sections/02_phydra} 
-
-
 \usepackage{comment}
 
 \begin{document}
@@ -18,19 +12,25 @@ Note: to allow for an intuitive depiction of multiple instances of each paramete
 Overall I attempted to make the presentation of symbols and equations coherent between use cases.
 \end{comment}
 
-In this appendix the model use cases are described mathematically, independent of their specific implementation in the phydra package. For documented model code, please see the examples folder on the phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}).
-
+In this appendix the model use cases are described mathematically, independent of their specific implementation in the phydra package. For schematics presenting model structure, see Section \ref{Section:UseCases}.
 
 \subsection{Use Case 1}
 
+The first use case model employs slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of a biologically inert deep ocean below a well mixed layer of seasonally variable depth that contains the ecosystem. The ecosystem is described as a traditional NPZD model, containing four state variables describing a nutrient $N$ (in this case nitrate), phytoplankton $P$, zooplankton $Z$ and detritus $D$.
+
+based on EMPOWER; but with these and these SPECIFIC modifications to system of equations:
 % modifications of EMPOWER:
-%- light harvesting\\
+%- light harvesting\\ 
 %- light $PAR$ & nutrient $N^\emptyset$ forcing\\ 
 %- temperature dependence of phytoplankton growth?.\\ 
 
-The physical environment of the model uses slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of a biologically inert deep ocean below a well mixed layer of seasonally variable depth that contains the ecosystem. The ecosystem is described as a traditional NPZD model, containing four state variables describing a nutrient (in this case nitrate) $N$, phytoplankton $P$, zooplankton $Z$ and detritus $D$. 
 
-In slab models, the concentration of nutrient in the bottom layer \unit{N^\emptyset} is often assumed to be fixed. In the ocean there is usually a gradient of concentration over depth and this can be represented using functions of nutrient over depth \citep{Frost1987GrazingSpp., Fasham1995VariationsAnalysis}. In this study we use an empirical climatology as the forcing \unit{N^\emptyset}, that is the result of combining WOA 2018 data with MLD climatology (see Section \ref{Section:ForcingSection}). This data provides the contrasting seasonal dynamics for the temperate and tropical location (see Figure \ref{x1-Figure:phydraforcing}). For this analysis we use the WOA 2018 nitrate climatology as \unit{N^\emptyset} forcing. 
+
+In slab models, the concentration of nutrient in the bottom layer \unit{N^\emptyset} is often assumed to be fixed. In the ocean there is usually a gradient of concentration over depth and this can be represented using functions of nutrient over depth \citep{Frost1987GrazingSpp., Fasham1995VariationsAnalysis}. In this study we use an empirical climatology as the forcing \unit{N^\emptyset}, that is the result of combining WOA 2018 data with MLD climatology (see Section \ref{Section:ForcingSection}). For this analysis we use the WOA 2018 nitrate climatology as \unit{N^\emptyset} forcing. 
+% Additionally PAR, 
+%TMLD and 
+%MLD FORCING
+This data provides the contrasting seasonal dynamics for the temperate and tropical location (see Figure \ref{Figure:phydraforcing}).
 
 \subsubsection{Model Equations}
 The rates of change of the state variables are described by the following set of equations:
@@ -80,14 +80,18 @@ The rates of change of the state variables are described by the following set of
 \subsubsection{Mixing}
 
 % Nutrient dynamics
-\unit{N^\emptyset} determines the possible nutrient supply to the ecosystem. Mixing of nutrients is a function of a constant mixing parameter, \unit{N^\emptyset}, N and the value and derivative of MLD, following \citet{Evans1985ACycles}. In contrast to other components, mixing affecting the nutrient is a positive term adding to N along the gradient between \unit{N^\emptyset} and N. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth.
+\unit{N^\emptyset} determines the possible nutrient supply to the ecosystem. Mixing of nutrients is a function of a constant mixing parameter, \unit{N^\emptyset}, N and the value and derivative of MLD \citep{Evans1985ACycles}. In contrast to other components, mixing affecting the nutrient is a positive term adding to N along the gradient between \unit{N^\emptyset} and N. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth.
 The magnitude of mixing is described by the coefficient $K$:
 
 \begin{equation}
-    K = \frac{1}{H(t)} \cdot \left(h^{+}(t) + \kappa\right)
+    K = \frac{h^{+}(t) + \kappa}{H(t)}
 \end{equation}
 
-Constant diffusive mixing is parameterized by $\kappa$, which is further modified by the changes in mixed layer depth (MLD) forcing, provided in the unit \unit{m} (meters) of depth. The MLD at a certain time point is $H(t)$ and the change in MLD is its derivative $\frac{d}{d t} H(t)$. The function $h^{+}(t)$ gives the effects of entrainment and detrainment due to the changes in MLD.
+Constant diffusive mixing is parameterized by $\kappa$, 
+
+? which is further modified by the changes in mixed layer depth (MLD) forcing, provided in the unit \unit{m} (meters) of depth. ?
+
+The MLD at a certain time point is $H(t)$ and the change in MLD is its derivative $\frac{d}{d t} H(t)$. The function $h^{+}(t)$ gives the effects of entrainment and detrainment due to the changes in MLD.
 
 \begin{equation}
     h^{+}(t) = \max\left(0, \frac{d}{d t} H(t)\right)
@@ -103,7 +107,15 @@ Phytoplankton biomass $P$ increases through temperature-dependent, light- \& nut
     \gamma^{T} = 1.066^{T_{MLD}} \label{mumax}
 \end{equation}
 
-With the assumption of balanced growth the maximum growth rate $\mu^{\emptyset}$ is equal to the maximum photosynthetic rate $V^{max}_P$. The temperature forcing $T_{MLD}$ is the average temperature of the mixed layer.
+The temperature forcing $T_{MLD}$ is the average temperature of the mixed layer, as supplied from global WOA 2018 climatology.
+
+
+The light-limiting term $\gamma^{I}$ represents the total light I available to phytoplankton the upper mixed layer. According to Steele’s formulation \cite{Steele1962EnvironmentalSea}:
+
+
+
+% HERE put this mf equation down! 
+
 
 !!!!!!! THIS NEEDS STEEELE, not SMITH !!!!!!!!!!!!!!!!
 The light limitation of phytoplankton growth is described by the Smith photosynthesis-irradiance (P-I) function:
