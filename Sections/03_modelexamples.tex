@@ -49,8 +49,7 @@ For a complete structure-independent mathematical description of the presented m
 Our first use case presents a classical NPZD model embedded in a "slab" physical setting. The simplified two-layer structure provides a zero-dimensional and mechanistically simple description of physical processes affecting euphotic ecosystems in the open ocean. The classical structure lends itself well as an efficient physical test-bed for more complicated ecosystem descriptions and is often used as a teaching example.
 \\
 The presented model is a slightly modified version of the elegant EMPOWER model, as presented by \citet{Anderson2015c}. 
-The modifications we introduced were aimed at simplifying the description of the physical environment and the parameterisation of phytoplankton growth. 
-Specifically our model formulation uses empirical forcing for irradiance (PAR) and nutrient concentration of the deep layer (\unit{N^\emptyset}). We chose to use Steele's formulation to represent light-limitation of phytoplankton growth in the mixed layer independent of chlorophyll biomass, as adapted from \cite{Acevedo-Trejos2016}.
+
 
 See Figure \ref{Figure:phydraschematics_1} (a) for a schematic of the model structure and please refer to Appendix 1.1 for the full system of equations.
 
@@ -145,7 +144,6 @@ All phytoplankton non-grazing losses contribute to detritus.\\
 In this simple model, zooplankton growth is not affected by environmental factors such as light or temperature.
 Zooplankton grazing is the main top-down control of the phytoplankton population in our model. We follow the EMPOWER model in the choice of implementing a multiple-prey grazing formulation acting on both phytoplankton and detritus. In contrast to the grazing formulations employed by e.g. \cite{Fasham1990a}, \citeauthor{Anderson2015c} used a passive switching response, also described as a sigmoidal or Holling type 3 grazing function. The benefit of this type of grazing function over active-switching formulations is that grazing is generally proportional to food availability and the density dependence of prey preference is directly related to single prey responses \citep{Gentleman2003a}.
 
-The specific preferences for phytoplankton and detritus are set at 0.67 for phytoplankton and 0.33 for detritus. This dimensionless prey preference results in a specific half-saturation constant for each prey item, after scaling by the parameter $k^Z$. The actual prey preference during the simulation is dependent on these half-saturation constants and the current biomass of the prey. Passive switching between prey sources describes that with an increase in detritus less phytoplankton will be consumed, but overall intake still increases with any increase in total prey biomass. 
 The zooplankton growth term is a product of total grazed phytoplankton, absorption efficiency $\beta$ and net production efficiency $\epsilon$. Using these two parameters, grazed biomass is split three ways into the fraction actually assimilated to zooplankton biomass, a fraction that is egested to detritus (e.g. faecal pellets) and another that is directly excreted as nutrient. 
 
 % Zooplankton mortality fluxes
@@ -158,15 +156,22 @@ The processes adding to the pool of detritus are phytoplankton mortality, egeste
 
 A complete presentation of equations is given in Appendix 1.\\
 
+\clearpage
+
 \subsubsection{Model setup \& runtime}
 % d) xs.Model, xs.create_setup, xsimlab.run()
 The model setup parameters and runtime parameters are given in two tables.
+
+The specific preferences for phytoplankton and detritus are set at 0.67 for phytoplankton and 0.33 for detritus.
+
 \\
 
-
+% I can resort to a more applied presentation here, actually show code?
 !give list of (model setup) processes here!\\
 
 !give table of (model runtime) parameters here!\\
+
+
 
 
 % Forcing setup

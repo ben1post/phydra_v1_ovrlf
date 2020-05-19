@@ -18,61 +18,66 @@ In this appendix the model use cases are described mathematically, independent o
 
 The first use case model employs slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of a biologically inert deep ocean below a well mixed layer of seasonally variable depth that contains the ecosystem. The ecosystem is described as a traditional NPZD model, containing four state variables describing a nutrient $N$ (in this case nitrate), phytoplankton $P$, zooplankton $Z$ and detritus $D$.
 
-based on EMPOWER; but with these and these SPECIFIC modifications to system of equations:
+The general model structure is inspired by the EMPOWER model presented by \citet{Anderson2015c}. 
+Modifications to the original EMPOWER model structure were aimed at simplifying the description of physical forcings and phytoplankton growth.
+Instead of resolving irradiance forcing mathematically, we supply an empiric time-integrated climatological forcing of photosynthetically active radiation (PAR). Light limitation of phytoplankton growth is represented by a less physiologically resolved Steele's function 
+Specifically our model formulation uses empirical forcing for irradiance (PAR), instead of calculating daily photosynthesis from noon irradiance and day length. Nutrient below the mixed layer  (\unit{N^\emptyset}) is similarly only resolved as an empirical climatological forcing, and not a function of depth or constant value. We use Steele's formulation to describe light-limitation of phytoplankton growth in the mixed layer, as adapted from \citet{Acevedo-Trejos2016} and further described in \citet{Ebenhoh1997}. The only parameter modifying light limitation is an optimal irradiance value $I^{opt}$ at which the growth rate of phytoplankton saturates, and higher values cause limitations again to model effects of photo-inhibition. This was a conscious choice to simplify our model use case, away from a more complicated, but physiologically resolved parameterisation. A more realistic representation of light-limited growth would include chlorophyll-to-biomass ratios and related parameters and functions. See \citet{Anderson2015c} for an insightful discussion of light-limitation in slab models.
+
 % modifications of EMPOWER:
 %- light harvesting\\ 
 %- light $PAR$ & nutrient $N^\emptyset$ forcing\\ 
 %- temperature dependence of phytoplankton growth?.\\ 
 
-
-
 In slab models, the concentration of nutrient in the bottom layer \unit{N^\emptyset} is often assumed to be fixed. In the ocean there is usually a gradient of concentration over depth and this can be represented using functions of nutrient over depth \citep{Frost1987GrazingSpp., Fasham1995VariationsAnalysis}. In this study we use an empirical climatology as the forcing \unit{N^\emptyset}, that is the result of combining WOA 2018 data with MLD climatology (see Section \ref{Section:ForcingSection}). For this analysis we use the WOA 2018 nitrate climatology as \unit{N^\emptyset} forcing. 
+
+Average temperature in the mixed layer \unit{T_{ML}}
+
 % Additionally PAR, 
 %TMLD and 
 %MLD FORCING
 This data provides the contrasting seasonal dynamics for the temperate and tropical location (see Figure \ref{Figure:phydraforcing}).
 
 \subsubsection{Model Equations}
-The rates of change of the state variables are described by the following set of equations:
+The rates of change of the state variables are described by the following set of equations. For a full table of all symbols used here see Table \ref{appendix:table:usecase1parameters}.
 
 \begin{equation}
     \frac{d N}{d t} = 
-    K (N^0 - N) % Nutrient mixing
+    K (N^\emptyset - N) % Nutrient mixing
     + \beta(1 - \epsilon)(G^P + G^D) % Unassimilated grazing by Z
-    + m^D \cdot D % Remineralisation of D
-    - \mu^{\emptyset} \ \gamma^{T} \ \gamma^{I} \ \gamma^{N} \cdot P % Phytoplankton gains
+    + m^D \ D % Remineralisation of D
+    - \mu^{\emptyset} \ \gamma^{T} \ \gamma^{I} \ \gamma^{N} \ P % Phytoplankton gains
 \end{equation}
 
 %PHYTOPLANKTON
 \begin{equation}
     \frac{d P}{d t} =
-    \mu^{\emptyset} \ \gamma^{T} \ \gamma^{I} \ \gamma^{N} \cdot P  % Phytoplankton gains
-    - m^P \cdot P % Linear mortality
-    - m^{P2} \cdot (P)^2 % Quadratic mortality
+    \mu^{\emptyset} \ \gamma^{T} \ \gamma^{I} \ \gamma^{N} \ P  % Phytoplankton gains
+    - m^P \ P % Linear mortality
+    - m^{P2} \ (P)^2 % Quadratic mortality
     - G^P % Z grazing
-    - K \cdot P % Phytoplankton mixing
+    - K \ P % Phytoplankton mixing
 \end{equation}
 
 %ZOOPLANKTON
 \begin{equation}
     \frac{d Z}{d t} =
-    \beta \cdot \epsilon(G^P + G^D) % Assimilated grazing
-    - m^Z \cdot Z % Linear mortality
-    - m^{Z2} \cdot (Z)^2 % Quadratic mortality
-    - K \cdot Z % Zooplankton mixing
+    \beta \ \epsilon(G^P + G^D) % Assimilated grazing
+    - m^Z \ Z % Linear mortality
+    - m^{Z2} \ (Z)^2 % Quadratic mortality
+    - K \ Z % Zooplankton mixing
 \end{equation}
 
 %DETRITUS
 \begin{equation}
     \frac{d D}{d t} = 
-    m^P \cdot P % Linear mortality
-    + m^{P2} \cdot (P)^2 % Quadratic mortality
-    + m^Z \cdot Z % Linear mortality
+    m^P \ P % Linear mortality
+    + m^{P2} \ (P)^2 % Quadratic mortality
+    + m^Z \ Z % Linear mortality
     + (1 - \beta)(G^P + G^D) % Unassimilated grazing by Z
     - G^D % Z grazing on D
-    - m^D \cdot D % Remineralisation of D
-    - K \cdot D % Mixing of D
-    - \frac{v}{H(t)} \cdot D % Sinking of D
+    - m^D \ D % Remineralisation of D
+    - K \ D % Mixing of D
+    - \frac{v}{H(t)} \ D % Sinking of D
 \end{equation}
 
 
@@ -104,48 +109,38 @@ $K$ affects all state variables in the upper mixed layer. In addition to $K$, de
 Phytoplankton biomass $P$ increases through temperature-dependent, light- \& nutrient-limited growth. Temperature dependence of the  growth rate $\gamma^{T}$ is calculated from the Eppley curve \citep{Eppley1972TemperatureSea}.
 
 \begin{equation}
-    \gamma^{T} = 1.066^{T_{MLD}} \label{mumax}
+    \gamma^{T} = 1.066^{T_{ML}} \label{mumax}
 \end{equation}
 
-The temperature forcing $T_{MLD}$ is the average temperature of the mixed layer, as supplied from global WOA 2018 climatology.
+\unit{T_{ML}} in this case is the average temperature of the mixed layer forcing in \unit{\degree C}, as supplied from global WOA 2018 climatology.
 
 
 The light-limiting term $\gamma^{I}$ represents the total light I available to phytoplankton the upper mixed layer. According to Steele’s formulation \cite{Steele1962EnvironmentalSea}:
 
-
-
-% HERE put this mf equation down! 
-
-
-!!!!!!! THIS NEEDS STEEELE, not SMITH !!!!!!!!!!!!!!!!
-The light limitation of phytoplankton growth is described by the Smith photosynthesis-irradiance (P-I) function:
-
 \begin{equation}
-    V_P = \frac{\alpha \cdot I \cdot V^{max}_P}{\sqrt{(V^{max}_P)^2 + \alpha^2 I^2}}
+    \gamma^{I} = \frac{1}{H(t)} \int_{0}^{H(t)}\left[ \frac{I(z)}{I_s} \cdot \exp{\left( 1 - \frac{I(z)}{I_s} \right) }  \right]ds \label{steele}
 \end{equation}
-where $V_P$ is the photosynthetic rate, $\alpha$ is the initial slope of the P-I curve, $I$ is irradiance and $V^{max}_P$ is the temperature-dependent maximum photosynthetic rate defined in equation \eqref{mumax}.
 
 
-The irradiance forcing $I^0$ is a time averaged measurement of photosynthetically active radiation (PAR) at the surface. Attenuation of $I^\emptyset$ at depth $z$ in the mixed layer is calculated according to the Lambert-Beer equation:
+describe 
+
+"where Is is the light level at which photosynthesis saturates and I(z) is the irradiance at depth z. The"
+
+The irradiance forcing $I^\emptyset$ is a temporally and spatially averaged monthly climatology of photosynthetically active radiation (PAR) at the surface. 
+
+Attenuation of $I^\emptyset$ at depth $z$ in the mixed layer is calculated according to the Lambert-Beer equation:
 
 \begin{equation}
     I(z) = I^\emptyset \cdot e^{-k^{PAR} \cdot Z} \label{beer}
 \end{equation}
 
-The attenuation coefficient $k^{PAR}$ is the sum of the attenuation coefficient of seawater $k^w$ and that of chlorophyll $k^c$, which is multiplied by phytoplankton biomass $P$:
+The attenuation coefficient $k^{PAR}$ is the sum of the attenuation coefficient of seawater $k^w$ and that of phytoplankton biomass $k^c$, which is multiplied by $P$:
 
 \begin{equation}
     k^{PAR} = k^w + k^c \cdot P
 \end{equation}
 
-Combining the equations and integrating across the mixed layer, the numerical solution for the integrated light-limiting term affecting phytoplankton growth is:
-
-\begin{equation}
-    \gamma^I = \frac{V^P_{max}}{k^{PAR} \cdot H(t)} \ln{ \left( \frac{ x_0+\sqrt{(V^{max}_P)^2+x_0^2} }{ x_z+\sqrt{(V^{max}_P)^2+x_z^2} } \right)}
-\end{equation}
-where $x_0$ = $\alpha \cdot I_0$ and $x_z$ = $\alpha \cdot I(H(t))$, with $I(z)$ calculated according to equation \eqref{beer}.
-
-!!!!!!! THIS NEEDS STEEELE, not SMITH !!!!!!!!!!!!!!!!
+Combining the equations and integrating across the mixed layer, the numerical solution for the integrated light-limiting term affecting phytoplankton growth is calculated.\\
 
 Nutrient limitation of phytoplankton growth $\gamma^N$ is described by the Michaelis-Menten (or Monod) equation.
 
@@ -153,7 +148,9 @@ Nutrient limitation of phytoplankton growth $\gamma^N$ is described by the Micha
     \gamma^N = \frac{N}{k^N + N}
 \end{equation}
 
-where $k^N$ is the half-saturation constant. $N$ is nutrient concentration, in this case dissolved inorganic nitrogen (DIN).
+where $k^N$ is the half-saturation constant. $N$ is nutrient concentration, in this case dissolved inorganic nitrogen (DIN).\\
+
+Growth = Uptake\\
 
 Non-grazing mortality of phytoplankton is described by both a linear $m^P$ and a quadratic factor $m^{P2}$. The former accounts for natural mortality and excretion. Quadratic mortality describes density-dependent loss processes, which can be caused by viral infection. All non-grazing mortality terms feed into the detritus pool
 
@@ -161,19 +158,19 @@ Non-grazing mortality of phytoplankton is described by both a linear $m^P$ and a
 Grazing by zooplankton occurs on both phytoplankton and detritus. The grazing function is a Holling Type 3 grazing response as presented in \citet{Anderson2015c}.
 
 \begin{equation}
-    G^P = I^{max} \left( \frac{ \hat{\phi}^P P}{(k^Z)^2 + \hat{\phi}^D D +\hat{\phi}^P P}  \right) Z
+    G^P = I^{\emptyset} \left( \frac{ \hat{\phi}^P P}{(k^Z)^2 + \hat{\phi}^D D +\hat{\phi}^P P}  \right) Z
 \end{equation}
 where $\hat{\phi}^P$ = $\phi^P \cdot P$, $\hat{\phi}^D$ = $\phi^D \cdot D$.
 
-This formulation describes the total biomass of phytoplankton that is grazed $G^P$. Parameter $I^{max}$ is the maximum specific ingestion rate for a food source. Here the value is the same for both phytoplankton and detritus. The density dependent feeding coefficients $\hat{\phi}$ are calculated from multiplying the feeding parameter $\phi$ by prey biomass. The actual relative feeding preference can be calculated from the ration between $\hat{\phi}^D$ and $\hat{\phi}^P$. The arbitrary parameter $k^Z$ determines the half-saturation constants $k$ for grazing on a specific prey based on the choice of $\phi$, with the relationship $k$ = $\sqrt{\frac{(k^Z)^2 }{ \phi}}$
+This formulation describes the total biomass of phytoplankton that is grazed $G^P$. Parameter $I^{\emptyset}$ is the maximum specific ingestion rate for a food source. Here the value is the same for both phytoplankton and detritus. The density dependent feeding coefficients $\hat{\phi}$ are calculated from multiplying the feeding parameter $\phi$ by prey biomass. The actual relative feeding preference can be calculated from the ration between $\hat{\phi}^D$ and $\hat{\phi}^P$. The arbitrary parameter $k^Z$ determines the half-saturation constants $k$ for grazing on a specific prey based on the choice of $\phi$, with the relationship $k$ = $\sqrt{\frac{(k^Z)^2 }{ \phi}}$.
 
-For detritus the formula is the following:
+Similarly the detritus grazing flux is defined as:
 
 \begin{equation}
-    G^P = I^{max} \left( \frac{ \hat{\phi}^D D}{(k^Z)^2 + \hat{\phi}^D D +\hat{\phi}^P P}  \right) Z
+    G^D = I^{\emptyset} \left( \frac{ \hat{\phi}^D D}{(k^Z)^2 + \hat{\phi}^D D +\hat{\phi}^P P}  \right) Z
 \end{equation}
 
-The sigmoidal response includes passive prey switching via an interference effect, where the increase in biomass of one prey slightly reduces the intake of other prey. The effect does not create sub-optimal feeding (i.e. an increase in biomass of a less common prey decreases total grazing), which can be observed in active switching grazing formulations as that used by \citet{Fasham1990a}.
+This sigmoidal response includes passive prey switching via an interference effect, where the increase in biomass of one prey slightly reduces the intake of other prey. In contrast to other grazing formulations \citep[e.g.][]{Fasham1990a}, the prey switching mechanism does not create sub-optimal feeding, where an increase in biomass of less common prey can decreases the total grazing flux \citep{Gentleman2003a}.
 
 Zooplankton ingestion of prey does not directly convert to biomass gained however. The total biomass grazed $G$ is split three ways between growth, excretion of dissolved nutrients and egestion of faecal matter \& particles. The parameters describing the contribution of each process are the absorption efficiency $\beta$ and net production efficiency $\epsilon$. Gross growth efficiency is the product of these two factors.  
 
@@ -186,14 +183,9 @@ The model parameters in Table \ref{appendix:table:usecase1parameters} are adapte
 
 
 \subsubsection{NOTES:}
-Yes, the $V^{max}_P$ \& $\alpha$  units are pretty weird, and do require a unit conversion to $d^{-1}$ and the result of the light harvesting function needs to be divided by $\theta_{chla}$ to convert to the actual non-dimensional light limiting term. To me it seems like this is not well explained in the EMPOWER publication (still doesn't REALLY make sense to me), but I actually saw how they calculated it in the model code. I still need to work on how to present that understandably in the text before. 
-\\ !ToDO: 
-- make sure that all parameters have a uniform description, and then update accordingly in table, then update accordingly in text! \\
-
-- what are all the functions i need to modify, for my newest version of EMPOWER? \\
-    - the temperature dependence \\
-    - the units of growth rate \\
-    - \\
+- so now just need to add Smith equation
+- and make sure the presentation works out, wording wise. check against EMPOWER presentation!
+- and fix the parameter and symbol tables!
 
 
 \clearpage
@@ -212,13 +204,12 @@ $Z$ & concentration of zooplankton biomass in the upper mixed layer & \unit{µM 
 $D$ & concentration of detritus in the upper mixed layer & \unit{µM \ N} \\
 $K$ & material exchange between mixed and bottom layer & \unit{d^{-1}} \\
 $N_0$ & nutrient concentration right below mixed layer & \unit{µM \ N} \\
-% TODO: change all square brackets to \unit{  }
 $\beta$ & absorption efficiency of zooplankton grazing &  dimensionless \\
-$k_{NZ}$ & net production efficiency of zooplankton grazing & dimensionless \\
+$\epsilon$ & net production efficiency of zooplankton grazing & dimensionless \\
 $G_P$ & total biomass of phytoplankton grazed by zooplankton & \unit{µM \ N} \\
 $G_D$ & total biomass of detritus grazed by zooplankton & \unit{µM \ N} \\
 $m_D$ & remineralisation rate of detritus & \unit{d^{-1}} \\
-$\mu_{max}(T)$ & temperature-dependent max. growth rate of phytoplankton & \unit{d^{-1}} \\
+$\gamma_T$ & temperature dependency of phytoplankton growth & dimensionless \\
 $\gamma_I$ & light limitation of phytoplankton growth &  dimensionless\\
 $\gamma_N$ & nutrient limitation of phytoplankton growth & dimensionless \\
 $m_P$ & linear mortality of phytoplankton & \unit{d^{-1}} \\
@@ -234,13 +225,14 @@ $v$ & sinking rate of detritus & \unit{m \ d^{-1}}\\
 
 
 
+% the following table needs to define all model parameters! (not all of them (actually most) aren't in symbols above)
 \begin{table*}[t]
 \caption{Model Parameters}
 \begin{tabular}{l l l l l}
 Parameter & Meaning & Unit & Temperate & Tropical \\
 \tophline
-$V^{max}_P$ & max photosynthesis rate & \unit{g \ C (g \ chl)^{−1} h^{−1}} & 2.5  &  \\
-$\alpha$ & initial slope of P-I curve & \unit{g \ C (g \ chl)^{−1} h^{−1} (µE \ m^{-2} \ s^{-1})^{-1}} & 0.034 & \\
+
+$\mu_{\emptyset}$ & maximum phytoplankton growth rate  & \unit{d^{-1}} & & \\
 $k_N$ & half-sat. const: N uptake & \unit{µM \ N} & 0.85 & \\
 $m_P$ & linear P mortality & \unit{d^{−1}} & 0.015 & \\
 $m_{P2}$ & quadratic P mortality & \unit{(µM \ N)^{-1} d^{−1}} & 0.025 & \\
@@ -264,8 +256,6 @@ $\theta_{chla}$ & C to chlorophyll ratio & \unit{g \ g^{-1}} & 75 & \\
 \label{appendix:table:usecase1parameters}
 \end{table*}
 %
-
-
 \clearpage
 
 % this is a custom function to be able to see references when rendering subfiles:
