@@ -5,70 +5,40 @@
 
 
 \subsection{Use Case 2}
-The model setup is based on the ASTroCAT model \citep{Banas2011b}, with minor modifications to the physical environment. 
-Our model setup describes a size-structured community of phytoplankton and zooplankton, with a single nutrient resolved, embedded in a physical setting akin to a laboratory chemostat.
-A chemostat is a flow-through system, where organisms are grown in a bottle with a continuous influx of a nutrient solution. At the same rate all components of the bottle flow out of the bottle.
 
-The ecosystem component is a NPZ model, containing three components describing nutrients $N$, phytoplankton $P$, zooplankton $Z$. In addition this model describes multiple state variables of phytoplankton and zooplankton, with each state variable defined by their equivalent spherical diameter.
-In model runs presented in this paper, we used follow \citet{Banas2011b} in running simulations with 40 size classes of each planktonic component. 
-The technical implementation allows running the model with any number of size classes, therefore the mathematical description will be kept general in describing the number of size classes by the subscript $i$ for phytoplankton and $j$ for zooplankton. Note that the implementation of a size-spectral model by \citeauthor{Banas2011b} implicitly has the same number of phytoplankton and zooplankton state variables (i.e. $i = j$).
+For the second use case we have implemented a size-spectral NPZ ecosystem model as presented in Figure \ref{Figure:phydraschematics_1} (b) with a nutrient $N$ (in this case nitrate), multiple size classes of both phytoplankton $P_i$ and zooplankton $Z_j$ as state variables. 
+This model use case employs a simple chemostat as physical setting. A flow-through culture, where organisms grow in a bottle with a continuous influx of a nutrient solution. At the same rate all components of the bottle flow out of the system, so that volume remains constant over time.
+Model structure and parameterisation is adapted from the ASTroCAT model \citep{Banas2011b}, with slight modifications to the physical environment and parameterisation. 
+\\
+The model describes a size-structured community of phytoplankton and zooplankton, with each state variable defined by their equivalent spherical diameter (ESD). In model runs presented in this paper, we follow \citet{Banas2011b} in running simulations with 40 size classes of equally log-spaced ESD of $P$ (1 to 20 \unit{\mu m}), and 40 matching classes of $Z$ (2.1 to 460  \unit{\mu m}). 
+The model can be defined with any number of size classes within meaningful boundaries of the allometric parameterisation. The mathematical description will be kept general in describing the number of size classes by the subscript $i$ for phytoplankton and $j$ for zooplankton. Note that the implementation by \citeauthor{Banas2011b} implicitly defines the same number of phytoplankton and zooplankton state variables (i.e. $i = j$).
 
+The main modification to the model structure in ASTroCAT is the physical setting. An added outflow acts as a loss term on all model components to place them in a traditional experimental setting for phytoplankton ecology, the chemostat. 
 
+\subsubsection{Flow}
 
-\subsubsection{Model Equations}
-The rates of change of the state variables are described by the following set of equations:
+Nutrient supply to the system is defined by a linear flow rate $f$ and the nutrient concentration in the supplied solution $N^\emptyset$. All components, including phytoplankton and zooplankton are lost from the system at the same rate $f$.
 
-\begin{equation}
-    \frac{d N}{d t} = 
-    f \cdot N^0 % Nutrient mixing
-    + (1 - \epsilon - \beta)\sum_{j} \sum_{i} G_{ij}^P % Unassimilated grazing by Z
-    - \sum_{i} ( \mu_i^{\emptyset} \cdot \gamma_i^N \cdot P_i) % Phytoplankton gains
-    - f \cdot N
-\end{equation}
-
-%PHYTOPLANKTON
-\begin{equation}
-    \frac{d P_i}{d t} =
-    \mu_i^{\emptyset} \cdot  \gamma_i^N \cdot   P_i  % Phytoplankton gains
-    - m^P  \cdot \mu_i^{0} \cdot P_i % Linear mortality
-    - \sum_{j} G_{ij}^P % Z grazing
-    - f \cdot P_i
-\end{equation}
-
-%ZOOPLANKTON
-\begin{equation}
-    \frac{d Z_j}{d t} =
-    \epsilon \cdot \sum_{i} G_{ij}^P % Assimilated grazing
-    - m^{Z2} \cdot Z_j \cdot \sum_{j} Z_j  % Quadratic mortality
-    - f \cdot Z_j
-\end{equation}
-
-
-
-\subsubsection{Environment}
-
-Nutrient supply to the system is defined by a linear flow rate $f$ and the nutrient concentration in the supplied solution $N^0$. All components, including phytoplankton and zooplankton are lost from the system at the same rate $f$.
+\subsubsection{Nutrient}
+Dissolved inorganic nitrogen (DIN) in the model system ($N$) is supplied from influx of medium (with nutrient concentration $N^\emptyset$) at a constant rate $f$ and the fraction of grazed biomass that is excreted by $Z$. The concentration $N^\emptyset$ and the flow rate $f$ determine the total nutrient supply to the system. At the same rate $N$ is flowing out from the system. Zooplankton excretion is a recycled term, that also adds back into the pool of $N$. The major loss term to $N$ is phytoplankton growth.
 
 \subsubsection{Phytoplankton}
-Phytoplankton biomass $P$ increases through  nutrient-limited growth. 
-
-Nutrient limitation of phytoplankton growth $\gamma_i^N$ is described by the Michaelis-Menten (or Monod) equation.
+Phytoplankton biomass $P$ increases through  nutrient-limited growth. Nutrient limitation of phytoplankton growth $\gamma_i^N$ is described by the Michaelis-Menten (or Monod) equation:
 
 \begin{equation}
-    \gamma^i_N =  \frac{N}{k^i_N + N} 
+    \gamma_i^N =  \frac{N}{k_i^N + N} 
 \end{equation}
 
-where $k_i^N$ is the size-dependent half-saturation constant. $N$ is nutrient concentration, in this case dissolved inorganic nitrogen (DIN).
+where $k_i^N$ is the size-dependent half-saturation constant. $N$ is ambient nutrient concentration in the medium.
 
-
-Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_i^{0}$. This accounts for natural mortality and excretion.
+Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_i^{\emptyset}$. This accounts for natural mortality and excretion.
 
 \subsubsection{Zooplankton}
 Zooplankton size class $j$ grazing on phytoplankton size class $i$ is calculated by
 \begin{equation}
-    G_{ij}^P = I_j^0 \ \frac{ \phi_{ij} \cdot P_i }{ k_j^Z + \sum_{i}(\phi_{ij} \cdot P_i) } \ Z_j
+    G_{ij}^P = \mu_j^Z \ \frac{ \phi_{ij} \cdot P_i }{ k_j^Z + \sum_{i}(\phi_{ij} \cdot P_i) } \ Z_j
 \end{equation}
-where $I_j^0$ is the size-dependent maximum ingestion rate, $k_j^Z$ is the prey half-saturation level and $\phi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.\\
+where $\mu_j^Z$ is the size-dependent maximum ingestion rate, $k_j^Z$ is the prey half-saturation level and $\phi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.\\
 
 Prey preference is assumed to vary with phytoplankton size $size_i^{P}$ in a log-Gaussian distribution around an optimal prey size for each grazer $size_j^{opt}$.
 
@@ -77,16 +47,107 @@ Prey preference is assumed to vary with phytoplankton size $size_i^{P}$ in a log
 \end{equation}
 Where $\Delta size^{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m)}, that controls the width of the Gaussian distribution.\\
 
-\subsubsection{Model Parameters}
-The model parameters in table \ref{appendix:table:usecase2parameters}.
+Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G^P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\beta$ and $\epsilon$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton  \citep{Straile1997GrossGroup}. The fraction of $G^P$ egested (e.g. as faecal pellets) is calculated via $1-\beta$, which in the current model setup is assumed to be exported quickly in the flow-through setting and lost from the system. 
+
+ Zooplankton experiences mortality according to the parameter $m^{Z2}$, describing higher order mortality and predation of zooplankton that is removed from the system. This mortality closure term is quadratic \citep{Edwards2000TheModels}, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
 
 
-\subsubsection{NOTES:}
-...
+\subsubsection{Model Equations}
+The rates of change of the state variables are described by the following set of equations:
+
+\begin{equation}
+    \frac{d N}{d t} = 
+    f \ N^\emptyset % Nutrient mixing
+    +  \beta (1 - \epsilon) \sum_{j} \sum_{i} G_{ij}^P % Unassimilated grazing by Z
+    - \sum_{i} ( \mu_i^{\emptyset} \ \gamma_i^N \ P_i) % Phytoplankton gains
+    - f \ N
+\end{equation}
+
+%PHYTOPLANKTON
+\begin{equation}
+    \frac{d P_i}{d t} =
+    \mu_i^{\emptyset} \  \gamma_i^N \   P_i  % Phytoplankton gains
+    - m^P  \ \mu_i^{\emptyset} \ P_i % Linear mortality
+    - \sum_{j} G_{ij}^P % Z grazing
+    - f \ P_i
+\end{equation}
+
+%ZOOPLANKTON
+\begin{equation}
+    \frac{d Z_j}{d t} =
+    \beta \ \epsilon \ \sum_{i} G_{ij}^P % Assimilated grazing
+    - m^{Z2} \ Z_j \ \sum_{j} Z_j  % Quadratic mortality
+    - f \ Z_j
+\end{equation}
+
+
+
 
 \clearpage
 %TABLES & FIGURES
 
+
+\begin{table*}[t]
+
+\caption{ Definition of symbols employed in use case 2 appendix. (\unit{µM \ N} = \unit{mmol \ Nitrogen \ m^{-3}}) }
+
+\begin{tabular}{l l l}
+Symbol & Meaning & Unit\\
+\tophline
+\tophline
+State variables:\\
+\middlehline
+$N$ & concentration of nutrient in the upper mixed layer & \unit{µM \ N} \\
+$P$ & concentration of phytoplankton biomass in the upper mixed layer & \unit{µM \ N} \\
+$Z$ & concentration of zooplankton biomass in the upper mixed layer & \unit{µM \ N} \\
+$D$ & concentration of detritus in the upper mixed layer & \unit{µM \ N} \\
+\\
+
+Forcings:\\
+\middlehline
+$N^\emptyset$ & nutrient concentration right below mixed layer & \unit{µM \ N} \\
+$H$ & depth of the upper mixed layer (MLD) & \unit{m} \\
+$h^+$ & positive derivative of H(t) & \unit{m \ d^{−1}}  \\
+$I$ & irradiance at the surface & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}} \\
+$T$ & temperature of the upper mixed layer & \unit{\degree C} \\
+\\
+Processes:\\
+\middlehline
+$K$ & material exchange between mixed and bottom layer & \unit{m \ d^{-1}} \\
+$\gamma_T$ & temperature dependency of phytoplankton growth & dimensionless \\
+$\gamma_I$ & light limitation of phytoplankton growth &  dimensionless\\
+$\gamma_N$ & nutrient limitation of phytoplankton growth & dimensionless \\
+$G_P$ & total biomass of phytoplankton grazed by zooplankton & \unit{µM \ N} \\
+$G_D$ & total biomass of detritus grazed by zooplankton & \unit{µM \ N} \\
+\\
+Parameters: \\
+\middlehline
+$\kappa$ & constant mixing parameter & \unit{m \ d^{−1}}  \\
+$v^D$ & additional sinking parameter & \unit{m \ d^{−1}}  \\
+$\mu^\emptyset$ & maximum phytoplankton growth rate & \unit{d^{−1}}  \\
+$I^{opt}$ & constant mixing parameter & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}}  \\
+$k^w$ & light attenuation constant of sea water & \unit{m^{−1}}  \\
+$k^c$ & light attenuation constant of phytoplankton biomass & \unit{m^{−1}}  \\
+$k^N$ & half-saturation constant for nutrient uptake & \unit{µM \ N}  \\
+$\mu^Z$ & maximum ingestion rate of zooplankton & \unit{d^{−1}}  \\
+$\phi_P$ & zooplankton grazing preference for phytoplankton & dimensionless \\
+$\phi_D$ & zooplankton grazing preference for zooplankton & dimensionless \\
+$k_Z$ & half-saturation constant for zooplankton intake & \unit{µM \ N} \\
+$\beta$ & absorption efficiency of zooplankton grazing &  dimensionless \\
+$\epsilon$ & net production efficiency of zooplankton grazing & dimensionless \\
+$m^D$ & remineralisation rate of detritus & \unit{d^{-1}} \\
+$m^P$ & linear mortality of phytoplankton & \unit{d^{-1}} \\
+$m^{P2}$ & quadratic mortality of phytoplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
+$m^Z$ & linear mortality of zooplankton & \unit{d^{-1}} \\
+$m^{Z2}$ & quadratic mortality of zooplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
+%\middlehline
+%\bottomhline
+\end{tabular}
+\label{appendix:table:usecase1symbols}
+%\belowtable{This is a test} % Table Footnotes
+\end{table*}
+
+%%%%%%%%%%%%%%%%
 
 
 \begin{table*}[t]
@@ -121,31 +182,6 @@ $\Delta size^{P}$ & Prey size tolerance for grazers & \unit{log_{10}(\mu m)} \\
 %\belowtable{This is a test} % Table Footnotes
 \label{appendix:table:usecase2symbols}
 \end{table*}
-
-
-
-\begin{table*}[t]
-\caption{Allometric parameterisations and empirical parameter values employed in use case 2, adapted from \citet{Banas2011b}.}
-\begin{tabular}{l l l l l}
-Empirical fit & Applicability & Source \\
-\tophline
-$\mu_i^{0} = (2.6 \ d^{-1}) \left( \frac{size^i_{P}}{1\mu m} \right)^{-0.45}$ & Phytoplankton 1-100 ESD \unit{\mu m} & Tang(1995) \\
-$k_i^N = (0.1 \ \unit{µM \ N})\left( \frac{size^i_{P}}{1\mu m} \right)$ & Phytoplankton 1-100 ESD \unit{\mu m} & Eppley et al. (1969) \\
-
-$I_j^0 = (26 \ d^{-1})\left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
-
-$k_j^Z = 3 \ \unit{µM \ N} $ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
-
-$size_j^{opt} = (0.65 \ \unit{\mu m})\left( \frac{size^i_{P}}{1\mu m} \right)^{0.56}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1994) \\
-$\Delta size^{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994)  \\
-\middlehline
-
-\bottomhline
-\end{tabular}
-\belowtable{TODO: the sources need to be added properly! for now just text..} % Table Footnotes
-\label{appendix:table:usecase2parameters}
-\end{table*}
-%
 
 
 \clearpage

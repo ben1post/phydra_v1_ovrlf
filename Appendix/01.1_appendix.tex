@@ -112,7 +112,7 @@ Similarly the detritus grazing flux is defined as:
 
 This sigmoidal response includes passive prey switching via an interference effect, where the increase in biomass of one prey slightly reduces the intake of other prey. In contrast to other grazing formulations \citep[e.g.][]{Fasham1990a}, the prey switching mechanism does not create sub-optimal feeding, where an increase in biomass of less common prey can decreases the total grazing flux \citep{Gentleman2003a}.
 
-Zooplankton ingestion of prey does not directly convert to biomass gained however. The total biomass grazed ($G^P + G^D$) is split three ways between zooplankton growth (to $Z$), excretion of dissolved nutrients (to $N$) and egestion of faecal matter \& particles (to $D$). The parameters describing the contribution of each process are the absorption efficiency $\beta$ and net production efficiency $\epsilon$. Gross growth efficiency is the product of these two factors.  
+Zooplankton ingestion of prey does not directly convert to biomass gained however. The total biomass grazed ($G^P + G^D$) is split three ways between zooplankton growth (to $Z$), excretion of dissolved nutrients (to $N$) and egestion of faecal matter \& particles (to $D$). Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G^P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\epsilon$ and $\beta$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton \citep{Straile1997GrossGroup}. The fraction of $G^P$ egested to $D$ (e.g. as faecal pellets) is calculated via $1-\beta$. 
 
 Similar to phytoplankton mortality, the linear mortality factor $m^Z$ parameterizes natural mortality and excretion and feeds into the pool of detritus. The quadratic factor $m^{Z2}$ describes higher order predation on zooplankton and is removed from the system.
 
@@ -178,7 +178,9 @@ The rates of change of the state variables are described by the following set of
 \begin{tabular}{l l l}
 Symbol & Meaning & Unit\\
 \tophline
+\tophline
 State variables:\\
+\middlehline
 $N$ & concentration of nutrient in the upper mixed layer & \unit{µM \ N} \\
 $P$ & concentration of phytoplankton biomass in the upper mixed layer & \unit{µM \ N} \\
 $Z$ & concentration of zooplankton biomass in the upper mixed layer & \unit{µM \ N} \\
@@ -186,6 +188,7 @@ $D$ & concentration of detritus in the upper mixed layer & \unit{µM \ N} \\
 \\
 
 Forcings:\\
+\middlehline
 $N^\emptyset$ & nutrient concentration right below mixed layer & \unit{µM \ N} \\
 $H$ & depth of the upper mixed layer (MLD) & \unit{m} \\
 $h^+$ & positive derivative of H(t) & \unit{m \ d^{−1}}  \\
@@ -193,6 +196,7 @@ $I$ & irradiance at the surface & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}} \\
 $T$ & temperature of the upper mixed layer & \unit{\degree C} \\
 \\
 Processes:\\
+\middlehline
 $K$ & material exchange between mixed and bottom layer & \unit{m \ d^{-1}} \\
 $\gamma_T$ & temperature dependency of phytoplankton growth & dimensionless \\
 $\gamma_I$ & light limitation of phytoplankton growth &  dimensionless\\
@@ -201,6 +205,7 @@ $G_P$ & total biomass of phytoplankton grazed by zooplankton & \unit{µM \ N} \\
 $G_D$ & total biomass of detritus grazed by zooplankton & \unit{µM \ N} \\
 \\
 Parameters: \\
+\middlehline
 $\kappa$ & constant mixing parameter & \unit{m \ d^{−1}}  \\
 $v^D$ & additional sinking parameter & \unit{m \ d^{−1}}  \\
 $\mu^\emptyset$ & maximum phytoplankton growth rate & \unit{d^{−1}}  \\
