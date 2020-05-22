@@ -89,7 +89,7 @@ Nutrient limitation of phytoplankton growth $\gamma^N$ is described by the Micha
 
 where $k^N$ is the half-saturation constant for nutrient uptake. $N$ is the ambient nutrient concentration, in this case of dissolved inorganic nitrogen (DIN). In this simple model there is no distinction between nutrient uptake and assimilation of nutrient via growth.\\
 
-Non-grazing mortality of phytoplankton is described by both a linear $m^P$ and a quadratic factor $m^{P2}$. The former accounts for natural mortality and excretion. Quadratic mortality describes density-dependent loss processes, which can be caused by viral infection. All non-grazing mortality terms feed into the detritus pool.
+Non-grazing mortality of phytoplankton is described by both a linear $m^P$ and a quadratic factor $m^{P2}$ \citep{Yool2011Medusa-1.0:Domain}. The former accounts for natural mortality and excretion. Quadratic mortality describes density-dependent loss processes, which can be caused by viral infection. All non-grazing loss terms feed into the detritus pool.
 
 \subsubsection{Zooplankton}
 Grazing by zooplankton occurs on both phytoplankton and detritus. The grazing function is a Holling Type 3 grazing response as presented in \citet{Anderson2015c}:
@@ -114,15 +114,15 @@ This sigmoidal response includes passive prey switching via an interference effe
 
 Zooplankton ingestion of prey does not directly convert to biomass gained however. The total biomass grazed ($G^P + G^D$) is split three ways between zooplankton growth (to $Z$), excretion of dissolved nutrients (to $N$) and egestion of faecal matter \& particles (to $D$). Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G^P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\epsilon$ and $\beta$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton \citep{Straile1997GrossGroup}. The fraction of $G^P$ egested to $D$ (e.g. as faecal pellets) is calculated via $1-\beta$. 
 
-Similar to phytoplankton mortality, the linear mortality factor $m^Z$ parameterizes natural mortality and excretion and feeds into the pool of detritus. The quadratic factor $m^{Z2}$ describes higher order predation on zooplankton and is removed from the system.
+Similar to phytoplankton mortality, the linear mortality factor $m^Z$ parameterizes natural mortality and excretion and feeds into the pool of detritus. The quadratic factor $m^{Z2}$ describes higher order predation on zooplankton and is removed from the system. 
 
 \subsection{Detritus}
 Detritus concentration in the upper layer ($D$) is supplied by all mortality of phytoplankton, linear zooplankton mortality and zooplankton egestion (e.g. faecal pellets). The loss terms are remineralisation, zooplankton grazing, mixing and an additional sinking flux. 
 
-Detritus is remineralised at a constant rate $m^D$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate of $v^D$. This term is added to describe the fast export of larger detritus particles below the mixed layer \citep{Anderson2015c}.
+Detritus is remineralised at a constant rate $m^D$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate of $v^D$. This term is added to describe the fast export of larger detritus particles below the mixed layer. 
 
 \subsubsection{Full equations}
-The rates of change of the state variables are described by the following set of equations. For a full table of all symbols used here see Table \ref{appendix:table:usecase1symbols}.
+The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase2symbols}. See \citet{Anderson2015c} for a more detailed discussion of model structure and formulation.
 
 \begin{equation}
     \frac{d N}{d t} = 
@@ -227,7 +227,7 @@ $m^{Z2}$ & quadratic mortality of zooplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}}
 %\middlehline
 %\bottomhline
 \end{tabular}
-\label{appendix:table:usecase1symbols}
+\label{appendix:table:usecase2symbols}
 %\belowtable{This is a test} % Table Footnotes
 \end{table*}
 

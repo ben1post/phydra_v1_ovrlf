@@ -49,11 +49,12 @@ Where $\Delta size^{P}$ is the prey size tolerance parameter, with units of \uni
 
 Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G^P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\beta$ and $\epsilon$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton  \citep{Straile1997GrossGroup}. The fraction of $G^P$ egested (e.g. as faecal pellets) is calculated via $1-\beta$, which in the current model setup is assumed to be exported quickly in the flow-through setting and lost from the system. 
 
- Zooplankton experiences mortality according to the parameter $m^{Z2}$, describing higher order mortality and predation of zooplankton that is removed from the system. This mortality closure term is quadratic \citep{Edwards2000TheModels}, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
+ Zooplankton experiences quadratic mortality according to the parameter $m^{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
 
 
 \subsubsection{Model Equations}
-The rates of change of the state variables are described by the following set of equations:
+The rates of change of the state variables are described by the following set of equations.
+See \citet{Banas2011b} for a more detailed discussion of model structure and formulation. 
 
 \begin{equation}
     \frac{d N}{d t} = 
@@ -97,49 +98,43 @@ Symbol & Meaning & Unit\\
 \tophline
 State variables:\\
 \middlehline
-$N$ & concentration of nutrient in the upper mixed layer & \unit{µM \ N} \\
-$P$ & concentration of phytoplankton biomass in the upper mixed layer & \unit{µM \ N} \\
-$Z$ & concentration of zooplankton biomass in the upper mixed layer & \unit{µM \ N} \\
-$D$ & concentration of detritus in the upper mixed layer & \unit{µM \ N} \\
+$N$ & concentration of nutrient in model system & \unit{µM \ N} \\
+$P_i$ & concentration of phytoplankton size class $i$ biomass  & \unit{µM \ N} \\
+$Z_j$ & concentration of zooplankton size class $i$ biomass  & \unit{µM \ N} \\
 \\
 
 Forcings:\\
 \middlehline
-$N^\emptyset$ & nutrient concentration right below mixed layer & \unit{µM \ N} \\
-$H$ & depth of the upper mixed layer (MLD) & \unit{m} \\
-$h^+$ & positive derivative of H(t) & \unit{m \ d^{−1}}  \\
-$I$ & irradiance at the surface & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}} \\
-$T$ & temperature of the upper mixed layer & \unit{\degree C} \\
+$f$ & flow-through rate of chemostat environment (influx \& outflux) & \unit{d^{-1}} \\
+$N_0$ & nutrient concentration of source medium for chemostat & \unit{µM \ N} \\
 \\
+
+
 Processes:\\
 \middlehline
-$K$ & material exchange between mixed and bottom layer & \unit{m \ d^{-1}} \\
-$\gamma_T$ & temperature dependency of phytoplankton growth & dimensionless \\
-$\gamma_I$ & light limitation of phytoplankton growth &  dimensionless\\
-$\gamma_N$ & nutrient limitation of phytoplankton growth & dimensionless \\
-$G_P$ & total biomass of phytoplankton grazed by zooplankton & \unit{µM \ N} \\
-$G_D$ & total biomass of detritus grazed by zooplankton & \unit{µM \ N} \\
+$G_{ij}^P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{µM \ N} \\
+$\gamma_i^N$ & nutrient-dependence of the growth of phytoplankton size class $i$ & dimensionless\\
+$\phi_{ij}$ & Preference of grazer $Z_j$ for prey $P_i$ & dimensionless \\
 \\
+
 Parameters: \\
 \middlehline
-$\kappa$ & constant mixing parameter & \unit{m \ d^{−1}}  \\
-$v^D$ & additional sinking parameter & \unit{m \ d^{−1}}  \\
-$\mu^\emptyset$ & maximum phytoplankton growth rate & \unit{d^{−1}}  \\
-$I^{opt}$ & constant mixing parameter & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}}  \\
-$k^w$ & light attenuation constant of sea water & \unit{m^{−1}}  \\
-$k^c$ & light attenuation constant of phytoplankton biomass & \unit{m^{−1}}  \\
-$k^N$ & half-saturation constant for nutrient uptake & \unit{µM \ N}  \\
-$\mu^Z$ & maximum ingestion rate of zooplankton & \unit{d^{−1}}  \\
-$\phi_P$ & zooplankton grazing preference for phytoplankton & dimensionless \\
-$\phi_D$ & zooplankton grazing preference for zooplankton & dimensionless \\
-$k_Z$ & half-saturation constant for zooplankton intake & \unit{µM \ N} \\
-$\beta$ & absorption efficiency of zooplankton grazing &  dimensionless \\
-$\epsilon$ & net production efficiency of zooplankton grazing & dimensionless \\
-$m^D$ & remineralisation rate of detritus & \unit{d^{-1}} \\
-$m^P$ & linear mortality of phytoplankton & \unit{d^{-1}} \\
-$m^{P2}$ & quadratic mortality of phytoplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
-$m^Z$ & linear mortality of zooplankton & \unit{d^{-1}} \\
-$m^{Z2}$ & quadratic mortality of zooplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
+$\mu_i^{\emptyset}$ & size-dependent max. growth rate of phytoplankton & \unit{d^{-1}} \\
+$k_i^N$ & Phytoplankton size class $i$ half-saturation constant for nutrient uptake & \unit{µM \ N} \\
+$m^P$ & fraction of size-dependent $\mu_i^{\emptyset}$ that is phytoplankton mortality & dimensionless \\
+
+$\mu_j^Z$ & maximum ingestion rate for zooplankton size class $j$ &  \unit{d^{-1}} \\
+
+$k_j^Z$ & Prey half-saturation level for zooplankton size class $j$ & \unit{µM \ N} \\
+$size_i^{P}$ & Individual size of phytoplankton (prey) size class $i$ & \unit{\mu m} \\
+$size_j^{opt}$ & Optimal prey size for zooplankton size class $j$ & \unit{\mu m} \\
+$\Delta size^{P}$ & Prey size tolerance for grazers & \unit{log_{10}(\mu m)} \\
+
+$\beta$ & absorption efficiency of zooplankton, fraction of $G_{ij}^P$ &  dimensionless \\
+$\epsilon$ & net production efficiency of zooplankton, fraction of $\beta$ & dimensionless \\
+
+$m^{Z2}$ & quadratic mortality of zooplankton, dependent on total $Z$ biomass & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
+
 %\middlehline
 %\bottomhline
 \end{tabular}
@@ -149,39 +144,6 @@ $m^{Z2}$ & quadratic mortality of zooplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}}
 
 %%%%%%%%%%%%%%%%
 
-
-\begin{table*}[t]
-\caption{Definition of symbols employed in use case 2 appendix, with the corresponding units. \unit{µM \ N} = \unit{mmol \ Nitrogen \ m^{-3}}}
-\begin{tabular}{l l l}
-Symbol & Meaning & Unit\\
-\tophline
-$N$ & concentration of nutrient in the upper mixed layer & \unit{µM \ N} \\
-$P_i$ & concentration of phytoplankton size class $i$ biomass in the upper mixed layer & \unit{µM \ N} \\
-$Z_j$ & concentration of zooplankton size class $i$ biomass in the upper mixed layer & \unit{µM \ N} \\
-$D$ & concentration of detritus in the upper mixed layer & \unit{µM \ N} \\
-$f$ & flow rate of chemostat flow-through & \unit{d^{-1}} \\
-$N_0$ & nutrient concentration of source medium for chemostat & \unit{µM \ N} \\
-% TODO: change all square brackets to \unit{  }
-$\beta$ & absorption efficiency of zooplankton grazing &  dimensionless \\
-$\epsilon$ & net production efficiency of zooplankton grazing & dimensionless \\
-$G_{ij}^P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{µM \ N} \\
-$\mu_i^{0}$ & size-dependent max. growth rate of phytoplankton & \unit{d^{-1}} \\
-$\gamma_i^N$ & nutrient-dependence of the growth of phytoplankton size class $i$ & dimensionless\\
-$m^P$ & fraction of $\mu_i^{0}$ that is phytoplankton mortality & dimensionless \\
-$m^{Z2}$ & quadratic mortality of zooplankton, dependent on total $Z$ biomass & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
-$k_i^N$ & Phytoplankton size class $i$ half-saturation constant for nutrient uptake & \unit{µM \ N} \\
-$I_j^0$ & maximum ingestion rate for zooplankton size class $j$ &  \unit{d^{-1}} \\
-$\phi_{ij}$ & Preference of grazer $Z_j$ for prey $P_i$ & dimensionless \\
-$k_j^Z$ & Prey half-saturation level for zooplankton class $j$ & \unit{µM \ N} \\
-$size_i^{P}$ & Individual size in phytoplankton (prey) class $i$ & \unit{\mu m} \\
-$size_j^{opt}$ & Optimal prey size for zooplankton size class $j$ & \unit{\mu m} \\
-$\Delta size^{P}$ & Prey size tolerance for grazers & \unit{log_{10}(\mu m)} \\
-%\middlehline
-%\bottomhline
-\end{tabular}
-%\belowtable{This is a test} % Table Footnotes
-\label{appendix:table:usecase2symbols}
-\end{table*}
 
 
 \clearpage
