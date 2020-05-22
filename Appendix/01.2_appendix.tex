@@ -52,7 +52,7 @@ Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross gr
 Zooplankton experiences quadratic mortality according to the parameter $m^{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
 
 \clearpage
-\subsubsection{Full model equations}
+\subsubsection{Model equations}
 The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase2symbols}.
 See \citet{Banas2011b} for a more detailed discussion of model structure and formulation. 
 
@@ -101,13 +101,13 @@ State variables:\\
 $N$ & concentration of nutrient in model system & \unit{\mu M \ N} \\
 $P_i$ & concentration of phytoplankton size class $i$ biomass  & \unit{\mu M \ N} \\
 $Z_j$ & concentration of zooplankton size class $j$ biomass  & \unit{\mu M \ N} \\
-\\
+
 
 Forcings:\\
 \middlehline
 $f$ & flow-through rate of chemostat environment (influx \& outflux) & \unit{d^{-1}} \\
 $N_0$ & nutrient concentration of source medium for chemostat & \unit{\mu M \ N} \\
-\\
+
 
 
 Processes:\\
@@ -115,7 +115,7 @@ Processes:\\
 $\gamma_i^N$ & nutrient-dependence of the growth of phytoplankton size class $i$ & dimensionless\\
 $G_{ij}^P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{\mu M \ N} \\
 $\phi_{ij}$ & Preference of grazer $Z_j$ for prey $P_i$ & dimensionless \\
-\\
+
 
 Parameters: \\
 \middlehline

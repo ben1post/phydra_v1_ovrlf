@@ -91,13 +91,13 @@ Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross gr
 
 Natural mortality of zooplankton is implemented in the model via the linear mortality rate $m^Z$. Linear mortality feeds into the pool of $D$. In addition, zooplankton experiences quadratic mortality according to the parameter $m^{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
 
-\subsection{Detritus}
+\subsubsection{Detritus}
 Detritus concentration in the upper layer ($D$) is supplied by all mortality of phytoplankton, linear zooplankton mortality and zooplankton egestion (e.g. faecal pellets). The loss terms are remineralisation, zooplankton grazing, mixing and an additional sinking flux. 
 
 Detritus is remineralised at a constant rate $m^D$. Similar to $P_i$ and $Z_j$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate of $v^D$. This term is added to describe the fast export of larger detritus particles below the mixed layer. 
 
 \clearpage
-\subsubsection{Full model equations}
+\subsubsection{Model equations}
 The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase3symbols}.
 See the previous two use case sections (A 1.1 and A 1.2) for a more detailed discussion of model structure and formulation. 
 
@@ -167,7 +167,7 @@ $H$ & depth of the upper mixed layer (MLD) & \unit{m} \\
 $h^+$ & positive derivative of H(t) & \unit{m \ d^{−1}}  \\
 $I$ & irradiance at the surface & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}} \\
 $T$ & temperature of the upper mixed layer & \unit{\degree C} \\
-\\
+
 
 
 Processes:\\
@@ -178,7 +178,7 @@ $\gamma_T$ & temperature dependency of phytoplankton growth & dimensionless \\
 $\gamma_I$ & light limitation of phytoplankton growth &  dimensionless\\
 $G_{ij}^P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{\mu M \ N} \\
 $\phi_{ij}$ & Preference of grazer $Z_j$ for prey $P_i$ & dimensionless \\
-\\
+
 
 Parameters: \\
 \middlehline

@@ -116,13 +116,13 @@ Zooplankton ingestion of prey does not directly convert to biomass gained howeve
 
 Similar to phytoplankton mortality, the linear mortality factor $m^Z$ parameterizes natural mortality and excretion and feeds into the pool of detritus. The quadratic factor $m^{Z2}$ describes higher order predation on zooplankton and is removed from the system. 
 
-\subsection{Detritus}
+\subsubsection{Detritus}
 Detritus concentration in the upper layer ($D$) is supplied by all mortality of phytoplankton, linear zooplankton mortality and zooplankton egestion (e.g. faecal pellets). The loss terms are remineralisation, zooplankton grazing, mixing and an additional sinking flux. 
 
 Detritus is remineralised at a constant rate $m^D$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate of $v^D$. This term is added to describe the fast export of larger detritus particles below the mixed layer. 
 
 \clearpage
-\subsubsection{Full model equations}
+\subsubsection{Model equations}
 The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase1symbols}. See \citet{Anderson2015c} for a more detailed discussion of model structure and formulation.
 
 \begin{equation}
@@ -186,7 +186,6 @@ $N$ & concentration of nutrient in the upper mixed layer & \unit{\mu M \ N} \\
 $P$ & concentration of phytoplankton biomass in the upper mixed layer & \unit{\mu M \ N} \\
 $Z$ & concentration of zooplankton biomass in the upper mixed layer & \unit{\mu M \ N} \\
 $D$ & concentration of detritus in the upper mixed layer & \unit{\mu M \ N} \\
-\\
 
 Forcings:\\
 \middlehline
@@ -195,7 +194,6 @@ $H$ & depth of the upper mixed layer (MLD) & \unit{m} \\
 $h^+$ & positive derivative of H(t) & \unit{m \ d^{−1}}  \\
 $I$ & irradiance at the surface & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}} \\
 $T$ & temperature of the upper mixed layer & \unit{\degree C} \\
-\\
 Processes:\\
 \middlehline
 $K$ & material exchange between mixed and bottom layer & \unit{m \ d^{-1}} \\
@@ -204,7 +202,6 @@ $\gamma_I$ & light limitation of phytoplankton growth &  dimensionless\\
 $\gamma_N$ & nutrient limitation of phytoplankton growth & dimensionless \\
 $G_P$ & total biomass of phytoplankton grazed by zooplankton & \unit{\mu M \ N} \\
 $G_D$ & total biomass of detritus grazed by zooplankton & \unit{\mu M \ N} \\
-\\
 Parameters: \\
 \middlehline
 $\kappa$ & constant mixing parameter & \unit{m \ d^{−1}}  \\
