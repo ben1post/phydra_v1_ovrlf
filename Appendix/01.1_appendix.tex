@@ -45,7 +45,7 @@ Dissolved inorganic nitrogen in the mixed layer ($N$) is supplied via mixing, zo
 Nutrients are entrained from the bottom layer. Mixing of nutrients is a positive term adding to $N$ along the gradient between $N^\emptyset$ and $N$. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth, which is the only loss term.
 
 \subsubsection{Phytoplankton}
-Phytoplankton biomass ($P$) increases through temperature-dependent, light- \& nutrient-limited growth. The growth rate ($\mu^{P}$) is the product of a maximum growth rate ($\mu^{\emptyset}$) and the growth-dependencies on temperature ($\gamma^{T}$), light ($\gamma^{T}$) and nutrients ($\gamma^{T}$): 
+Phytoplankton biomass ($P$) increases through temperature-dependent, light- \& nutrient-limited growth. The growth rate ($\mu^{P}$) is the product of a maximum growth rate ($\mu^{\emptyset}$) and the growth-dependencies on temperature ($\gamma^{T}$), light ($\gamma^{I}$) and nutrients ($\gamma^{N}$): 
 
 \begin{equation}
     \mu^{P} = \mu^{\emptyset} \ \gamma^{T} \ \gamma^{I} \ \gamma^{N}
@@ -121,8 +121,9 @@ Detritus concentration in the upper layer ($D$) is supplied by all mortality of 
 
 Detritus is remineralised at a constant rate $m^D$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate of $v^D$. This term is added to describe the fast export of larger detritus particles below the mixed layer. 
 
-\subsubsection{Full equations}
-The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase2symbols}. See \citet{Anderson2015c} for a more detailed discussion of model structure and formulation.
+\clearpage
+\subsubsection{Full model equations}
+The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase1symbols}. See \citet{Anderson2015c} for a more detailed discussion of model structure and formulation.
 
 \begin{equation}
     \frac{d N}{d t} = 
@@ -173,7 +174,7 @@ The rates of change of the state variables are described by the following set of
 
 \begin{table*}[t]
 
-\caption{ Definition of symbols employed in use case 1 appendix. (\unit{µM \ N} = \unit{mmol \ Nitrogen \ m^{-3}}) }
+\caption{ Definition of symbols employed in use case 1 appendix. (\unit{\mu M \ N} = \unit{mmol \ Nitrogen \ m^{-3}}) }
 
 \begin{tabular}{l l l}
 Symbol & Meaning & Unit\\
@@ -181,15 +182,15 @@ Symbol & Meaning & Unit\\
 \tophline
 State variables:\\
 \middlehline
-$N$ & concentration of nutrient in the upper mixed layer & \unit{µM \ N} \\
-$P$ & concentration of phytoplankton biomass in the upper mixed layer & \unit{µM \ N} \\
-$Z$ & concentration of zooplankton biomass in the upper mixed layer & \unit{µM \ N} \\
-$D$ & concentration of detritus in the upper mixed layer & \unit{µM \ N} \\
+$N$ & concentration of nutrient in the upper mixed layer & \unit{\mu M \ N} \\
+$P$ & concentration of phytoplankton biomass in the upper mixed layer & \unit{\mu M \ N} \\
+$Z$ & concentration of zooplankton biomass in the upper mixed layer & \unit{\mu M \ N} \\
+$D$ & concentration of detritus in the upper mixed layer & \unit{\mu M \ N} \\
 \\
 
 Forcings:\\
 \middlehline
-$N^\emptyset$ & nutrient concentration right below mixed layer & \unit{µM \ N} \\
+$N^\emptyset$ & nutrient concentration right below mixed layer & \unit{\mu M \ N} \\
 $H$ & depth of the upper mixed layer (MLD) & \unit{m} \\
 $h^+$ & positive derivative of H(t) & \unit{m \ d^{−1}}  \\
 $I$ & irradiance at the surface & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}} \\
@@ -201,8 +202,8 @@ $K$ & material exchange between mixed and bottom layer & \unit{m \ d^{-1}} \\
 $\gamma_T$ & temperature dependency of phytoplankton growth & dimensionless \\
 $\gamma_I$ & light limitation of phytoplankton growth &  dimensionless\\
 $\gamma_N$ & nutrient limitation of phytoplankton growth & dimensionless \\
-$G_P$ & total biomass of phytoplankton grazed by zooplankton & \unit{µM \ N} \\
-$G_D$ & total biomass of detritus grazed by zooplankton & \unit{µM \ N} \\
+$G_P$ & total biomass of phytoplankton grazed by zooplankton & \unit{\mu M \ N} \\
+$G_D$ & total biomass of detritus grazed by zooplankton & \unit{\mu M \ N} \\
 \\
 Parameters: \\
 \middlehline
@@ -212,11 +213,11 @@ $\mu^\emptyset$ & maximum phytoplankton growth rate & \unit{d^{−1}}  \\
 $I^{opt}$ & constant mixing parameter & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}}  \\
 $k^w$ & light attenuation constant of sea water & \unit{m^{−1}}  \\
 $k^c$ & light attenuation constant of phytoplankton biomass & \unit{m^{−1}}  \\
-$k^N$ & half-saturation constant for nutrient uptake & \unit{µM \ N}  \\
+$k^N$ & half-saturation constant for nutrient uptake & \unit{\mu M \ N}  \\
 $\mu^Z$ & maximum ingestion rate of zooplankton & \unit{d^{−1}}  \\
 $\phi_P$ & zooplankton grazing preference for phytoplankton & dimensionless \\
 $\phi_D$ & zooplankton grazing preference for zooplankton & dimensionless \\
-$k_Z$ & half-saturation constant for zooplankton intake & \unit{µM \ N} \\
+$k_Z$ & half-saturation constant for zooplankton intake & \unit{\mu M \ N} \\
 $\beta$ & absorption efficiency of zooplankton grazing &  dimensionless \\
 $\epsilon$ & net production efficiency of zooplankton grazing & dimensionless \\
 $m^D$ & remineralisation rate of detritus & \unit{d^{-1}} \\
@@ -227,7 +228,7 @@ $m^{Z2}$ & quadratic mortality of zooplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}}
 %\middlehline
 %\bottomhline
 \end{tabular}
-\label{appendix:table:usecase2symbols}
+\label{appendix:table:usecase1symbols}
 %\belowtable{This is a test} % Table Footnotes
 \end{table*}
 

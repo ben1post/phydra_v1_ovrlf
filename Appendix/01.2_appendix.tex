@@ -11,9 +11,9 @@ This model use case employs a simple chemostat as physical setting. A flow-throu
 Model structure and parameterisation is adapted from the ASTroCAT model \citep{Banas2011b}, with slight modifications to the physical environment and parameterisation. 
 \\
 The model describes a size-structured community of phytoplankton and zooplankton, with each state variable defined by their equivalent spherical diameter (ESD). In model runs presented in this paper, we follow \citet{Banas2011b} in running simulations with 40 size classes of equally log-spaced ESD of $P$ (1 to 20 \unit{\mu m}), and 40 matching classes of $Z$ (2.1 to 460  \unit{\mu m}). 
-The model can be defined with any number of size classes within meaningful boundaries of the allometric parameterisation. The mathematical description will be kept general in describing the number of size classes by the subscript $i$ for phytoplankton and $j$ for zooplankton. Note that the implementation by \citeauthor{Banas2011b} implicitly defines the same number of phytoplankton and zooplankton state variables (i.e. $i = j$).
+The model can be defined with any number of size classes within meaningful boundaries of the allometric parameterisation. Size classes are denoted by the subscript $i$ for phytoplankton and $j$ for zooplankton. In the implementation of a size-spectral model by \citeauthor{Banas2011b} the food-web is implicitly made up of pairs of $P_i$ and $Z_j$, to avoid creating classes at the ends of the size spectrum that are artificially released or suppressed by grazing pressure.
 
-The main modification to the model structure in ASTroCAT is the physical setting. An added outflow acts as a loss term on all model components to place them in a traditional experimental setting for phytoplankton ecology, the chemostat. 
+The main modification to the model structure in ASTroCAT is the physical setting. An additional outflow acts as a loss term on all model components to place them in a traditional experimental setting for phytoplankton ecology, a chemostat system.
 
 \subsubsection{Flow}
 
@@ -49,11 +49,11 @@ Where $\Delta size^{P}$ is the prey size tolerance parameter, with units of \uni
 
 Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G^P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\beta$ and $\epsilon$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton  \citep{Straile1997GrossGroup}. The fraction of $G^P$ egested (e.g. as faecal pellets) is calculated via $1-\beta$, which in the current model setup is assumed to be exported quickly in the flow-through setting and lost from the system. 
 
- Zooplankton experiences quadratic mortality according to the parameter $m^{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
+Zooplankton experiences quadratic mortality according to the parameter $m^{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
 
-
-\subsubsection{Model Equations}
-The rates of change of the state variables are described by the following set of equations.
+\clearpage
+\subsubsection{Full model equations}
+The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase2symbols}.
 See \citet{Banas2011b} for a more detailed discussion of model structure and formulation. 
 
 \begin{equation}
@@ -90,7 +90,7 @@ See \citet{Banas2011b} for a more detailed discussion of model structure and for
 
 \begin{table*}[t]
 
-\caption{ Definition of symbols employed in use case 2 appendix. (\unit{µM \ N} = \unit{mmol \ Nitrogen \ m^{-3}}) }
+\caption{ Definition of symbols employed in use case 2 appendix. (\unit{\mu M \ N} = \unit{mmol \ Nitrogen \ m^{-3}}) }
 
 \begin{tabular}{l l l}
 Symbol & Meaning & Unit\\
@@ -98,34 +98,34 @@ Symbol & Meaning & Unit\\
 \tophline
 State variables:\\
 \middlehline
-$N$ & concentration of nutrient in model system & \unit{µM \ N} \\
-$P_i$ & concentration of phytoplankton size class $i$ biomass  & \unit{µM \ N} \\
-$Z_j$ & concentration of zooplankton size class $i$ biomass  & \unit{µM \ N} \\
+$N$ & concentration of nutrient in model system & \unit{\mu M \ N} \\
+$P_i$ & concentration of phytoplankton size class $i$ biomass  & \unit{\mu M \ N} \\
+$Z_j$ & concentration of zooplankton size class $j$ biomass  & \unit{\mu M \ N} \\
 \\
 
 Forcings:\\
 \middlehline
 $f$ & flow-through rate of chemostat environment (influx \& outflux) & \unit{d^{-1}} \\
-$N_0$ & nutrient concentration of source medium for chemostat & \unit{µM \ N} \\
+$N_0$ & nutrient concentration of source medium for chemostat & \unit{\mu M \ N} \\
 \\
 
 
 Processes:\\
 \middlehline
-$G_{ij}^P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{µM \ N} \\
 $\gamma_i^N$ & nutrient-dependence of the growth of phytoplankton size class $i$ & dimensionless\\
+$G_{ij}^P$ & total biomass of phytoplankton size class $j$ grazed by zooplankton size class $i$ & \unit{\mu M \ N} \\
 $\phi_{ij}$ & Preference of grazer $Z_j$ for prey $P_i$ & dimensionless \\
 \\
 
 Parameters: \\
 \middlehline
 $\mu_i^{\emptyset}$ & size-dependent max. growth rate of phytoplankton & \unit{d^{-1}} \\
-$k_i^N$ & Phytoplankton size class $i$ half-saturation constant for nutrient uptake & \unit{µM \ N} \\
+$k_i^N$ & Phytoplankton size class $i$ half-saturation constant for nutrient uptake & \unit{\mu M \ N} \\
 $m^P$ & fraction of size-dependent $\mu_i^{\emptyset}$ that is phytoplankton mortality & dimensionless \\
 
 $\mu_j^Z$ & maximum ingestion rate for zooplankton size class $j$ &  \unit{d^{-1}} \\
 
-$k_j^Z$ & Prey half-saturation level for zooplankton size class $j$ & \unit{µM \ N} \\
+$k_j^Z$ & Prey half-saturation level for zooplankton size class $j$ & \unit{\mu M \ N} \\
 $size_i^{P}$ & Individual size of phytoplankton (prey) size class $i$ & \unit{\mu m} \\
 $size_j^{opt}$ & Optimal prey size for zooplankton size class $j$ & \unit{\mu m} \\
 $\Delta size^{P}$ & Prey size tolerance for grazers & \unit{log_{10}(\mu m)} \\
@@ -138,7 +138,7 @@ $m^{Z2}$ & quadratic mortality of zooplankton, dependent on total $Z$ biomass & 
 %\middlehline
 %\bottomhline
 \end{tabular}
-\label{appendix:table:usecase1symbols}
+\label{appendix:table:usecase2symbols}
 %\belowtable{This is a test} % Table Footnotes
 \end{table*}
 
