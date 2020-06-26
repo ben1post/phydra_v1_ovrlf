@@ -21,3 +21,21 @@ $\Delta size_{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994
 \belowtable{TODO: the sources need to be added properly! for now just text..} % Table Footnotes
 \label{appendix:table:usecase2parameters}
 \end{table*}
+
+
+
+
+%%%%%
+
+
+\subsubsection{Global nutrient, light and temperature climatologies as slab model forcing}
+In line with the concept of phydra as a tool for rapid prototyping of marine ecosystem models, we compiled a set of global climatological forcings for slab models. These forcings are derived from World Ocean Atlas (WOA) 2018 data and a recent global MLD climatology kindly provided by Clément de Boyer Montégut, and Moderate Resolution Imaging Spectroradiometer (MODIS-aqua) satellite data for the time period 2002–2019.
+
+WOA data provides objectively analysed climatological mean depth profiles of nutrients (nitrate, phosphate \& silicate) and temperature on 1 \unit{°} longitude/latitude grid \cite{Garcia2019WORLDSilicate}. The values have been interpolated from data collected in the World Ocean Database and provide an empirical estimate of the biogeochemical conditions in areas of the global ocean throughout the year. WOA 2018 data is maintained and provided by NOAA (\url{https://www.nodc.noaa.gov/OC5/woa18/woa18data.html, accessed October 2019}).\\
+
+The MLD climatology is an updated version of the original climatology presented in  \citet{deBoyerMontegut2004MixedClimatology}, collecting data up until 2014 and with a modified criterion for MLD. The analysis of profile data combines a fixed threshold criterion for temperature (0.2 \unit{°C}) and a variable threshold criterion in density (equivalent to a 0.2 \unit{°C} decrease). MLD is diagnosed as the minimum calculated depth of both criterion for each station. This ensures that both temperature and salinity are homogeneous within the mixed layer, and compensated or barrier layers do not skew the values of MLD. This combined MLD criterion corresponds to a proxy of overturning extent depth over a few days, which lends this MLD value very well as the forcing that drives the upwelling of deeper nutrients into the upper mixed layer in slab physics (Clément de Boyer Montégut, personal communication). Spatial resolution of the climatology is on a 2 \unit{°} longitude/latitude grid.\\
+
+In addition to the oceanographic and biogeochemical parameters, the provided set of global forcings includes a global climatology of irradiance from satellite data. The NASA satellite MODIS-aqua provides the most up-to-date global climatologies of photosynthetically active radiation (PAR) \cite{MODIS-Aqua2018NASAGroup}. 
+\\
+With this set of forcings we can experimentally run a slab model built in phydra in (almost) any location of the ocean. MLD can be used as an empirical forcing for mixing in our slab models. Average nutrient concentration below the mixed layer, extracted from the WOA 2018 climatologies, can be used to provide an estimate of nutrient supply at certain locations throughout the year. The deep nutrient climatology averages WOA 2018 data 5 \unit{m} below closest available climatological MLD value. The final 1 \unit{°} gridded data product can be accessed via Github [provide link] and is easily integrated with models built using the phydra package. 
+The monthly climatologies are spatially averaged over a selected location (see Figure \ref{phydraforcing} a) and interpolated to obtain daily values (see Figure \ref{phydraforcing} b).

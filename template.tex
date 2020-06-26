@@ -156,11 +156,16 @@
 
 phytoplankton modeling is central to understanding the biogeochemical cycles driving the earth system.
 
+Phydra is an object-oriented Python package for developing marine ecosystem models in a flexible modular structure. As an extension of the xarray-simlab package, phydra is embedded in the python scientific ecosystem and provides a collection of tool-sets for rapid prototyping, analysis \& visualisation of models. 
+
 phydra is an open-source object-oriented python package for modeling marine ecosystems, based on the xarray-simlab framework, with the goal to support efficient, open and easily reproducible model development. 
 
 The library provides pre-built model components that can be used to assemble complex marine ecosystem models. All basic processes can be adapted and modified using python to describe different and more complex ecosystems. 
 
 By being embedded within the xarray-simlab framework, phydra benefits from compatibilities with other scientific python packages, such as dask for parallel computing, xarray and zarr for handling large datasets, and further plotting and data analysis functionalities. 
+
+The drawback of an interpreted programming language like python is circumvented by using the python Gekko package as a solving back end, which compiles model to efficient byte code before execution.
+
 
 Here, we demonstrate the usage of the phydra v1 package in a simple NPZD setting and to showcase the flexibility, in a more complex size based trophic structure model. Both in slab physics.
 //

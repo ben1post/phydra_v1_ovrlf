@@ -4,8 +4,6 @@
 
 \begin{document}
 
-\ref{Figure:phydraschematics}
-
 
  %% \ SECTION 3
 \section{Use cases} \label{Section:UseCases}
@@ -18,13 +16,10 @@ Structure: just go through it, Use Case I, Use Case II, Use Case II. No Methods 
 
 go through it from front to back, explain what an NPZD model is.
 "We recreate the NPZD model formulation by Anderson, in the model there is one .." describe equations in words. Then say See Anderson et al. or appendix X for full equations
-
-
 %  quickly explain overview, explain methods for all of them shortly, with schematics, and put full system of equations & parameter tables in the Appendix!
 
 TODO b4 handing in 2 esteban:
 - fix the legend missing in NPZDslab Figure
-
 \end{comment}
 
 % PARAGRAPH STARTS HERE:
@@ -38,9 +33,7 @@ TODO b4 handing in 2 esteban:
 % c) fluxes
 % d) xs.Model, xs.create_setup, xsimlab.run()
 
-Phydra is an object-oriented Python package for developing marine ecosystem models in a flexible modular structure. As an extension of the xarray-simlab package, phydra is embedded in the python scientific ecosystem and provides a collection of tool-sets for rapid prototyping, analysis \& visualisation of models. 
-
-To showcase this utility, we present three model use cases of varying ecosystem complexity. In this section, we present simplified descriptions of model structure and mechanisms, following the model development workflow presented in Section \ref{Section:phydrapackage}.
+To showcase the utility of the Phydra package, we present three model use cases of varying ecosystem complexity. In this section, we present simplified descriptions of model structure and mechanisms, following the model development workflow presented in Section \ref{Section:phydrapackage}.
 Per use case, we first describe the generic physical environment employed. The environment collects the model components and computes common forcing fluxes. After describing the model components and what they represent, we move on to describe the fluxes that define the interactions between components. Finally, setup \& parameters for the model runtime are presented and simulation results are shown.
 
 For a complete structure-independent mathematical description of the presented models please see Appendix 1. Additionally model and analysis code for all use cases is publicly available as documented interactive jupyter notebooks in the phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}). \\
@@ -55,9 +48,39 @@ See Figure \ref{Figure:phydraschematics_1} (a) for a schematic of the model stru
 
 
 \subsubsection{Physical environment}
+
+\begin{table*}[t]
+\caption{Physical environment of use case 1. }
+\begin{tabular}{l l l}
+Processes & Function & Source \\
+\tophline
+Interpolated forcings:\\
+$N^\emptyset$ & Nutrient concentration below the mixed layer &  WOA 2018 (Garcia et al.) \\
+$I^\emptyset$ & Photosynthetically active radiation (PAR) at the surface &  MODIS-aqua \\
+$T^{\mathrm{ML}}$ & Average temperature within the mixed layer & WOA 2018 (Garcia et al.) \\
+$H^{\mathrm{MLD}}$ & Depth of the mixed layer (MLD) &  MLD climatology (de Boyer Montegut et al.)\\
+
+
+Calculated properties:\\
+$h$ & change in MLD over time, $\frac{d}{d t} H$ & \\
+$h^+$ & positive change in MLD over time, $\max(0, \ h)$  & \\
+$K$ & mixing coefficient, $\frac{1}{H}(h^{+} + \kappa + v)$ & \\
+
+Parameters: \\
+$\kappa$ & constant mixing coefficient & \\
+$v$ & additional sinking flux & \\
+
+\bottomhline
+\end{tabular}
+\belowtable{TODO: the sources need to be added properly! for now just text..} % Table Footnotes
+\label{Table:UseCase1PhysEnv}
+\end{table*}
+%
+
+
 % a) physical env (this handles forcing)
 The physical environment of a phydra model (hereafter referred to simply as environment) describes an xarray-simlab process that provides an interface for model forcings and methods for generalised forcing fluxes (e.g. mixing) in the Phydra package (see Section \ref{Section:PhysicalEnvironment} for details on phydra environments).
-The environment of use cases 1 is a 'slab' description of an open ocean water column that is compatible with four types of external forcings: an external nutrient supply from below the mixed layer, (\unit{N^\emptyset}), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR) and average temperature above the mixed layer depth (\unit{T_{MLD}}).
+The environment of use cases 1 is a 'slab' description of an open ocean water column that is compatible with four types of external forcings: an external nutrient supply from below the mixed layer, (\unit{N_0}), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR) and average temperature above the mixed layer depth (\unit{T_{ML}}).
 
 The specific forcings used here are derived from a compiled global dataset of WOA 2018 nutrient and temperature climatologies, a MLD climatology, and MODIS-aqua satellite data for irradiance and chlorophyll biomass verification data (see Section \ref{Section:ForcingSection} for a detailed description). Phydra contains functionality to spatially average the climatological data for a chosen latitude/longitude box from the supplied forcing dataset at model runtime. The resulting monthly climatologies are interpolated to daily values. See Figure \ref{Figure:phydraforcing} for the two locations and specific forcings used for the presented simulations. Within the phydra structure, the slab environment supplies these forcings to fluxes that are dependent on any of these forcings.
 
