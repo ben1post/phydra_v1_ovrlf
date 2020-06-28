@@ -39,3 +39,82 @@ In addition to the oceanographic and biogeochemical parameters, the provided set
 \\
 With this set of forcings we can experimentally run a slab model built in phydra in (almost) any location of the ocean. MLD can be used as an empirical forcing for mixing in our slab models. Average nutrient concentration below the mixed layer, extracted from the WOA 2018 climatologies, can be used to provide an estimate of nutrient supply at certain locations throughout the year. The deep nutrient climatology averages WOA 2018 data 5 \unit{m} below closest available climatological MLD value. The final 1 \unit{°} gridded data product can be accessed via Github [provide link] and is easily integrated with models built using the phydra package. 
 The monthly climatologies are spatially averaged over a selected location (see Figure \ref{phydraforcing} a) and interpolated to obtain daily values (see Figure \ref{phydraforcing} b).
+
+
+
+
+
+
+\subsection{Xarray-Simlab: object-oriented modelling framework}
+%!
+\textit{For now this subsection just includes my bullet points, Benoît Bovy has promised to write it.}
+%!
+
+A key point is in the name, xarray-simlab builds a flexible model structure on top xarray -> for labelled multidimensional datasets in python.
+
+This means models in xarray-simlab natively use xarray as the basis for the data structure. A model with the proper parameterisation creates an xarray-dataset, which stores the output after model is run.
+
+This 
+
+- Further detail on the xarray-simlab framework used for phydra!
+
+"xarray-simlab is a Python library that provides both a generic framework for building computational models in a modular fashion and a xarray extension for setting and running simulations using the xarray.Dataset structure. It is designed for fast, interactive and exploratory modelling."
+
+
+specific version used here: v0.4.1 \cite{benoit_bovy_2020_3755979}
+
+
+The xarray-simlab framework is built on a very few concepts that allow great flexibility in model customisation:
+
+- models
+- processes
+- variables
+
+\subsubsection{Models, processes and variables}
+in xarray-simlab, (almost) everything is a process.
+- in the following sections, introduce the specific implementation of xarray-simlab processes within phydra, what is actually implemented in v1 and how it can be modified and used.
+
+models
+
+processes
+
+Just describe this in text...!
+
+variables
+- foreign variables
+- group variables
+- on-demand variables
+- index variables
+- object variables
+
+
+\subsection{GEKKO Optimization suite: compiled solver back end}
+
+Automatic differentiation provides the necessary gradients, accurate to machine precision, without extra work from the user.
+that allows more efficient computation of larger models, a modular mathematical syntax from which to build our model,
+and a powerful framework for model optimisation.
+
+The GEKKO package 
+
+"GEKKO is an object-oriented Python library that offers model construction, analysis tools, and visualisation of simulation and optimisation."
+
+"The GEKKO Python package solves large-scale mixed-integer and differential algebraic equations with nonlinear programming solvers. Modes of operation include machine learning, data reconciliation, real-time optimization, dynamic simulation, and nonlinear model predictive control." \cite{Beal2018GekkoSuite}
+
+"GEKKO is not only an algebraic modeling language (AML) for posing optimization problems in simple object-oriented equation-based models to interface with powerful built-in optimization solvers but is also a package with the built-in ability to run model predictive control, dynamic parameter estimation, real-time optimization, and parameter update for dynamic models on real-time applications. The"
+
+"Algebraic modeling languages (AML) facilitate the interface between advanced solvers and
+human users. High-end, off-the-shelf gradient-based solvers require extensive information about the problem, including variable bounds, constraint functions and bounds, objective functions, and first and second derivatives of the functions, all in consistent array format. AMLs simplify the process by allowing the model to be written in a simple, intuitive format."
+
+"GEKKO fills the role of a typical AML, but extends its capabilities to specialize in dynamic
+optimization applications. As an AML, GEKKO provides a user-friendly, object-oriented Python interface to develop models and optimization solutions. Python is a free and open-source language that is flexible, popular, and powerful. IEEE Spectrum ranked Python the #1 programming language in 2017. Being a Python package allows GEKKO to easily interact with other popular scientific and numerical packages. Further, this enables GEKKO to connect to any real system that can be accessed through Python. Since Python is designed for readability and ease rather than speed, the Python GEKKO model is
+converted to a low-level representation in the Fortran back-end for speed in function calls. Automatic differentiation provides the necessary gradients, accurate to machine precision, without extra work from the user. GEKKO then interacts with the built-in open-source, commercial, and custom large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, and MINLP) in the back-end. Optimization results are loaded back to Python for easy access and further analysis or manipulation."
+
+specific version used here: v0.2.7
+
+\subsubsection{Gekko variable types}
+there are more, Gekko is much more complex than our use case, but the ones used in this implementation are
+- Parameters. 
+- Intermediates. 
+- State Variables.  
+- Equations.
+additionally some functions like summing of terms (sum(x)) or calculating the Euler exponent (exp(x)) have specific implementations that are part of the Gekko library.

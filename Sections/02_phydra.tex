@@ -18,143 +18,92 @@ Andrew's comments: (THIS IS METHODS)
 - mention that xarray-simlab is general enough to support IBMs! But not developed here.
 \end{comment}
 
+
+
  %% \ SECTION 2
 \section{The Phydra package: structure \& features} \label{Section:phydrapackage}
 % 2nd Section:
 % Background, theoretical framework. Specifics here!
 
 
+Phydra is an open-source object-oriented Python package for modeling marine ecosystems.
 
 
-The Phydra package is an open-source project embedded within the Python scientific ecosystem. T  
 
-are central to Phydra's function and will be presented below.
+The goal of this project is to support efficient, open and easily reproducible model development. 
 
-The library of modular processes and the user interface are built on functionality borrowed from the Xarray-simlab package \citep{Bovy2018Xarray-simlab:Interactively}. Xarray-simlab provides an object-oriented framework for building and running flexible models within the labelled multi-dimensional data structure of Xarray. The structure stores the variables defined at model setup with their respective labels for easy plotting and postproccesing. Xarrays are easily converted to Netcdf files, the commonly used file format for biogeochemical data. The defined models can take any form, from sequential Games-of-life to large landscape erosion models in the fastscape package \citep{benoit_bovy_2020_3840917}. Xarray-simlab currently only provides step-wise calculation of Python functions acting on defined variables and is not optimised for solving systems of differential equations. 
-We use the Python GEKKO Optimisation suite to provide a more robust integration of models built in Phydra,. GEKKO is an open-source, object-oriented library of model construction, analysis and optimisation tools \citep{Beal2018GEKKOSuite}. Models can be constructed based on a common syntax and are compiled to efficient FORTAN code before solving.
-Utilizing GEKKO as a back end solver within the Xarray-simlab framework, we keep the benefits of , a native data structure that is natively labelled and documented and the efficient compuation of lower level languages.
+\subsection{Python backend: xarray-simlab and GEKKO}
 
-Automatic differentiation provides the necessary gradients, accurate to machine precision, without extra work from the user.
+The Phydra package is built using the wealth of functionality provided by the open-source scientific Python community. Two packages in particular form the basis of Phydra: Xarray-simlab as a flexible framework and GEKKO as an efficient solver.
 
-that allows more efficient computation of larger models, a modular mathematical syntax from which to build our model,
-and a powerful framework for model optimisation.
+GEKKO as a computational backend.
 
-The GEKKO package 
+The library of modular processes and the user interface are built from the xarray-simlab package \citep{Bovy2018Xarray-simlab:Interactively}. 
+Xarray-simlab provides a generic framework for building computational models in a modular fashion and an extension for model setup, running simulations and storing output using the xarray.Dataset structure.
 
-"GEKKO is an object-oriented Python library that offers model construction, analysis tools, and visualisation of simulation and optimisation."
+Xarray provides an efficient and labelled multi-dimensional storage format, that is integrated with functionality for easy plotting and post-processing and storing of model output. Xarray.Datasets are easily converted to Netcdf files, the commonly used file format for biogeochemical data. 
+
+In addition to a native storage format, xarray-simlab provides the object-oriented framework for model building blocks, as well as the model setup and runtime user interface in Phydra. A process that is part of the model is 
+
+Xarray-simlab currently only provides step-wise calculation of Python functions acting on defined variables and is not optimised for solving systems of differential equations. Instead we use the Python GEKKO Optimisation suite to provide a more robust back end to solving models built in Phydra. GEKKO is an open-source, object-oriented library of model construction, analysis and optimisation tools built on a core algebraic modelling language \citep{Beal2018GEKKOSuite}. Models can be constructed based on a common syntax and are compiled to efficient FORTRAN code before solving.
+Utilizing GEKKO as a backend solver within the xarray-simlab framework, we can combine the usability of a high-level language like Python with the efficient computation of lower-level languages.
 
 Both of these Python packages are relatively young and actively being developed, which provides some challenges but also allows for constant improvements to the functionality that Phydra provides.
-
-Below we will describe how Phydra leverages these open-source projects to provide a tool-set to construct, modify, solve, analyse and share marine ecosystem models. In the following sub-sections, the basic modular components of Phydra are discussed and a general model development workflow is presented.
-
+Below we will describe how Phydra leverages these open-source projects to provide a tool-set to construct, modify, solve, analyse and share marine ecosystem models. The basic modular components of Phydra are discussed and a general model development workflow is presented.
 
 
+\subsection{Phydra building-blocks}
 
+Phydra leverages the objects and syntax provided by the xarray-simlab and GEKKO packages, to create a set of building-blocks for ecosystem models that can be combined flexibly. 
 
+Phydra provides a library of modular model building-blocks that can be used to assemble complex marine ecosystem models. These building-blocks are contained in xarray-simlab processes, which are specially decorated Python classes.
 
-\subsection{Xarray-Simlab: object-oriented modelling framework}
-%!
-\textit{For now this subsection just includes my bullet points, Benoît Bovy has promised to write it.}
-%!
+When assembling a model, there are certain basic processes that have to be included in order to allow the GEKKO solver to assemble the full model. These base processes are included with every call to create a Phydra model using \texttt{phydra.Model()}. Additional processes to add to the model can be drawn from the Phydra library. 
+The library is ordered into different logical components in a marine ecosystem, describing their function either as an environment, component, flux or forcing. 
 
-A key point is in the name, xarray-simlab builds a flexible model structure on top xarray -> for labelled multidimensional datasets in python.
+The logic behind this order is that an ecosystem model would need at least one of each of these processes added in order to run. Phydra currently only supports running a single environment in a 0-dimensional setting with a flexible number of components and fluxes. In future versions the framework can potentially support multiple environments and dimensions.
 
-This means models in xarray-simlab natively use xarray as the basis for the data structure. A model with the proper parameterisation creates an xarray-dataset, which stores the output after model is run.
+The open-source code structure allows users to easy develop or modify processes to describe a specific ecosystem. The ordering of the building-blocks is not an implicit order, self-written building blocks can blur the boundaries and combine different functions.
 
-This 
+The first version of the library will contain all processes needed to create the three model use cases presented in Section \ref{Section:UseCases}. Users of Phydra could provide their own use cases to the standard library in a collaborative effort to support efficient, open and easily reproducible marine ecosystem model development.
 
-- Further detail on the xarray-simlab framework used for phydra!
+As a collaborative process, the library can grow to incorporate a much wider range of use cases.
 
-"xarray-simlab is a Python library that provides both a generic framework for building computational models in a modular fashion and a xarray extension for setting and running simulations using the xarray.Dataset structure. It is designed for fast, interactive and exploratory modelling."
-
-"xarray-simlab is a tool for fast model development and easy, interactive model exploration. It aims at empowering scientists to do better research in less time, collaborate efficiently and make new discoveries."
-
-specific version used here: v0.4.1 \cite{benoit_bovy_2020_3755979}
-
-
-The xarray-simlab framework is built on a very few concepts that allow great flexibility in model customisation:
-
-- models
-- processes
-- variables
-
-\subsubsection{Models, processes and variables}
-in xarray-simlab, (almost) everything is a process.
-- in the following sections, introduce the specific implementation of xarray-simlab processes within phydra, what is actually implemented in v1 and how it can be modified and used.
-
-models
-
-processes
-
-Just describe this in text...!
-
-variables
-- foreign variables
-- group variables
-- on-demand variables
-- index variables
-- object variables
-
-
-\subsection{GEKKO Optimization suite: compiled solver back end}
-
-"The GEKKO Python package solves large-scale mixed-integer and differential algebraic equations with nonlinear programming solvers. Modes of operation include machine learning, data reconciliation, real-time optimization, dynamic simulation, and nonlinear model predictive control." \cite{Beal2018GekkoSuite}
-
-"GEKKO is not only an algebraic modeling language (AML) for posing optimization problems in simple object-oriented equation-based models to interface with powerful built-in optimization solvers but is also a package with the built-in ability to run model predictive control, dynamic parameter estimation, real-time optimization, and parameter update for dynamic models on real-time applications. The"
-
-"Algebraic modeling languages (AML) facilitate the interface between advanced solvers and
-human users. High-end, off-the-shelf gradient-based solvers require extensive information about the problem, including variable bounds, constraint functions and bounds, objective functions, and first and second derivatives of the functions, all in consistent array format. AMLs simplify the process by allowing the model to be written in a simple, intuitive format."
-
-"GEKKO fills the role of a typical AML, but extends its capabilities to specialize in dynamic
-optimization applications. As an AML, GEKKO provides a user-friendly, object-oriented Python interface to develop models and optimization solutions. Python is a free and open-source language that is flexible, popular, and powerful. IEEE Spectrum ranked Python the #1 programming language in 2017. Being a Python package allows GEKKO to easily interact with other popular scientific and numerical packages. Further, this enables GEKKO to connect to any real system that can be accessed through Python. Since Python is designed for readability and ease rather than speed, the Python GEKKO model is
-converted to a low-level representation in the Fortran back-end for speed in function calls. Automatic differentiation provides the necessary gradients, accurate to machine precision, without extra work from the user. GEKKO then interacts with the built-in open-source, commercial, and custom large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, and MINLP) in the back-end. Optimization results are loaded back to Python for easy access and further analysis or manipulation."
-
-specific version used here: v0.2.7
-
-\subsubsection{Gekko variable types}
-there are more, Gekko is much more complex than our use case, but the ones used in this implementation are
-- Parameters. 
-- Intermediates. 
-- State Variables.  
-- Equations.
-additionally some functions like summing of terms (sum(x)) or calculating the Euler exponent (exp(x)) have specific implementations that are part of the Gekko library.
-
-
-\subsection{Phydra: flexible marine ecosystem modelling}
-
-Phydra leverages the objects and syntax provided by Xarray-simlab and GEKKO, to create flexible marine ecosystem models that can be solved efficiently. The GEKKO model instance that handles solving and optimisation is initialised in a Xarray-simlab process and shared between all the processes that constitute a model instance. These processes are object classes that are provided with Phydra. We separate the processes into multiple logical categories that represent logical structures in a marine ecosystem model: Environments, Forcings, Components and Fluxes.
+These processes are classes that are provided with Phydra. We separate the processes into multiple logical categories that represent structures in a marine ecosystem model: Environments, Forcings, Components and Fluxes.
 
 \subsubsection{Environments} \label{Section:PhysicalEnvironment}
 
-A Phydra Environment defines the structure of the ecosystem and provides external inputs (i.e. forcings) that can be accessed by all processes linked to this environment. As a simple example we could take a chemostat model. The flow-through culture system is defined by a solution of nutrients that flows into a tank of fixed volume. Organisms within the tank grow, consume nutrients and are also flushed out of the system with the outflow of the medium. The Environment process in Phydra describing a chemostat would have the nutrient concentration in the flowing substrate, as well as the flow-rate of the system as required external forcing processes. The forcing input can be supplied from different Forcing processes, for example with a time-varying flow rate. Components, which define the state variables in our model, are grouped within our chemostat Environment and the Fluxes (e.g. nutrient uptake or mortality) affect Components within this Environment. We can add any number of Components from the Phydra library into our Environment and between the Components we could add any number of interactions.
+A Phydra Environment defines the structure of the ecosystem and provides external inputs (i.e. forcings) that can be accessed by all processes linked to this environment. As a simple example we could take a chemostat model. The flow-through culture system is defined by a solution of nutrients that flows into a tank of fixed volume. Organisms within the tank grow, consume nutrients and are also flushed out of the system with the outflow of the medium. The Environment process in Phydra describing a chemostat would have the nutrient concentration in the medium, as well as the flow-rate of the system as required external forcing processes. The forcing input can be supplied from different Forcing processes, for example with a time-varying flow rate. Components, which define the state variables in our model, are grouped within our chemostat Environment and the Fluxes (e.g. nutrient uptake or mortality) affect Components within this Environment. We can add any number of Components from the Phydra library into our Environment and between the Components we could add any number of interactions.
 
 Phydra as of now provides an easily modifiable base Environment and implementations of a chemostat Environment, as well as a slab-ocean Environment. The first release of Phydra supports only single zero-dimensional implementations of these basic ecosystem models, but the development of multi-dimensional Environments is a high priority for further development.
 
-\subsubsection{Model forcing (and verification) data} \label{Section:ForcingSection}
+\subsubsection{Forcings} \label{Section:ForcingSection}
 
-To simplify models of complex systems larger processes are not mechanistically implemented, but instead empirically represented as an external forcing. Model forcings and data used in model optimisation are represented by GEKKO parameters that are supplied to the model discretised at the same time-step that the model is solved.
+Model forcings and data used in model optimisation are represented by GEKKO parameters that are supplied to the model discretised at the same time-step that the model is solved.
 
 Included with this version of Phydra we have the necessary forcing types that have to be supplied to the provided Environments. For a chemostat model, this is a source concentration of a component in the medium, as well as a flow rate of the system. The slab-ocean Environment interfaces with forcings describing the concentration of a component below the mixed layer, movement of the mixed layer depth (MLD), irradiance at surface and temperature within the mixed layer. There are basic methods supplied to create either constant forcing or values over time based on mathematical functions. Additionally a base Forcing process can be modified by a user to provide any external data, which can then be used by other processes in the library. The flexible class-based structure allows a process class inheriting from the base MLD forcing process to be recognised as an MLD forcing in the Fluxes and processes of our model.
 
 \subsubsection{Components}
 
-An ecosystem model tracks chemical compounds as well as organisms via state variables. These state variables can define completely different species, but can also be multiple state variables within a group that share common processes. Components within Phydra are defined at this higher level and can contain a single state variable or a group of state variables that share a common process.
+An ecosystem model tracks chemical compounds as well as organisms via state variables. These state variables can define completely different components of a model, or represent a functional group. Components within Phydra are defined at this higher level and can contain a single state variable or an array of state variables that share common fluxes with differing parameterisation. Each component is added to the model with a specific label that is used to reference this component in all processes affecting or dependent on it. 
 
-What is the info defined with a Component:
-- Units!
-- Name & label within model
-- dimensionality! (for now just groups of SV in 0D)
+The actual dimensions of a model component are initialized after passing a parameter at model setup. 
 
-PFT models -> complexity.. this whole issue
+This has been designed for easily testing different levels of ecosystem complexity. As shown in the second use case, where this is useful is in setting up phytoplankton size classes in trait-based models. All phytoplankton state variables grow on a common nutrient, but uptake parameters are related to allometries of cell size. A phytoplankton component could be initialized, with a certain size range and number of state variables. Within the allometric growth process parameters are dynamically initialized based on the size provided by the component. 
 
-- Components are state variables, make sure to use clear wording and explain well
+Phydra thus simplifies model setup for these types of models considerably. 
+
+In addition to size, the component could be modified to include information on units or other specific parameters relevant to the model. The added flexible dimensionality of components was designed with the current issues in marine ecosystem model in mind. The effects of different levels of complexity, in the number and definition of phytoplankton functional types (PFT) for example, is not routinely tested in marine ecosystem models. Phydra provides a framework that allows for easy testing through flexible modification of such model complexity at model setup.
+
+Components in Phydra currently only supports 1-dimensional functional groups, but extending this to 2- and 3-dimensional flexibility is a high development priority. 
+
 
 \subsubsection{Fluxes}
-Due to the flexible nature of Environments and Components, the interactions between fluxes are dependent 
+The previous building blocks of an environment, components and forcing create the structure of the model, but when solved at this stage there would be no meaningful simulation. In order to define exchanges of matter between components flux processes are added to our model instance, defining the affected components via labels at model setup.
+There are multiple types of fluxes provided as base classes in the library. These base classes are defined by the type of interaction between components. Single fluxes provide loss or gain processes to a single variable, such as sinking or influx from outside the ecosystem. In order to simplify creating common forcing fluxes, a single flux process can a list of affected components as input at model setup. An example for more complex forcing type are exchange fluxes, where a flux affects one component as a source and another as a sink. These can be set up with flexible dimensionality of components. Grazing fluxes are a slightly more complicated subclass of a grid-wise flux, as ingestion is usually normalized by total prey availability, so all forcing interactions need to be calculated in a dynamically generated matrix of all prey items consumed by a component.
 
-what is a flux:
-- closure or input terms - one component affected
-- Any transfer between Components
+Will be able to develop much further, extending flux base classes or adding new ones.
+
 
 - Flows are parts of differential equations, that affect one or more components, and can be influenced by forcing and the physical environment
 
@@ -166,6 +115,12 @@ Please follow the up-to-date instructions on the Github repository for installat
 Since python is a fast developing language, we will provide instructions to install a fully compatible virtual environment with the Conda package manager separate from a users normal python environment. For interactive coding and rapid prototyping we recommend using the Jupyter environment that is available via Conda. For more complex and larger model runs on servers or clusters python scripts are preferable.
 
 \subsection{Model development workflow}
+
+The model construction process has two definitive stages, 
+ 
+ \texttt{phydra.Model()}
+ 
+ \texttt{phydra.create_setup()}
 
 Constructing marine ecosystem models in Phydra is by nature flexible, but the user can follow a general workflow of assembling models from the library of processes. This wokflow is visualized in \ref{Figure:phydraschematics} and will be further explained below.
 

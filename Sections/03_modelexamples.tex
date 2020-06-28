@@ -36,7 +36,7 @@ TODO b4 handing in 2 esteban:
 To showcase the utility of the Phydra package, we present three model use cases of varying ecosystem complexity. In this section, we present simplified descriptions of model structure and mechanisms, following the model development workflow presented in Section \ref{Section:phydrapackage}.
 Per use case, we first describe the generic physical environment employed. The environment collects the model components and computes common forcing fluxes. After describing the model components and what they represent, we move on to describe the fluxes that define the interactions between components. Finally, setup \& parameters for the model runtime are presented and simulation results are shown.
 
-For a complete structure-independent mathematical description of the presented models please see Appendix 1. Additionally model and analysis code for all use cases is publicly available as documented interactive jupyter notebooks in the phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}). \\
+For a complete structure-independent mathematical description of the presented models please see Appendix 1. Additionally model and analysis code for all use cases is publicly available as documented interactive Jupyter notebooks in the Phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}). \\
 
 \subsection{Use case 1: a NPZD slab model}
 Our first use case presents a classical NPZD model embedded in a "slab" physical setting. The simplified two-layer structure provides a zero-dimensional and mechanistically simple description of physical processes affecting euphotic ecosystems in the open ocean. The classical structure lends itself well as an efficient physical test-bed for more complicated ecosystem descriptions and is often used as a teaching example.
@@ -61,7 +61,7 @@ $T^{\mathrm{ML}}$ & Average temperature within the mixed layer & WOA 2018 (Garci
 $H^{\mathrm{MLD}}$ & Depth of the mixed layer (MLD) &  MLD climatology (de Boyer Montegut et al.)\\
 
 
-Calculated properties:\\
+no ,, this is done in flux ...Calculated properties:\\
 $h$ & change in MLD over time, $\frac{d}{d t} H$ & \\
 $h^+$ & positive change in MLD over time, $\max(0, \ h)$  & \\
 $K$ & mixing coefficient, $\frac{1}{H}(h^{+} + \kappa + v)$ & \\
@@ -79,26 +79,25 @@ $v$ & additional sinking flux & \\
 
 
 % a) physical env (this handles forcing)
-The physical environment of a phydra model (hereafter referred to simply as environment) describes an xarray-simlab process that provides an interface for model forcings and methods for generalised forcing fluxes (e.g. mixing) in the Phydra package (see Section \ref{Section:PhysicalEnvironment} for details on phydra environments).
+The physical environment of a phydra model (hereafter referred to simply as environment) describes an xarray-simlab process that provides an interface for model forcings and methods for generalised forcing fluxes (e.g. mixing) in the Phydra package (see Section \ref{Section:PhysicalEnvironment}).
 
 In two of the presented use cases, we adapt a slab representation of ocean physics as defined by \citet{Evans1985ACycles}. The multi-dimensional ocean is reduced to two layers, where the upper layer provides a zero dimensional setting for our ecosystem model. The bottom layer is often assumed to contain a fixed concentration of nutrients, but this can also vary with depth or time. There is constant exchange between the layers. Nutrients are usually mixing up into the upper layer, where they are consumed by phytoplankton. 
 
 The fraction of all ecosystem components sinking to the bottom layer are lost from the system. These exchanges of water masses within this two-layered model ocean are driven by the empirically derived mixed layer depth (MLD). Additional common forcings that are used in slab models modify phytoplankton growth, e.g. metabolic rates via temperature and light harvesting via irradiance. Such forcing can situate a slab model theoretically in any location in the global ocean. Compared to the natural habitat of marine plankton, the slab model is a radical simplification. With the appropriate forcing the resulting simulations can yield meaningful results that can be compared with bulk properties of the marine ecosystem \cite[e.g.][]{Evans1985ACycles, Fasham1990a}.
 
-The environment of use cases 1 is a 'slab' description of an open ocean water column that is compatible with four types of external forcings: an external nutrient supply from below the mixed layer, (\unit{N_0}), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR) and average temperature above the mixed layer depth (\unit{T_{ML}}).
+The environment of use cases 1 is a 'slab' description of an open ocean water column that is compatible with four types of external forcings: an external nutrient supply from below the mixed layer, (\unit{N_0}), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR) \unit{I^\emptyset} and average temperature above the mixed layer depth (\unit{T_{ML}}).
 
 
 The specific forcings used here are derived from a compiled global dataset of WOA 2018 nutrient and temperature climatologies, a MLD climatology, and MODIS-aqua satellite data for irradiance and chlorophyll biomass verification data. 
-The forcing data is spatially averaged across regions of the world...
-Phydra contains functionality to spatially average the climatological data for a chosen latitude/longitude box from the supplied forcing dataset at model runtime. The resulting monthly climatologies are interpolated to daily values. See Figure \ref{Figure:phydraforcing} for the two locations and specific forcings used for the presented simulations. Within the phydra structure, the slab environment supplies these forcings to fluxes that are dependent on any of these forcings.
+The forcing data is spatially averaged across regions of the world... 
+The resulting monthly climatologies are interpolated to daily values. See Figure \ref{Figure:phydraforcing} for the two locations and specific forcings used for the presented simulations. Within the phydra structure, the slab environment supplies these forcings to fluxes that are dependent on any of these forcings.
 
 % PE forcing 1: mixing
-In addition to supplying forcings, environments in phydra can calculate specific forcing coefficients and fluxes. These common environmental influences can efficiently be computed in the shared environment, before the effect on each model component is computed in detail. \\
-
-The slab environment provides an interface for two types of functions, calculating mixing coefficients and light in the mixed layer. We follow \citet{Evans1985ACycles} in the formulation of mixing. The change in depth of the mixed layer over time, described mathematically by the derivative of MLD, provides an estimate of mixing intensity. When MLD is shallowing (derivative is negative), the loss of component concentration is balanced with the increasing concentration due to a decreasing model volume. A deepening MLD dilutes all components (unless otherwise specified) and drives the mixing of nutrients into the upper layer. 
+\\
+The Mixing process provided in the Phydra library provides an interface for a process calculating mixing coefficients and assigning them to affect different components. We follow \citet{Evans1985ACycles} in the formulation of mixing. The change in depth of the mixed layer over time, described mathematically by the derivative of MLD, provides an estimate of mixing intensity. When MLD is shallowing (derivative is negative), the loss of component concentration is balanced with the increasing concentration due to a decreasing model volume. A deepening MLD dilutes all components (unless otherwise specified) and drives the mixing of nutrients into the upper layer. 
 % SEE TABLE X1 for a presentation of properties of the environment
 
-The mixing flux in a slab environment is most often a negative term acting on components as they grow within the upper layer and sink to the unresolved deep layer. The standard mixing flux is therefore defined negatively, but the modular structure allows the creation of different mixing fluxes, with parameters that modify the effects of the generalised forcing fluxes defined in the environment, e.g. to add an additional sinking flux. It is also useful to define the mixing flux for the nutrient component separately, because it is generally positive. Nutrients are supplied from the deeper layer via a \unit{N^\emptyset} forcing as a function of mixing and the gradient in concentration to the upper layer. 
+The mixing flux in a slab environment is most often a negative term acting on components as they grow within the upper layer and sink to the unresolved deep layer. The standard mixing flux is therefore defined negatively, but the modular structure allows the creation of different mixing fluxes, with parameters that modify the effects of the generalised forcing fluxes defined in the environment, e.g. to add an additional sinking flux. The mixing flux for the nutrient component is defined separately, because it is a function of nutrient upwelling from the deeper layer via the \unit{N^\emptyset} forcing as a function of mixing and the gradient in concentration to the upper layer.
 
 % this sections still needs some practical coding, the structure is not fully functional yet
 In slab models, the concentration of nutrient in the bottom layer \unit{N^\emptyset} is often assumed to be fixed. In the ocean there is usually a gradient of concentration over depth and this can be represented via functions over depth \citep{Frost1987GrazingSpp., Fasham1995VariationsAnalysis}. In this study we use an empirical climatology as the forcing \unit{N^\emptyset}, that is the result of combining WOA 2018 data with MLD climatology. From this analysis we use the WOA 2018 nitrate climatology as \unit{N^\emptyset} forcing.
@@ -106,10 +105,7 @@ In slab models, the concentration of nutrient in the bottom layer \unit{N^\empty
 % PE forcing 2: light
 Another common forcing process defined in this environment, is the integrated amount of light available in the upper mixed layer. The amount of light is calculated based on the supplied PAR forcing, the current value of MLD and a function of light attenuation with ocean depth. In our model, incident irradiance is supplied by MODIS-aqua satellite climatologies. Integrated light availability in the upper mixed layer is calculated via Beer's law, dependent on MLD and the sum of extinction coefficients of water and phytoplankton biomass. 
 
-% In addition to mixing flux, also Light in MLD is calculated here, according to the specific funcitons supplied. T_mld is made available to other processes that might depend on it.
-
-Average temperature in the mixed layer \unit{T^{ML}}
-\unit{T^{ML}},
+The calculation of a primary producers growth rate is usually one of the more complex mathematical formulations, perhaps second to grazing formulations. In the most simple case the growth of phytoplankton in our slab model would be calculated as a saturating Monod (or Michealis-Menten) function. There is no distinction between the rate of nutrient uptake and the assimilation of these nutrients. We add this simplified relationship to our model using the MonodGrowth process. At model setup the user only needs to provide the label of the ressource that is consumed and the component that is growing, in addition to parameters such as the half-saturation constant for uptake, to have this growth function implemented. More accurate representations of growth in marine ecosystem models additionally track additional factors limiting growth. In our first use case, phytoplankton growth is limited by nutrient uptake, according to Monod, as well as temperature and light-availability in the mixed layer. These additional growth limiting factors are included in the library as a MonodLightTempGrowth process, that inherits the forcing for average temperature in the mixed layer \unit{T^{ML}} and PAR at surface \unit{I^\emptyset}, 
 
 MLD (+deriv)
 
@@ -267,7 +263,7 @@ The two locations show markedly different dynamics. The temperate location shows
 From an attempt at describing an oceanic physical setting with a highly simplified ecosystem, we move to a simplified laboratory setting with a complex description of a size-structured ecosystem. The model structure for the second use case was adapted from \cite{Banas2011b}, with the modification that we explicitly describe the physical setting as a flow-through chemostat. See Figure \ref{phydraschematics_1} (b) for a schematic of the model structure. \\
 
 
-- Chemostats, a.k.a. continuous cultures, have been regularly used in exploring properties of phytoplankton! Seminal studies of Droop on nutrient uptake were perfomed using chemostats. \citep{Droop1968VitaminLutheri} \\
+- Chemostats, a.k.a. continuous cultures, have been regularly used in exploring properties of phytoplankton! Seminal studies of Droop on nutrient uptake were performed using chemostats. \citep{Droop1968VitaminLutheri} \\
 - also to this day, still an interesting, very simple setting for phytoplankton models\\
 
 Size is called a "master-trait" in the trait-based description of plankton ecology, allowing modellers and ecologist to describe the diverse plankton community along one continuous axis. (This is of course an oversimplification, and it takes careful consideration of the choice of allometries and often a combination of functional properties and size classes to achieve a more realistic representation of natural phytoplankton assemblages.)
@@ -355,7 +351,7 @@ All phytoplankton non-grazing losses contribute to detritus.\\
 
 % Zooplankton dynamics
 We assume that zooplankton can actively maintain themselves in the upper mixed layer and only compute diluting effects of MLD deepening, but no other mixing terms.
-Zooplankton grazing is implemented with the same function described in use case 2 (see Section !3.2!) 
+Zooplankton grazing is implemented with the same function (which?) described in use case 2 (see Section !3.2!) 
 
 Zooplankton grows via assimilating ingested phytoplankton, defined as the product of growth efficiency $\epsilon$ and total ingested phytoplankton. Ingestion of each zooplankton type is a size-dependent process defined by the size of the phytoplankton prey, a half saturation constant $K_s$, the zooplankton type's specific size preference and a size-dependent maximum ingestion rate. [perhaps show a figure visualising the size-dependent allometries?]
 The size preference of zooplankton types is assumed to vary with prey size in a log-Gaussian distribution around an optimal prey size for each grazer.
@@ -374,7 +370,7 @@ A complete presentation of equations is given in Appendix 1.\\
 % JUST RESULTS NO DISCUSSION
 
 Using this new complex model structure, and the same forcing used for use case 1, exemplary simulations were performed in two contrasting locations. 
-See Figure \ref{SizeStructuredSlab_results} for the average temporal evolution of the aggregated size-classes of \\
+See Figure \ref{SizeStructuredSlab_results} for the average annual dynamics of the aggregated size-classes of \\
 
 
 - explain here how the runs are set up\\
