@@ -94,6 +94,9 @@ Automatic differentiation provides the necessary gradients, accurate to machine 
 that allows more efficient computation of larger models, a modular mathematical syntax from which to build our model,
 and a powerful framework for model optimisation.
 
+
+Model forcings and data used in model optimisation are represented by GEKKO parameters that are supplied to the model discretised at the same time-step that the model is solved.
+
 The GEKKO package 
 
 "GEKKO is an object-oriented Python library that offers model construction, analysis tools, and visualisation of simulation and optimisation."
@@ -118,3 +121,10 @@ there are more, Gekko is much more complex than our use case, but the ones used 
 - State Variables.  
 - Equations.
 additionally some functions like summing of terms (sum(x)) or calculating the Euler exponent (exp(x)) have specific implementations that are part of the Gekko library.
+
+
+
+
+% FROM DIMENSIONALITY SECTION:
+- Dimensionality is a very important fact of building models, and xarray-simlab provides a simple, but sometimes tricky interface for managing dimensionality, so make sure to explain it relatively well here, as well as the implementations.
+- I can cite https://www.biogeosciences.net/17/609/2020/ to explain why dimensionality is an important consideration in phytoplankton models.
