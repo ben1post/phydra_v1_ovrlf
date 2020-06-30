@@ -128,3 +128,22 @@ additionally some functions like summing of terms (sum(x)) or calculating the Eu
 % FROM DIMENSIONALITY SECTION:
 - Dimensionality is a very important fact of building models, and xarray-simlab provides a simple, but sometimes tricky interface for managing dimensionality, so make sure to explain it relatively well here, as well as the implementations.
 - I can cite https://www.biogeosciences.net/17/609/2020/ to explain why dimensionality is an important consideration in phytoplankton models.
+
+
+
+
+Growth & $\mu_{\emptyset}$ & maximum phytoplankton growth rate  & \unit{d^{-1}} & & \\
+& $k_N$ & half-sat. const: N uptake & \unit{µM \ N} & 0.85 & \\
+& $m_P$ & linear P mortality & \unit{d^{−1}} & 0.015 & \\
+& $m_{P2}$ & quadratic P mortality & \unit{(µM \ N)^{-1} d^{−1}} & 0.025 & \\
+& $I_{max}$ & Z max. ingestion rate & \unit{d^{−1}} & 1.0 & \\
+& $k_Z$ & Z half-saturation for intake & \unit{µM \ N} & 0.6 & \\
+& $\phi_P$ & grazing preference: P & & 0.67 & \\
+& $\phi_D$ & grazing preference: D & & 0.33 & \\
+& $\beta_Z$ & Z absorption efficiency & & 0.69 & \\
+& $k_{NZ}$ & Z net production efficiency & & 0.75 &  \\
+& $m_Z$ & linear Z mortality  & \unit{d^{−1}} & 0.02 & \\
+& $m_{Z2}$ & quadratic Z mortality & \unit{(µM \ N)^{-1} d^{−1}} & 0.34 & \\
+& $v_D$ & D sinking rate & \unit{m \ d^{−1}} & 6.43 & \\
+& $m_D$ & D remineralisation rate & \unit{d^{−1}} & 0.06 & \\
+& $\kappa$ & constant mixing parameter & \unit{m \ d^{−1}} & 0.13 & \\
