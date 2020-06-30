@@ -92,85 +92,6 @@ More complex representations of growth in marine ecosystem models track addition
 
 \subsection{Model development workflow}
 
-Phydra is a tool-box for marine ecosystem modeling, that is freely extensible by a user to be applied to many different use cases. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on creating the most appropriate model structure and parameterisation for the specific scientific hypothesis that is being investigated. 
-Phydra is by nature a collaborative project that encourages sharing and modification of ecosystem models.
-
-Constructing marine ecosystem models in Phydra is by nature flexible, but the user can follow a general workflow of assembling models from the library of processes. This workflow is visualized in \ref{Figure:phydraschematics} and will be further explained below.
-
-\subsubsection{Installing and running Phydra}
-The Phydra package is available via the Python pip package manager, but we encourage using Conda as a package manager that is provided with the scientific Anaconda Python distribution.
-Please follow the up-to-date instructions on the Github repository for installation of Phydra and its dependencies.
-% CONDA NAME DROP
-Since python is a fast developing language, we will provide instructions to install a fully compatible virtual environment with the Conda package manager separate from a users standard python environment. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter environment that is available via Conda. For more complex and larger model runs on servers or clusters python scripts are preferable.
-
-
-\subsubsection{Model creation}
-
-To create a Phydra model object, the desired environment, forcings, components and fluxes are provided with their corresponding label to the \texttt{phydra.Model()} function.
-
-Ideally the model can be assembled from processes already provided in the Phydra library. The framework allows most processes that are not included to be included as modifications of provided base classes or custom written processes. 
-
-At model initialisation the processes to be included are added to the model with a label specified by the user. These labels will be the specific name of the process in this model instance. At model creation, the labels are used to reference a process and provide necessary parameters.
-The xarray-simlab framework automatically checks that all references between processes are fulfilled and orders the processes in their logical order. 
-Finally the call \texttt{phydra.Model()} returns a Phydra model object. This model object contains all processes in the model and allows the user to view all parameters required as input at model setup. 
-
-\subsubsection{Model setup}
-
-An Phydra model object is itself only a collection of abstract processes, that defines the parameters needed at model setup. The next step towards computation is to embed this model in our xarray.Dataset storage at the given dimensionality and with the given parameters.
-
-This is done using the \texttt{phydra.create\_setup()} function. The necessary arguments are values for all input parameters as well as the required model output. 
-
-The function returns a labeled xarray dataset, that contains the model backend.
-
-
-Input parameters can have a required dimensionality, 
-
-The model output can be modified according to the question at hand. For large functional group models, it would make sense to store the output of each component indidividually, while a simple NPZD model can best be visualized by returned all components along a shared dimension.
-can be returned for all state variables initialized in the environment
-or grouped per specific component
-
-
-it is easy to add smaller modifications after this stage, by updating the model 
-test different dimensionality in a structured manner
-you can update parameters and create a new initialized model setup from an existing one
-
-\subsubsection{Runtime}
-% -> model_instance.xsimlab.run()
-% relatively straightforward, this will first initialize the model data variables according to the added processes and parameters supplied, and then start model evaluation
-
-you can also create a batch dimension for a specific parameter, that you specify at model runtime and the model is executed for every 
-
-- explain what the options are to run the model, depends on if a time implicit method will be added to solve, or if it will just remain with the time explicit steps of xarray-simlab
-
-% model execution in parallel currently only works along batch dimensions,
-% both xarray-simlab and GEKKO provide parallelization functionality future versions of phydra could leverage to run large models more efficiently. 
-
-
-\subsubsection{Model Diagnostics and additional functionality}
-
-If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes.
-
-\textit{NOTE: there are a few possible addons that might very well be included in the first version, depending on development progress. I will keep them as bullte points below.}
-
-- Gekko provides functionality to view the assembled model as latex output
-
-- Model optimisation (i.e. parameter fitting) is well supported by the GEKKO backend provided with phydra. 
-
-
-\subsubsection{Modification and further development}
-
-- Similar to how a forcing process can easily be subclassed to supply a different forcing, other processes in xsimlab can be easily subclassed and modified to have a different function, as long as the interaction between state variables matches
-- Explain interface to process subclasses, and how it is relatively easy to set up xsimlab processes with slightly different  formulations, but the same basic interaction
-
-
-% OPEN SOURCE CONTRIBUTION 
-Phydra (like Xarray-simlab and GEKKO) is an open-source project. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. Please read the contributing guidelines on the Github repository for further details.
-
-
-
-
-
-
 %%% TWO-COLUMN FIGURES
 %
 %%f
@@ -181,6 +102,70 @@ Phydra (like Xarray-simlab and GEKKO) is an open-source project. Contributions a
 \end{figure*}
 
 
+Phydra is a tool-box for marine ecosystem modeling, that is freely extensible by a user to be applied to many different use cases. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on creating the most appropriate model structure and parameterisation for the specific scientific hypothesis that is being investigated. 
+
+Constructing marine ecosystem models in Phydra is by design a flexible process, but the user can follow a general workflow of assembling models from the library of processes. This workflow is visualized in Figure \ref{Figure:phydraschematics} and will be further explained below.
+
+\subsubsection{Installing and running Phydra}
+The Phydra package is available via the Python pip package manager, but we encourage using Conda as a package manager that is provided with the scientific Anaconda Python distribution.
+Please follow the up-to-date instructions on the Github repository for installation of Phydra and its dependencies.
+
+% CONDA NAME DROP
+Since Python and the dependencies of Phydra are constantly developed further, we will provide instructions to install a fully compatible virtual environment with the Conda package manager separate from a users standard Python installation. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter environment that is available via Conda. For more complex and larger model runs on servers Python scripts are preferable.
+
+
+\subsubsection{Model creation}
+
+To create a Phydra model object, the desired processes defining environment, forcings, components and fluxes have to be provided with their corresponding label to the \texttt{phydra.Model()} function.
+The model can be assembled from the Phydra library, modifications of provided base classes or custom written processes. Multiple instances of fluxes or components can easily be added to the model, as long as the provided label differentiates them.
+These labels will be the specific name of the process in this model instance. At model setup, the labels are used to reference a process and provide the appropriate parameters.
+
+When creating a model, the xarray-simlab framework automatically checks that all references between processes are fulfilled, orders the processes in their logical order of execution and returns a Phydra model object. This model object contains all processes in the model and allows the user to view all parameters required as input at model setup. The Phydra library provides several basic model objects, that can be modified by a user through a simple interface that allows removing, modifying or adding new processes.
+
+\subsubsection{Model setup}
+
+A Phydra model object is itself only a collection of abstract processes. In order to fully initialize a model setup that can be solved the model object needs to be supplied with a full set of parameters.
+
+This is done using the \texttt{phydra.create\_setup()} function. The necessary arguments to this function are the model object to be setup, all required input parameters, the time range to solve the model and the specific model output to save during runtime. 
+
+Phydra provides several options to store model output, as well as storing the value of fluxes and forcings. This allows users to specify the model output that suits the complexity of the model construct. For complex functional group models the output of each component can be stored along an individually labelled dimension, while a simple NPZD model can store the output of components along a shared dimension.
+
+The function call returns an xarray dataset object that contains all provided parameters as well as the full model formulation. This model setup can be solved in the next step, but also provides an interface to exchange parameters to easily modify an already instantiated model setup.
+
+At model setup, the xarray-simlab framework supports batch dimensions of single or multiple parameters along which the model can be solved in parallel at runtime. This provides an efficient and intuitive interface to explore the parameter space of models.
+
+\subsubsection{Runtime}
+% -> model_instance.xsimlab.run()
+% relatively straightforward, this will first initialize the model data variables according to the added processes and parameters supplied, and then start model evaluation
+The model setup created in the previous step already contains the necessary parameters and labelled dataset for model runtime. All that is required of the user is to call the \texttt{xsimlab.run()} attribute and provide a model object that corresponds to the model setup. 
+
+\textit{NOTE: Currently there is only one way to solve models in Phydra: using the GEKKO dynamic sequential solver (IMODE 7).. but there are a few options to relatively easily provide an interface for other types of solvers. It just depends on how I can get the final version of Phydra v1 to work. That is why the sections below are not really worked out yet. I will set a deadline to get the final version of Phydra together until the end of the week, so that all features that are not included at this stage will be pushed to later releases.}
+
+- GEKKO provides a simple interface for steady state-simulations.
+
+- GEKKO does as of yet do not provide an adaptive step size solver like odeint, but I have created a feature request and talked to the developers. This will very likely be included in future versions.
+
+
+\subsubsection{Model Diagnostics and additional functionality}
+
+If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes. The magnitude of the fluxes can then easily be plotted and this shows 
+
+Xarray-simlab provides visualisation functions, that can be used to get a structured overview over all processes in a model instance. 
+
+- Model optimisation (i.e. parameter fitting) is well supported by the GEKKO backend. I will run some tests, and if it works very well, it might make sense to include it in this publication, since it is a major strong point for using Phydra.
+
+- Gekko provides functionality to export the assembled model equations in latex, I would very much like to make this accessible to the user of Phydra.
+
+
+\subsubsection{Modification and further development}
+
+The object-oriented structure of Phydra allows users to extend certain base processes to provide the desired functionality. 
+
+Similar to how a forcing process can easily be sub-classed to supply a different type of forcing to the environment, other processes can be easily modified to have a different function, as long as the interaction between state variables matches with the dimensions and overall structure of the components involved. 
+
+
+% OPEN SOURCE CONTRIBUTION 
+Phydra (like Xarray-simlab and GEKKO) is an open-source project. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. Please read the contributing guidelines on the Github repository for further details.
 
 
 

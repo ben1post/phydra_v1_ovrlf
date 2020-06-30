@@ -9,17 +9,19 @@
 \section{Use cases} \label{Section:UseCases}
 
 \begin{comment}
+TODO:
+
+- add 2 Tables for each use case, with the 1st naming all arguments to phydra.Model() and the 2nd naming all parameters supplied to phydra.create_setup()
+
+- 
 
 Andrew Comments:
 
-Structure: just go through it, Use Case I, Use Case II, Use Case II. No Methods & Results Section
+Structure: just go through it, Use Case I, Use Case II, Use Case II. 
 
 go through it from front to back, explain what an NPZD model is.
 "We recreate the NPZD model formulation by Anderson, in the model there is one .." describe equations in words. Then say See Anderson et al. or appendix X for full equations
 %  quickly explain overview, explain methods for all of them shortly, with schematics, and put full system of equations & parameter tables in the Appendix!
-
-TODO b4 handing in 2 esteban:
-- fix the legend missing in NPZDslab Figure
 \end{comment}
 
 % PARAGRAPH STARTS HERE:
@@ -33,13 +35,13 @@ TODO b4 handing in 2 esteban:
 % c) fluxes
 % d) xs.Model, xs.create_setup, xsimlab.run()
 
-To showcase the utility of the Phydra package, we present three model use cases of varying ecosystem complexity. In this section, we present simplified descriptions of model structure and mechanisms, following the model development workflow presented in Section \ref{Section:phydrapackage}.
+To showcase the utility of Phydra, we present three model use cases of varying complexity. In this section, we present simplified descriptions of model structure and mechanisms, following the model development workflow presented in Section \ref{Section:phydrapackage}.
 Per use case, we first describe the generic physical environment employed. The environment collects the model components and computes common forcing fluxes. After describing the model components and what they represent, we move on to describe the fluxes that define the interactions between components. Finally, setup \& parameters for the model runtime are presented and simulation results are shown.
 
 For a complete structure-independent mathematical description of the presented models please see Appendix 1. Additionally model and analysis code for all use cases is publicly available as documented interactive Jupyter notebooks in the Phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}). \\
 
 \subsection{Use case 1: a NPZD slab model}
-Our first use case presents a classical NPZD model embedded in a "slab" physical setting. The simplified two-layer structure provides a zero-dimensional and mechanistically simple description of physical processes affecting euphotic ecosystems in the open ocean. The classical structure lends itself well as an efficient physical test-bed for more complicated ecosystem descriptions and is often used as a teaching example.
+Our first use case presents a classical NPZD model embedded in a slab-ocean physical setting. The simplified two-layer structure provides a zero-dimensional and mechanistically simple description of physical processes affecting euphotic ecosystems in the open ocean. The classical structure lends itself well as an efficient physical test-bed for more complicated ecosystem descriptions and is often used as a teaching example.
 \\
 The presented model is a slightly modified version of the elegant EMPOWER model, as presented by \citet{Anderson2015c}. 
 
@@ -47,41 +49,13 @@ The presented model is a slightly modified version of the elegant EMPOWER model,
 See Figure \ref{Figure:phydraschematics_1} (a) for a schematic of the model structure and please refer to Appendix 1.1 for the full system of equations.
 
 
-\subsubsection{Physical environment}
-
-\begin{table*}[t]
-\caption{Physical environment of use case 1. }
-\begin{tabular}{l l l}
-Processes & Function & Source \\
-\tophline
-Interpolated forcings:\\
-$N^\emptyset$ & Nutrient concentration below the mixed layer &  WOA 2018 (Garcia et al.) \\
-$I^\emptyset$ & Photosynthetically active radiation (PAR) at the surface &  MODIS-aqua \\
-$T^{\mathrm{ML}}$ & Average temperature within the mixed layer & WOA 2018 (Garcia et al.) \\
-$H^{\mathrm{MLD}}$ & Depth of the mixed layer (MLD) &  MLD climatology (de Boyer Montegut et al.)\\
-
-
-no ,, this is done in flux ...Calculated properties:\\
-$h$ & change in MLD over time, $\frac{d}{d t} H$ & \\
-$h^+$ & positive change in MLD over time, $\max(0, \ h)$  & \\
-$K$ & mixing coefficient, $\frac{1}{H}(h^{+} + \kappa + v)$ & \\
-
-Parameters: \\
-$\kappa$ & constant mixing coefficient & \\
-$v$ & additional sinking flux & \\
-
-\bottomhline
-\end{tabular}
-\belowtable{TODO: the sources need to be added properly! for now just text..} % Table Footnotes
-\label{Table:UseCase1PhysEnv}
-\end{table*}
-%
+\subsubsection{Model creation}
 
 
 % a) physical env (this handles forcing)
-The physical environment of a phydra model (hereafter referred to simply as environment) describes an xarray-simlab process that provides an interface for model forcings and methods for generalised forcing fluxes (e.g. mixing) in the Phydra package (see Section \ref{Section:PhysicalEnvironment}).
+The environment of a Phydra model is an xarray-simlab process that provides an interface for model forcings and fluxes (see Section \ref{Section:PhysicalEnvironment}).
 
-In two of the presented use cases, we adapt a slab representation of ocean physics as defined by \citet{Evans1985ACycles}. The multi-dimensional ocean is reduced to two layers, where the upper layer provides a zero dimensional setting for our ecosystem model. The bottom layer is often assumed to contain a fixed concentration of nutrients, but this can also vary with depth or time. There is constant exchange between the layers. Nutrients are usually mixing up into the upper layer, where they are consumed by phytoplankton. 
+In two of the presented use cases, we adapt an environment that is a slab representation of ocean physics as defined by \citet{Evans1985ACycles}. The multi-dimensional ocean is reduced to two layers, where the upper layer provides a zero dimensional setting for our ecosystem model. The bottom layer is often assumed to contain a fixed concentration of nutrients, but this can also vary with depth or time. There is constant exchange between the layers. Nutrients are usually mixing up into the upper layer, where they are consumed by phytoplankton. 
 
 The fraction of all ecosystem components sinking to the bottom layer are lost from the system. These exchanges of water masses within this two-layered model ocean are driven by the empirically derived mixed layer depth (MLD). Additional common forcings that are used in slab models modify phytoplankton growth, e.g. metabolic rates via temperature and light harvesting via irradiance. Such forcing can situate a slab model theoretically in any location in the global ocean. Compared to the natural habitat of marine plankton, the slab model is a radical simplification. With the appropriate forcing the resulting simulations can yield meaningful results that can be compared with bulk properties of the marine ecosystem \cite[e.g.][]{Evans1985ACycles, Fasham1990a}.
 
@@ -104,12 +78,7 @@ In slab models, the concentration of nutrient in the bottom layer \unit{N^\empty
 % PE forcing 2: light
 Another common forcing process defined in this environment, is the integrated amount of light available in the upper mixed layer. The amount of light is calculated based on the supplied PAR forcing, the current value of MLD and a function of light attenuation with ocean depth. In our model, incident irradiance is supplied by MODIS-aqua satellite climatologies. Integrated light availability in the upper mixed layer is calculated via Beer's law, dependent on MLD and the sum of extinction coefficients of water and phytoplankton biomass. 
 
-
-MLD (+deriv)
-
 This data provides the contrasting seasonal dynamics for the temperate and tropical location (see Figure \ref{Figure:phydraforcing}).
-
-See Table XXX for a presentation of the specific functions included in the generalised slab environment. 
 
 \subsubsection{Model components}
 % b) components
@@ -119,15 +88,12 @@ Each model component is resolved as a single state variable. The biomass of all 
 %Nutrient component
 The only considered nutrient in the model system is nitrate. 
 
-Nutrient is affected by the nutrient mixing flux defined in the slab physical environment. (positively though)
-
-
+Nutrient is affected by the nutrient mixing flux defined in the slab physical environment.
 
 % Phytoplankton component
 A single phytoplankton state represents a naturally diverse phytoplankton communities. 
 
 % Zooplankton component
-
 
 % Detritus component
 Detritus is composed of a range of organic material including faecal pellets and aggregates of marine snow of various sizes. In our model we describe an average particle of detrital matter, of which a fraction is remineralised as another fraction is sinking out of the euphotic zone and lost from the system. 
@@ -139,17 +105,11 @@ Detritus is composed of a range of organic material including faecal pellets and
 Linking the 4 model components through different functional relationships are 
 
 a) PhytoGrowth flux
+
 b) PhytoMortality fluxes
+
 c) Grazing
 
-
-\begin{tabular}{c|c|c|c}
-flux & dependent components & affected components & function \\
-Mixing & environmental flux & NPZD & environmental forcing \\
-PhytoGrowth & N & NP & Monod \\
-Grazing & PZ & NPZD & Holling type 3\\
-\end{tabular}
-%This table can contain all fluxes, and their specifc mathematics, and how they are affecting and dependent on each component!
 
 
 % PHYTOPLANKTON
@@ -194,7 +154,7 @@ A complete presentation of equations is given in Appendix 1.\\
 
 \subsubsection{Model setup \& runtime}
 % d) xs.Model, xs.create_setup, xsimlab.run()
-The model setup parameters and runtime parameters are given in two tables.
+The model setup parameters and runtime parameters are given in table X.
 
 The specific preferences for phytoplankton and detritus are set at 0.67 for phytoplankton and 0.33 for detritus.
 
@@ -203,7 +163,47 @@ The specific preferences for phytoplankton and detritus are set at 0.67 for phyt
 % I can resort to a more applied presentation here, actually show code?
 !give list of (model setup) processes here!\\
 % hm.. should this be separate from all the fluxes here? Yes, because it is together with parameters! ?
+\begin{table*}[t]
+\caption{Arguments passed to phydra.Model with the supplied label with a short description of the function.}
+\begin{tabular}{l l l l}
+Label & Process  & Function \\
+\tophline
+Environment: \\
+"Slab" & SlabEnvironment  & Slab-ocean environment collects forcings and components \\
+\\
+Forcing: \\
+"N0" & ClimatologyN0  & Forcing for nutrient concentration below ML ($N^\emptyset$) from WOA2018 climatology\\
+"MLD" & ClimatologyMLD  & Forcing for MLD ($H^{\mathrm{MLD}}$) from IFremer climatology, ref X\\
+"PAR" & ClimatologyPAR  & Forcing for PAR at surface ($I^\emptyset$) from MODIS-aqua climatology\\
+"Tmld" & ClimatologyTemp  & Forcing for temperature in ML ($T^{\mathrm{ML}}$) from WOA2018 climatology\\
+\\
+Components: \\
+"N" & UniqueComponent & Single state variable for a component representing Nitrogen \\
+"P" & UniqueComponent & Single state variable for a component representing Phytoplankton \\
+"Z" & UniqueComponent & Single state variable for a component representing Zooplankton \\
+"D" & UniqueComponent & Single state variable for a component representing Detritus \\
+\\
+Fluxes: \\
+"Mixing" & Mixing & Loss of component based on MLD forcing \\
+"N\_Mixing" & NutrientMixing & Mixing of nutrients based on MLD and N0 forcing \\
 
+"Growth" & MonodTempLightLimitedGrowth & Limited growth flux based on N, PAR and Tmld forcing \\
+
+"Grazing" & HollingTypeIII & Sigmoidal Holling type 3 grazing flux on multiple sources \\
+
+"P\_LinearMort" & ExchangeLinearMortality & Linear mortality transferred to sink component \\
+"P\_QuadMort" & ExchangeQuadraticMortality & Quadratic mortality transferred to sink component \\
+
+"Z\_LinearMort" & ExchangeLinearMortality  & Linear mortality transferred to sink component \\
+"Z\_QuadMort" & ClosureQuadraticMortality & Quadratic mortality of component that is lost from system \\
+
+"D\_remin" & Remineralisation & Linear exchange flux \\
+%\bottomhline
+\end{tabular}
+\belowtable{Abbreviations: MLD = mixed layer depth, ML = mixed layer, PAR = photosynthetically active radiation} % Table Footnotes
+\label{Table:UseCase1PhysEnv}
+\end{table*}
+%
 % there is both xs.Model and xs.create_setup.
 
 !give table of (model runtime) parameters here!\\
