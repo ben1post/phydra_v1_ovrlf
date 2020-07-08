@@ -432,7 +432,7 @@ When creating a model, the xarray-simlab framework automatically checks that all
 
 A Phydra model object is itself only a collection of abstract processes. In order to fully initialize a model that can be solved, the model object needs to be supplied with a complete set of parameters.
 
-This is done using the \texttt{phydra.create\_setup()} function. The necessary arguments to this function are the model object to be setup, all required input parameters, the time range to solve the model and the specific model output to save during runtime. 
+This is done using the \texttt{phydra.create\_setup()} function. The necessary arguments to this function are the model object to be setup, all required input parameters, the time range to solve the model and the specific model output to save during runtime. The Phydra setup function is a thin wrapper around the Xarray-simlab model setup function that automatically includes the solver backend and clocks setup for the chosen solving method.
 
 Phydra provides several options to store model output, as well as storing the value of fluxes and forcings. This allows users to specify the model output that suits the complexity of the model construct. There are processes supplied that can aggregate all state variables, Forcings or Fluxes values for output storage to simplify the process of defining output. For complex functional group models the output of each component can be stored along an individually labelled dimension, while a simple NPZD model can store the output of components along a shared dimension.
 
@@ -443,25 +443,26 @@ At model setup, the xarray-simlab framework supports batch dimensions of single 
 \subsubsection{Runtime}
 % -> model_instance.xsimlab.run()
 % relatively straightforward, this will first initialize the model data variables according to the added processes and parameters supplied, and then start model evaluation
-The model setup created in the previous step already contains the necessary parameters and labelled dataset for model runtime. All that is required of the user is to call the \texttt{xsimlab.run()} attribute and provide a model object that corresponds to the model setup. 
+The model setup created in the previous step already contains the necessary parameters and labelled dataset for model runtime. All that is required of the user is to call the \texttt{xsimlab.run()} attribute and provide a model object that corresponds to the model setup. This does not have to be the same model instance used to create the setup, as long as specified parameters and output are compatible.
 
-\textit{NOTE: Currently there is only one way to solve models in Phydra: using the GEKKO dynamic sequential solver (IMODE 7).. but there are a few options to relatively easily provide an interface for other types of solvers. It just depends on how I can get the final version of Phydra v1 to work. That is why the sections below are not really worked out yet. I will set a deadline to get the final version of Phydra together until the end of the week, so that all features that are not included at this stage will be pushed to later releases.}
+\textit{NOTE: Currently there is only one way to solve models in Phydra: using the GEKKO dynamic sequential solver (IMODE 7).. but there are a few options to relatively easily provide an interface for other types of solvers for future versions. Not sure if I should mention the following:}
 
-- GEKKO provides a simple interface for steady state-simulations.
+-GEKKO provides a simple interface for steady state-simulations, and model optimisation. The models constructed with Phydra are completely compatible, simply the solver process needs to be exchanged (and for model optimisation an objective function needs to be defined additionally)
 
-- GEKKO does as of yet do not provide an adaptive step size solver like odeint, but I have created a feature request and talked to the developers. This will very likely be included in future versions.
+- GEKKO does as of yet not provide an adaptive step size solver like odeint, but I have created a feature request and talked to the developers. This will very likely be included in future versions.
+
 
 
 
 \subsubsection{Model Diagnostics and additional functionality}
 
-If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes. The magnitude of the fluxes can then easily be plotted and this shows 
+- If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes. The magnitude of the fluxes can then easily be plotted...
 
-Xarray-simlab provides visualisation functions, that can be used to get a structured overview over all processes in a model instance. 
+- Xarray-simlab provides visualisation functions, that can be used to get a structured overview over all processes in a model instance. These are not optimized for the current structure though, as most dependencies between subprocesses are handled in the solver backend, not via explicit xarray-simlab process dependencies.
+
+- Gekko stores model equations including the names of parameters and it would be possible to add some functions that print the mathematical equations.. which would be quite helpful to build and debug a model. (possible feature)
 
 - Model optimisation (i.e. parameter fitting) is well supported by the GEKKO backend. I will run some tests, and if it works very well, it might make sense to include it in this publication, since it is a major strong point for using Phydra.
-
-- Gekko provides functionality to export the assembled model equations in latex, I would very much like to make this accessible to the user of Phydra.
 
 
 \subsubsection{Modification and further development}
@@ -469,7 +470,6 @@ Xarray-simlab provides visualisation functions, that can be used to get a struct
 The object-oriented structure of Phydra allows users to extend certain base processes to provide the desired functionality. 
 
 Similar to how a forcing process can easily be sub-classed to supply a different type of forcing to the environment, other processes can be easily modified to have a different function, as long as the interaction between state variables matches with the dimensions and overall structure of the components involved. 
-
 
 % OPEN SOURCE CONTRIBUTION 
 Phydra (like Xarray-simlab and GEKKO) is an open-source project. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. Please read the contributing guidelines on the Github repository for further details.
@@ -485,7 +485,7 @@ Phydra (like Xarray-simlab and GEKKO) is an open-source project. Contributions a
 
 
 
-\textit{Note: I have already written a lot of text here, then moved it to the Appendix and started writing again. At the moment I am still experimenting with ways to present the model use cases in a way that suits Phydra's architecture.}
+\textit{Note: I have already written a lot of text here, then moved it to the Appendix and started writing again. I was experimenting with ways to present model structure, and currently the most finished is Use Case 1. It should be relatively easy to implement the same type of presentation for the other use cases, once the common structure is set. For a concise and complete overview of the models, please see the appendix. Sorry for the half-baked text, it probably doesn't make sense to review it in detail. Once the model example code is fully done (within the next weeks) I should be able to write this down a lot more easily.}
 
  %% \ SECTION 3
 \section{Use cases} \label{Section:UseCases}
@@ -522,19 +522,15 @@ For a complete structure-independent mathematical description of the presented m
 Our first use case presents a classical NPZD model embedded in a slab-ocean physical setting. The simplified two-layer structure provides a zero-dimensional and mechanistically simple description of physical processes affecting euphotic ecosystems in the open ocean. The classical structure lends itself well as an efficient physical test-bed for more complicated ecosystem descriptions and is often used as a teaching example.
 
 The presented model is a slightly modified version of the elegant EMPOWER model, as presented by \citet{Anderson2015c}. 
-
-
 See Figure \ref{Figure:phydraschematics_1} (a) for a schematic of the model structure and please refer to Appendix 1.1 for the full system of equations.
 
 
-\subsubsection{Environment}
-
+\subsubsection{Slab-ocean setting} \label{Section:SlabOcean}
 
 % a) physical env (this handles forcing)
-The environment of a Phydra model is an xarray-simlab process that provides an interface for model forcings and fluxes (see Section \ref{Section:StateVariables}). In the first and third use case, we adapt an environment that is a slab representation of ocean physics as defined by \citet{Evans1985ACycles}. The multi-dimensional ocean is reduced to two layers, where the upper layer provides a zero dimensional setting for our ecosystem model. The bottom layer is often assumed to contain a fixed concentration of nutrients, but this can also vary with depth or time. There is constant exchange between the layers. Nutrients are usually mixing up into the upper layer, where they are consumed by phytoplankton. The fraction of all ecosystem components sinking to the bottom layer are lost from the system. These exchanges of water masses within this two-layered model ocean are driven by the empirically derived mixed layer depth (MLD). Additional common forcings that are used in slab models modify phytoplankton growth, e.g. metabolic rates via temperature and light harvesting via irradiance. Such forcing can situate a slab model theoretically in any location in the global ocean. Compared to the natural habitat of marine plankton, the slab model is a radical simplification. With the appropriate forcing the resulting simulations can yield meaningful results that can be compared with bulk properties of the marine ecosystem \cite[e.g.][]{Evans1985ACycles, Fasham1990a}.
+In the first and third use case, we adapt a model environment that is a slab representation of ocean physics as defined by \citet{Evans1985ACycles}. The multi-dimensional ocean is reduced to two layers, where the upper layer provides a zero dimensional setting for our ecosystem model. The bottom layer is not explicitly modeled, but often is represented by external forcings of nutrient concentrations. There is constant exchange between the layers. Nutrients are usually mixing into the upper layer, where they are consumed by phytoplankton. The fraction of all ecosystem components sinking to the bottom layer are lost from the system. These exchanges of water masses within this two-layered model ocean are driven by the empirically derived mixed layer depth (MLD). Additional common forcings that are used in slab models modify phytoplankton growth, e.g. metabolic rates via temperature and light harvesting via irradiance. Such forcing can situate a slab model theoretically in any location in the global ocean. Compared to the natural habitat of marine plankton, the slab model is a radical simplification. With the appropriate forcing the resulting simulations can yield meaningful results that can be compared with bulk properties of the marine ecosystem \cite[e.g.][]{Evans1985ACycles, Fasham1990a}.
 
-The environment of use cases 1 is compatible with four types of external forcings: an external nutrient supply from below the mixed layer, (\unit{N_0}), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR) \unit{I^\emptyset} and average temperature above the mixed layer depth (\unit{T_{ML}}).
-
+Use cases 1 employs four types of external forcings: an external nutrient supply from below the mixed layer, (\unit{N_0}), depth of the mixed layer (MLD), photosynthetically active incident radiation (PAR) \unit{I^\emptyset} and average temperature above the mixed layer depth (\unit{T_{ML}}).
 
 The specific forcings used here are derived from a compiled global dataset of WOA 2018 nutrient and temperature climatologies, a MLD climatology and MODIS-aqua satellite data for irradiance and chlorophyll biomass verification data. The forcing data is spatially averaged across a region of the world as specified by user input at model setup. The resulting monthly climatologies are interpolated to daily values. See Figure \ref{Figure:phydraforcing} for the two locations and specific forcings used for the presented simulations. Within the phydra structure, the slab environment supplies these forcings to fluxes that are dependent on any of these forcings. 
 
@@ -551,7 +547,7 @@ Another common forcing process defined in this environment, is the integrated am
 
 This data provides the contrasting seasonal dynamics for the temperate and tropical location (see Figure \ref{Figure:phydraforcing}).
 
-\subsubsection{Components}
+\subsubsection{State variables}
 % b) components
 Embedded with the slab environment the NPZD model contains the name-defining four ecosystem components: Nutrient (N), phytoplankton (P), zooplankton (Z) and detritus (D). 
 Each model component is resolved as a single state variable. The biomass of all state variables is measured in the common model currency \unit{\mu M} of Nitrogen.
@@ -619,40 +615,39 @@ The two distinct steps of model creation and model setup are presented in two ta
 % I can resort to a more applied presentation here, actually show code?
 % hm.. should this be separate from all the fluxes here? Yes, because it is together with parameters! ?
 \begin{table*}[t]
-\caption{Processes with label supplied at model creation}
-\begin{tabular}{l l l l}
-Label & Process  & Function \\
+\caption{Description of processes with label supplied at model creation. \textit{NOTE: what I am trying to do here is to explains the models using the specific Phydra interface, this first table is the call to phydra.Model() and the second is the call to phydra.create\_setup(). Essentially I am initializing abstract instances of the processes here, that are linked with the appropriate labels at model setup. Additional solver \& time processes are not shown here.}}
+\begin{tabular}{l l}
+Label & Function \\
 \tophline
-\textit{Environment:} \\
-Slab & SlabEnvironment  & Slab-ocean environment collects forcings and components \\
+\textit{State variables:} \\
+N & Single state variable for a component representing Nitrogen \\
+P & Single state variable for a component representing Phytoplankton \\
+Z & Single state variable for a component representing Zooplankton \\
+D & Single state variable for a component representing Detritus \\
 \\
+
 \textit{Forcings:} \\
-N0 & ClimatologyN0  & Forcing for nutrient concentration below ML ($N^\emptyset$) from WOA2018 climatology\\
-MLD & ClimatologyMLD  & Forcing for MLD ($H^{\mathrm{MLD}}$) from IFremer climatology, ref X\\
-PAR & ClimatologyPAR  & Forcing for PAR at surface ($I^\emptyset$) from MODIS-aqua climatology\\
-Tmld & ClimatologyTemp  & Forcing for temperature in ML ($T^{\mathrm{ML}}$) from WOA2018 climatology\\
+N0 & Forcing for nutrient concentration below ML ($N^\emptyset$) from WOA2018 climatology\\
+MLD & Forcing for MLD ($H^{\mathrm{MLD}}$) from IFremer climatology\\
+PAR & Forcing for PAR at surface ($I^\emptyset$) from MODIS-aqua climatology\\
+Tmld & Forcing for temperature in ML ($T^{\mathrm{ML}}$) from WOA2018 climatology\\
 \\
-\textit{Components:} \\
-N & UniqueComponent & Single state variable for a component representing Nitrogen \\
-P & UniqueComponent & Single state variable for a component representing Phytoplankton \\
-Z & UniqueComponent & Single state variable for a component representing Zooplankton \\
-D & UniqueComponent & Single state variable for a component representing Detritus \\
-\\
+
 \textit{Fluxes:} \\
-Mixing & Mixing & Loss of component based on MLD forcing \\
-N\_Mixing & NutrientMixing & Mixing of nutrients based on MLD and N0 forcing \\
+Mixing & Loss of component based on supplied MLD forcing \\
+N\_Mixing & Mixing of nutrients based on supplied MLD and N0 forcing \\
 
-Growth & MonodTempLightLimitedGrowth & Limited growth flux based on N, PAR and Tmld forcing \\
+Growth & Limited growth flux based on N, PAR and Tmld forcing \\
 
-Grazing & HollingTypeIII & Sigmoidal Holling type 3 grazing flux on multiple sources \\
+Grazing & Sigmoidal Holling type 3 grazing flux on multiple sources \\
 
-P\_LinearMort & ExchangeLinearMortality & Linear mortality transferred to sink component \\
-P\_QuadMort & ExchangeQuadraticMortality & Quadratic mortality transferred to sink component \\
+P\_LinearMort & Linear mortality transferred to sink component  \\
+P\_QuadMort & Quadratic mortality transferred to sink component \\
+Z\_LinearMort & Linear mortality transferred to sink component \\
+Z\_QuadMort & Quadratic mortality of component that is lost from system (closure) \\
 
-Z\_LinearMort & ExchangeLinearMortality  & Linear mortality transferred to sink component \\
-Z\_QuadMort & ClosureQuadraticMortality & Quadratic mortality of component that is lost from system \\
-
-D\_remin & Remineralisation & Linear exchange flux \\
+D\_remin & Linear exchange flux to sink component \\
+Sinking & Linear sinking flux \\
 %\bottomhline
 \end{tabular}
 \belowtable{Abbreviations: MLD = mixed layer depth, ML = mixed layer, PAR = photosynthetically active radiation} % Table Footnotes
@@ -664,49 +659,40 @@ D\_remin & Remineralisation & Linear exchange flux \\
 
 
 \begin{table*}[t]
-\caption{Model Parameters for model setup}
-\begin{tabular}{l l l l l l}
-Process label & Parameter & Description & Unit & Temperate & Tropical \\
+\caption{Parameters supplied at model setup \textit{NOTE: What I am trying to present here is that the model setup step requires setting parameters, as well as providing the abstract processes with the labels of processes defined in the previous step. This defines what state variables and forcings are actually used in the equations and acted upon by the fluxes. This is definitely a bit convoluted.. and I am still thinking about ways to show this more clearly... The set of parameters is also not complete. I will write the actual model example code in the next weeks. I think once that is actually written down it will be much easier to wrap my head around how to present it.}}
+\begin{tabular}{l l l l l l l}
+Process & Flux I/O + FX labels & Parameter & Description & Unit & Temperate & Tropical \\
 \tophline
 
-\textit{Environment:} \\
--\\
-
+\textit{State variables:} \\
+N & & $N(0)$ & initial value & \unit{µM \ N} & 1 & 1 \\
+P & & $P(0)$ & initial value & \unit{µM \ N} & 1 & 1 \\
+Z & & $Z(0)$ & initial value & \unit{µM \ N} & 1 & 1 \\
+D & & $D(0)$ & initial value & \unit{µM \ N} & 1 & 1 \\
 \\
-\textit{Forcings:} \\
-All forcings & Lat & latitude of center of location & \unit{\degree N} & 40 & 0\\
-  & Lon & longitude of center of location& \unit{\degree E} & -20 & -20\\
-  & RBB & range of the bounding box & \unit{\degree} & 2 & 2 \\
-N0 & k & interpolation smoothing parameter & - & 5 & 5 \\
-MLD, PAR \& Tmld & k & interpolation smoothing parameter & - & 5 & 5 \\
 
-
-\\
-\textit{Components:} \\
--\\
-
-\\
 \textit{Fluxes:} \\
-Growth & $\mu_{\emptyset}$ & maximum phytoplankton growth rate  & \unit{d^{-1}} & & \\
-& $k_N$ & half-sat. const: N uptake & \unit{µM \ N} & 0.85 & \\
-P\_LinearMort & $m_P$ & linear P mortality & \unit{d^{−1}} & 0.015 & \\
-P\_QuadMort & $m_{P2}$ & quadratic P mortality & \unit{(µM \ N)^{-1} d^{−1}} & 0.025 & \\
- Grazing & $I_{max}$ & Z max. ingestion rate & \unit{d^{−1}} & 1.0 & \\
-& $k_Z$ & Z half-saturation for intake & \unit{µM \ N} & 0.6 & \\
-& $\phi_P$ & grazing preference: P & & 0.67 & \\
-& $\phi_D$ & grazing preference: D & & 0.33 & \\
-& $\beta_Z$ & Z absorption efficiency & & 0.69 & \\
-& $k_{NZ}$ & Z net production efficiency & & 0.75 &  \\
-Z\_LinearMort & $m_Z$ & linear Z mortality  & \unit{d^{−1}} & 0.02 & \\
-Z\_QuadMort & $m_{Z2}$ & quadratic Z mortality & \unit{(µM \ N)^{-1} d^{−1}} & 0.34 & \\
-Sinking & $v_D$ & D sinking rate & \unit{m \ d^{−1}} & 6.43 & \\
-D\_Remin & $m_D$ & D remineralisation rate & \unit{d^{−1}} & 0.06 & \\
-Mixing & $\kappa$ & constant mixing parameter & \unit{m \ d^{−1}} & 0.13 & \\
-\middlehline
+Growth & N->P [I0, Tmld]& $\mu_{\emptyset}$ & maximum phytoplankton growth rate  & \unit{d^{-1}} & & \\
+& & $k_N$ & half-sat. const: N uptake & \unit{µM \ N} & 0.85 & \\
+P\_LinearMort & P->D & $m_P$ & linear P mortality & \unit{d^{−1}} & 0.015 & \\
+P\_QuadMort & P->D & $m_{P2}$ & quadratic P mortality & \unit{(µM \ N)^{-1} d^{−1}} & 0.025 & \\
+Grazing & P->Z,D,N & $I_{max}$ & Z max. ingestion rate & \unit{d^{−1}} & 1.0 & \\
+&& $k_Z$ & Z half-saturation for intake & \unit{µM \ N} & 0.6 & \\
+&& $\phi_P$ & grazing preference: P & & 0.67 & \\
+&& $\phi_D$ & grazing preference: D & & 0.33 & \\
+&& $\beta_Z$ & Z absorption efficiency & & 0.69 & \\
+&& $k_{NZ}$ & Z net production efficiency & & 0.75 &  \\
+Z\_LinearMort & Z->D & $m_Z$ & linear Z mortality  & \unit{d^{−1}} & 0.02 & \\
+Z\_QuadMort & Z-> & $m_{Z2}$ & quadratic Z mortality & \unit{(µM \ N)^{-1} d^{−1}} & 0.34 & \\
+Sinking & D-> & $v_D$ & D linear sinking rate & \unit{m \ d^{−1}} & 6.43 & \\
+D\_Remin & D->N & $m_D$ & D remineralisation rate & \unit{d^{−1}} & 0.06 & \\
+Mixing & P,Z,D-> [MLD]& $\kappa$ & constant mixing parameter & \unit{m \ d^{−1}} & 0.13 & \\
+N\_Mixing & ->N [MLD]& $\kappa$ & constant mixing parameter & \unit{m \ d^{−1}} & 0.13 & \\ \\
+%\bottomhline
 
 \bottomhline
 \end{tabular}
-\belowtable{There are no parameters necessary to initialize the slab environment and the components, all function is contained in the processes passed at model creation.} % Table Footnotes
+\belowtable{The "flux labels" are defined as source -> sink [forcing]. This actually does not relate to how they are input to phydra, it is just how I tried to simplify it visually. Each flux has parameters, like "ressource label" or "forcing label" to which the user passes a string like "N" to reference the nitrate SV in the model. Adding all of these labels as parameters above seems a bit convoluted..} % Table Footnotes
 \label{Table:UseCase1Parameters}
 \end{table*}
 %
@@ -1147,7 +1133,7 @@ Phytoplankton biomass ($P$) increases through temperature-dependent, light- \& n
     \mu^{P} = \mu^{\emptyset} \ \gamma^{T} \ \gamma^{I} \ \gamma^{N}
 \end{equation}
 
-$T$ is the average temperature of the mixed layer in \unit{\degree C}, as supplied from model forcing. Temperature dependence of the growth rate ($\gamma^{T}$) is calculated via the Eppley curve \citep{Eppley1972TemperatureSea}.
+$T$ is the average temperature of the mixed layer in \unit{\degree C}, as supplied from model forcing. Temperature dependence of the growth rate ($\gamma^{T}$) is calculated via the Eppley curve \citep{Eppley1972TemperatureSea}, with an exponential equivalent to a $Q_{10}$ of 1.895.
 
 \begin{equation}
     \gamma^{T} = \exp{(0.063 \ T)} \label{mumax}
