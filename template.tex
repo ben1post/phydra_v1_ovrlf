@@ -726,14 +726,10 @@ Size is called a "master-trait" in the trait-based description of plankton ecolo
 
 See Figure \ref{Figure:phydraschematics_1} (b) for a schematic of the model structure. See Appendix 1.2 for the full system of equations.
 
-\subsubsection{Physical environment}
+\subsubsection{Model setup}
 \textit{Note: Here I aim to have the same kind of presentation as Use Case 1. So I describe the different model components and then show a tables with all processes initialized (Model Creation) and all parameters passed at Model Setup. If you think the way I presented Use Case 1 makes sense, I will do so. If not, I will first work out how to present Use Case 1 and then start working on this here.}
 
-\subsubsection{Model components}
 
-\subsubsection{Model fluxes}
-
-\subsubsection{Model runtime}
 
 In comparison to our first use case this model contains only three types of components (namely a nutrient, phytoplankton and zooplankton), but a much larger number of state variables (81 versus 4). The model currency is \unit{\mu M} of Nitrogen, with the only resolved nutrient being dissolved inorganic nitrogen. Additional state variables are 40 size classes of phytoplankton and 40 size classes of zooplankton. These size classes are initialised via a range of equivalent spherical diameters (ESD). For phytoplankton state variables, the ESD determines the nutrient uptake parameters, growth rates and grazing susceptibility, while for zooplankton it sets the prey range, ingestion rates and half-saturation constants of grazing. The specific size-based allometries are taken from meta-analysis of laboratory data (!refs Hansen et al 1997, Hansen et al 1994, Tang 1995, Eppley 1969). 
 
@@ -782,15 +778,9 @@ In the third use case we want to showcase flexible workflow of Phydra model deve
 - we will compare the model output to size-fractionated phytoplankton biomass (3 size fractions: pico, nano, micro) we group phytoplankton state variables into the three size fractions (See section FORCING for more details)
 - for model to data comparison, we need to adjust parameters, do parameter fitting (ideally I'll also do a sensitivity analysis with this model! should be simple using batch dims)
 
-\subsubsection{Physical environment}
+\subsubsection{Model setup}
 
 \textit{Note: As previously I want to first find a structure for Use Case 1 before working out how to present it here. This entire section is mostly copied together from the other two, and is quite rough! Still needs some work. }
-
-\subsubsection{Model components}
-
-\subsubsection{Model fluxes}
-
-\subsubsection{Model runtime}
 
 For schematic of model structure, see Figure \ref{Figure:phydraschematics_3}. Please check appendix for the system of equations. 
 Since use case 3 presents no new components or processes from the previous two use case, we will not discuss mechanisms in detail, but highlight from which use case they were adapted where a more detailed description can be found. 
