@@ -126,17 +126,20 @@
 
 \begin{abstract} [Just collecting ideas:] 
 
-phytoplankton modeling is central to understanding the biogeochemical cycles driving the earth system.
+Phytoplankton modeling is central to understanding the biogeochemical cycles driving the earth system.
 
-Phydra is an object-oriented Python package for developing marine ecosystem models in a flexible modular structure. As an extension of the xarray-simlab package, phydra is embedded in the python scientific ecosystem and provides a collection of tool-sets for rapid prototyping, analysis \& visualisation of models. 
+Phydra is an object-oriented Python framework for developing marine ecosystem models in a flexible modular structure. As an extension of the xarray-simlab package, phydra is embedded in the python scientific ecosystem and provides a collection of tool-sets for rapid prototyping, analysis \& visualisation of models. 
 
-phydra is an open-source object-oriented python package for modeling marine ecosystems, based on the xarray-simlab framework, with the goal to support efficient, open and easily reproducible model development. 
+Phydra is an open-source object-oriented python package for modeling marine ecosystems, based on the xarray-simlab framework, with the goal to support efficient, open and easily reproducible model development. 
 
 The library provides pre-built model components that can be used to assemble complex marine ecosystem models. All basic processes can be adapted and modified using python to describe different and more complex ecosystems. 
 
-By being embedded within the xarray-simlab framework, phydra benefits from compatibilities with other scientific python packages, such as dask for parallel computing, xarray and zarr for handling large datasets, and further plotting and data analysis functionalities. 
+Phydra provides an abstract framework to define systems of ordinary or partial differential equations, that can be translated and used with different solver systems the Python scientific ecosystem provides.
 
-The drawback of an interpreted programming language like python is circumvented by using the python Gekko package as a solving back end, which compiles model to efficient byte code before execution.
+Equation terms are building blocks that can be combined in a modular way.
+
+Python code handles model initialisation and passes the complex and efficient solving to dedicated 
+
 
 
 Here, we demonstrate the usage of the phydra v1 package in a simple NPZD setting and to showcase the flexibility, in a more complex size based trophic structure model. Both in slab physics.
@@ -319,6 +322,8 @@ The Phydra package is built on the wealth of functionality created by the open-s
 
 
 \subsection{Python backend: xarray-simlab and GEKKO}
+% PUT THIS IN THE APPENDIX, don't explain other peoples work that is explained elsewhere better
+% stay away from vague and overspecific language!
 
 The library of modular processes and the user interface are based on the Xarray-simlab Python package \citep{Bovy2018Xarray-simlab:Interactively}. Xarray-simlab provides a generic framework for building computational models in a modular fashion and an extension for storing model parameters, running simulations and storing output using the xarray.Dataset structure. Xarray provides an efficient and labelled multi-dimensional storage format, that is integrated with functionality for easy plotting, post-processing and storing of model output. Xarray.Datasets are easily converted to Netcdf files, a commonly used file format for biogeochemical data and large model output. 
 
@@ -489,6 +494,17 @@ Phydra (like Xarray-simlab and GEKKO) is an open-source project. Contributions a
 
  %% \ SECTION 3
 \section{Use cases} \label{Section:UseCases}
+
+% COMMENTS FROM ESTEBAN:
+% 2 Use Cases! simplify! 
+
+% present models traditionally first (like in appendix)
+% and then add another paragraph (very simple) how it is implemented in phydra
+% 
+
+% take care with all the traditionalist points: Units, forcing (+data) presentation, proper citation!
+
+% keep draft short! 20 pages total
 
 \begin{comment}
 TODO:
