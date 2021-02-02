@@ -16,7 +16,7 @@
 %% -----------------------------------------------------------------
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 \ProvidesClass{copernicus}
-    [2020/01/31 9.08 Copernicus papers]
+    [2021/01/12 9.25 Copernicus papers]
 \frenchspacing
 \clubpenalty10000
 \widowpenalty10000
@@ -290,10 +290,13 @@
   \@journalnameabbreviation
   \ifcopyediting\else\if@noref,\space\@msnumber\else,\space\@pvol, \@fpage\if@nolastpage\else{--\@lpage}\fi\fi, \@pyear\fi}
 \def\@journalurlInfo{%
+  %% URL raus, DOI rein; 2020-05-15
   \if@preface
-    \@journalurl\ifcopyediting\else/\preface@abbrev.pdf\fi
+    %\@journalurl\ifcopyediting\else/\preface@abbrev.pdf\fi
+    https://doi.org/10.5194/\preface@abbrev.pdf
   \else
-    \@journalurl\ifcopyediting\else/\if@noref\@msnumber\else\@pvol/\@fpage/\@pyear\fi/\fi
+    https://doi.org/10.5194/\if@noref\@msnumber\else\@journalnameshortlower-\@pvol-\@fpage-\@pyear\fi
+    %\@journalurl\ifcopyediting\else/\if@noref\@msnumber\else\@pvol/\@fpage/\@pyear\fi/\fi
   \fi}
 \def\runningheaderfont{%
   \if@stage@final%spec. obsolete ?
@@ -734,18 +737,23 @@
                \ifx\specialp@perstring\@undefined
                  \if!\@recvd!
                  \else
+                   \setbox\z@\hbox\bgroup
                      \strut\hbox{Received:\nobreakspace\@recvd}%
-                   \def\datesep{ -- }%
-                   \if@twostagejnl\ifx\@pubdiscuss\@empty\else
-                     \datesep \hbox{Discussion started:\nobreakspace\@pubdiscuss}\def\datesep{\newline\def\datesep{ -- }}%
-                   \fi\fi
-                   \if!\@revsd!\else\datesep \hbox{Revised:\nobreakspace\@revsd}\fi
-                   \if!\@accptd!\else\datesep \hbox{Accepted:\nobreakspace\@accptd}\fi
-                   \ifx\@published\@undefined\else\datesep\fi
+                     \def\datesep{ -- }%
+                     \if@twostagejnl\ifx\@pubdiscuss\@empty\else
+                         \datesep \hbox{Discussion started:\nobreakspace\@pubdiscuss}\def\datesep{\newline\def\datesep{ -- }}%
+                       \fi
+                     \fi
+                     \if!\@revsd!\else\datesep \hbox{Revised:\nobreakspace\@revsd}\fi
+                     \if!\@accptd!\else\datesep \hbox{Accepted:\nobreakspace\@accptd}\fi
+                     \ifx\@published\@undefined\else\datesep\fi
+                   \egroup
+                   \unhcopy\z@
+                   \ifdim\wd\z@>100mm\strut\newline\strut\fi
                  \fi
                \fi
-               \ifx\@published\@undefined\else Published:\nobreakspace\@published\fi
-               \par\egroup
+               \ifx\@published\@undefined\else \strut\hbox{Published:\nobreakspace\@published}\fi
+               \strut\par\egroup
                \ifx\@howtocite\@empty\else\item[{How to cite:}]\@howtocite\fi
                \ifx\abstractexists\@undefined
                \else
@@ -1120,6 +1128,12 @@
   \def\fnum@figure{\rmfamily\bfseries\figurename\nobreakspace\thefigure}
   \def\fnum@table{\rmfamily\bfseries\tablename\nobreakspace\thetable}
 \fi
+\def\mytextcircled#1{%
+  \textcircled{\ifx\in@caption\relax
+    \check@mathfonts\fontsize\ssf@size\z@\math@fontsfalse\selectfont\kern-1\p@
+  \else
+    \check@mathfonts\fontsize\sf@size\z@\math@fontsfalse\selectfont
+  \fi #1}}
 \long\def\@makecaption#1#2{%
   \def\@tempa{figure}\ifx\@captype\@tempa
     \if@stage@final
@@ -1128,7 +1142,7 @@
       \vskip\abovecaptionskip\goodbreak
     \fi
   \fi
-  {\reset@font\small{\bfseries#1.} #2\par}%
+  {\let\in@caption\relax\reset@font\small{\bfseries#1.} #2\par}%
   \if@cop@home\ifonline\ifnum\csname c@\@captype\endcsname=1 % for 1st fig or tab only
     \immediate\write\@auxout{\string\gdef\string\@num\@captype{}}%
     \hypertarget{\@captype}{}%
@@ -1166,8 +1180,10 @@
 \RequirePackage[normalem]{ulem}%
 \RequirePackage[T1]{fontenc}
 \RequirePackage{textcomp}
-\RequirePackage{fontawesome5}
-\RequirePackage{fontawesome}
+\if@cop@home
+  \RequirePackage{fontawesome5}
+  \RequirePackage{fontawesome}
+\fi
 \ifx\xmltexversion\@undefined
   \RequirePackage[utf8]{inputenc}
   \def\strip@x#1x#2\@nil{#1}%
@@ -1181,6 +1197,7 @@
 \edef\@classoptionslist{english,\old@classoptionslist}
 \RequirePackage{babel}
 \let\@classoptionslist\old@classoptionslist
+\ifx\StandardLayout\@undefined\let\StandardLayout\relax\fi
 \def\@tempa{french}\ifx\bbl@main@language\@tempa
   \StandardLayout
   %% Switch to quotation marks with additional horizontal spacing
@@ -1203,14 +1220,15 @@
 \fi
 \def\@tempa{%
   \def\introductionname{Introduction}%
+  \def\authorcontributionname{Author contributions}%
   \def\secabstractname{Kurzfassung}%
   \def\conclusionname{Conclusions}%
   \def\copyrightstatementname{Copyright statement}%
   \def\codeavailabilityname{Code availability}%
   \def\dataavailabilityname{Data availability}%
+  \def\ercavailabilityname{Executable research compendium (ERC)}%
   \def\codedataavailabilityname{Code and data availability}%
   \def\sampleavailabilityname{Sample availability}%
-  \def\authorcontributionname{Author contributions}%
   \def\competinginterestsname{Competing interests}%
   \def\videosupplementname{Video supplement}%
   \def\dosupplementname{Supplement}%
@@ -1239,6 +1257,7 @@
   \def\copyrightstatementname{Urheberrechtserklärung}%
   \def\codeavailabilityname{Codeverfügbarkeit}%
   \def\dataavailabilityname{Datenverfügbarkeit}%
+  \def\ercavailabilityname{Executable research compendium (ERC)}%
   \def\codedataavailabilityname{Code- und Datenverfügbarkeit}%
   \def\sampleavailabilityname{Probenverfügbarkeit}%
   \def\authorcontributionname{Autorenmitwirkung}%
@@ -1268,6 +1287,7 @@
   \def\copyrightstatementname{Affirmation du droit d'auteur}%
   \def\codeavailabilityname{Disponibilité du code}%
   \def\dataavailabilityname{Disponibilité des données}%
+  \def\ercavailabilityname{Executable research compendium (ERC)}%
   \def\sampleavailabilityname{Disponibilité des examples}%
   \def\codedataavailabilityname{Disponibilité du code et des données}%
   \def\authorcontributionname{Collaborateurs}%
@@ -1375,8 +1395,10 @@
       {\ifnewaffil\addtocounter{affil}{1}%
        \xdef\AB@thenote{\arabic{affil}}\fi
        \global\advance\c@authnum\@ne
-       \expandafter\ifx\csname deceased@\the\c@authnum\endcsname\true\relax\def\@@deceased{$^{,\text{\faCross}}$}\fi
-       \expandafter\ifx\csname econtrib@\the\c@authnum\endcsname\true\relax\def\@@econtrib{$^{,\text{\faStar}}$}\fi
+       \if@cop@home
+         \expandafter\ifx\csname deceased@\the\c@authnum\endcsname\true\relax\def\@@deceased{$^{,\text{\faCross}}$}\fi
+         \expandafter\ifx\csname econtrib@\the\c@authnum\endcsname\true\relax\def\@@econtrib{$^{,\text{\faStar}}$}\fi
+       \fi
        \def\@tempa{#1}\ifx\@tempa\@empty\def\AB@note{\AB@thenote}\else\def\AB@note{#1}%
         \setcounter{Maxaffil}{0}\fi
       \ifnum\value{authors}>1\relax
@@ -1450,6 +1472,7 @@
   \if!#2!\else\econtrib@sep#2\@nil\fi}
 
 \newcommand\deceased[2][]{\gdef\@deceasedtext{#1}\@deceased{#2}}
+\if@cop@home
 \def\@deceased#1{%
   \ifx\@deceasedtext\@empty\gdef\@deceasedNote{deceased}\else\gdef\@deceasedNote{deceased, \@deceasedtext}\fi
    \deceased@sep#1,\@nil
@@ -1464,7 +1487,10 @@
    \protected@xdef\AB@affillist{\the\@temptokena \AB@affilsep
      \AB@affilnote{\faStar}\protect\Affilfont\@econtribNote}%
  }
-
+\else
+  \let\equalcontrib\@gobble
+  \let\@deceased\@gobble
+\fi
 \def\Author{\@ifnextchar[\@Author{\@Author[]}}%]
 \def\@Author[#1]{%
   \def\@tempa{#1}%
@@ -1496,6 +1522,7 @@
   \setcounter{reaction}{0}%
   \def\theequation{\thesection\@arabic\c@equation}%
   \def\thereaction{\thesection R\@arabic\c@reaction}%
+  \let\c@org@lst\c@listings%
   \let\c@org@eq\c@equation%
   \let\org@theeq\theequation%
   \if@stage@final
@@ -1505,6 +1532,9 @@
     \@addtoreset{table}{section}%
     \setcounter{table}{0}%
     \def\thetable{\thesection\@arabic\c@table}%
+    \@addtoreset{listings}{section}%
+    \setcounter{listings}{0}%
+    \def\thelistings{\thesection\@arabic\c@listings}%
   \fi
   \global\let\old@sect\@sect
   \def\@sect##1##2##3##4##5##6[##7]##8{%
@@ -1568,6 +1598,7 @@
   \ifx\old@sect\@undefined\else\global\let\@sect\old@sect\fi
   \ifx\old@ssect\@undefined\else\global\let\@ssect\old@ssect\fi
   \def\thefigure{\@arabic\c@figure}%
+  \def\thelistings{\@arabic\c@listings}%
   \def\thetable{\@arabic\c@table}}
 \IfFileExists{url.sty}
   {\RequirePackage{url}\urlstyle{same}}%
@@ -1715,44 +1746,49 @@
    \g@addto@macro\subfiguresend{\global\let\theHfigure\thefigure@original}
    \g@addto@macro\subtablesend{\global\let\theHtable\thetable@original}}
   {\CopernicusWarningNoLine{Cannot find subfloat.sty; proceeding without it}}
-\RequirePackage[authoryear,round]{natbib}
-\def\NAT@sort{0}\def\NAT@cmprs{0}
-\renewcommand\NAT@sep{;} \renewcommand\NAT@cmt{, }
-\renewcommand\NAT@aysep{,} \renewcommand\NAT@yrsep{, }
-\setlength\bibsep\z@
-\let\bibfont\small
-\NAT@numbersfalse
-\NAT@set@cites
-\let\NAT@set@cites\relax
-\AtBeginDocument{\let\@citex\NAT@citex}
-\newcommand\urlprefix{}
-\renewenvironment{thebibliography}[1]
- {\bibsection
-  \if@secline\leavevmode\vspace*{-\baselineskip}\nobreak\fi
-  \parindent\z@
-  \bibpreamble
-  \bibfont
-  \list{\@biblabel{\arabic{NAT@ctr}}}{\@bibsetup{#1}%
-  \setcounter{NAT@ctr}{0}}%
-  \ifNAT@openbib
-    \renewcommand\newblock{\par}
-  \else
-    \renewcommand\newblock{\hskip .11em \@plus.33em \@minus.07em}%
-  \fi
-  \sloppy
-  %\clubpenalty4000\widowpenalty4000
-  \sfcode`\.=1000\relax
-  \let\citeN\cite \let\shortcite\cite
-  \let\citeasnoun\cite}
- {\def\@noitemerr{%
-  \PackageWarning{natbib}{Empty `thebibliography' environment}}%
-  \endlist\vskip-\lastskip}
-\def\bibsection{%
-  \if@stage@final
-    \if@manuscript\newpage\fi
-    \pdfbookmark[1]{\refname}{biblio}%
-  \fi
-  \noappendix\section*{\refname\if@cop@home\ifonline\hypertarget{references}{}\fi\fi}}
+
+\newif\ifNAT@openbib
+\IfFileExists{natbib.sty}
+  {\RequirePackage[authoryear,round]{natbib}
+   \bibpunct{(}{)}{;}{a}{,}{,~}
+   \def\NAT@sort{0}\def\NAT@cmprs{0}
+   \setlength\bibsep\z@
+   \let\bibfont\small
+   \renewcommand\bibitem{\@ifnextchar[{\@lbibitem}{\@lbibitem[??(????)]}}%]
+   \ifx\xmltexversion\@undefined\else
+     \NAT@set@cites
+     \let\NAT@set@cites\relax
+   \fi
+   \AtBeginDocument{\let\@citex\NAT@citex}
+   \newcommand\urlprefix{}
+   \renewenvironment{thebibliography}[1]
+   {\bibsection
+     \if@secline\leavevmode\vspace*{-\baselineskip}\nobreak\fi
+     \parindent\z@
+     \bibpreamble
+     \bibfont
+     \list{\@biblabel{\arabic{NAT@ctr}}}{\@bibsetup{##1}%
+       \setcounter{NAT@ctr}{0}}%
+     \ifNAT@openbib
+       \renewcommand\newblock{\par}
+     \else
+       \renewcommand\newblock{\hskip .11em \@plus.33em \@minus.07em}%
+     \fi
+     \sloppy
+     % \clubpenalty4000\widowpenalty4000
+     \sfcode`\.=1000\relax
+     \let\citeN\cite \let\shortcite\cite
+     \let\citeasnoun\cite}
+   {\def\@noitemerr{%
+       \PackageWarning{natbib}{Empty `thebibliography' environment}}%
+     \endlist\vskip-\lastskip}
+   \def\bibsection{%
+     \if@stage@final
+       \if@manuscript\newpage\fi
+       \pdfbookmark[1]{\refname}{biblio}%
+     \fi
+     \noappendix\section*{\refname\if@cop@home\ifonline\hypertarget{references}{}\fi\fi}}
+ }{\CopernicusWarningNoLine{Cannot find natbib.sty; proceeding without it}}
 \RequirePackage{rotating}
 \def\@rotxdblfloat#1[#2]{%
   \@float{#1}[#2]%
@@ -1837,10 +1873,15 @@
     \provide@orig@symbol{Phi}
     \provide@orig@symbol{Psi}
     \provide@orig@symbol{Omega}
+    %% Fix fuer #6924, vgl https://tex.stackexchange.com/questions/561236/setmathalphabet-messes-with-rm
+    \usepackage{etoolbox}%
+    \patchcmd\document@select@group{#1{#4}}{\expandafter#1\ifx\math@bgroup\bgroup{#4}\else#4\fi}{}{\fail}%
     \RequirePackage[mtbold]{mathtime}
     \DeclareSymbolFont{largesymbolsA}{U}{esint}{m}{n}%from esint.sty
     \DeclareMathSymbol{\oiintop}{\mathop}{largesymbolsA}{'015}%from esint.sty
     \def\oiint{\oiintop\nolimits}%from esint.sty
+    \DeclareMathSymbol{\fintop}{\mathop}{largesymbolsA}{'037}%from esint.sty
+    \def\fint{\fintop\nolimits}%from esint.sty
     \ifx\xmltexversion\@undefined\else{\catcode`\_=\active\global\let_\xmltexUndersc@re}\fi
     \if@sansserifface
       \DeclareMathVersion{sans}
@@ -2400,10 +2441,12 @@
   \long\def\codeavailability#1{\ifx\thesection\theolds\else\noappendix\fi\section{\codeavailabilityname}#1}
   \long\def\dataavailability#1{\ifx\thesection\theolds\else\noappendix\fi\section{\dataavailabilityname}#1}
   \long\def\codedataavailability#1{\ifx\thesection\theolds\else\noappendix\fi\section{\codedataavailabilityname}#1}
+  \long\def\ercavailability#1{\ifx\thesection\theolds\else\noappendix\fi\section{\ercavailabilityname}#1}
 \else
   \generateCommand{codeavailability}    {\endlist\egroup}
   \generateCommand{dataavailability}    {\endlist\egroup}
   \generateCommand{codedataavailability}{\endlist\egroup}
+  \generateCommand{ercavailability}{\endlist\egroup}
 \fi
 \generateCommand{authorcontribution}{\endlist\egroup}
 \generateCommand{sampleavailability}{\endlist\egroup}
@@ -2413,8 +2456,16 @@
 \generateCommand{disclaimer}        {\endlist\egroup}
 \generateCommand{sistatement}       {\endlist\egroup}
 \generateCommand{dosupplement}      {\endlist\egroup}
-\generateCommand{financialsupport}   {\endlist\egroup}
+\generateCommand{financialsupport}  {\endlist\egroup}
 \generateCommand{reviewstatement}   {\endlist\egroup}
+\long\def\specialsection#1#2{%
+  \expandafter\def\csname specialsection-#1name\endcsname{#1}%
+  \expandafter\ifx\csname specialsection-#1name\endcsname\@empty
+    \PackageError{copernicus.cls}{\string\specialsection\space needs a heading.}{Make sure that \string\specialsection{}{}\space has two arguments and that the first argument contains a heading.}%
+  \else
+    \generateCommand{specialsection-#1}  {\endlist\egroup}%
+    \csname specialsection-#1\endcsname{#2}%
+  \fi}
 
 \generateCommand{acknowledgement}   {}        \def\endacknowledgement{\endlist\egroup}
 \generateCommand{acknowledgements}  {}        \def\endacknowledgements{\endlist\egroup}
