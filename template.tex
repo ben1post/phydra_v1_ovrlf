@@ -76,9 +76,11 @@
 %\usepackage{rotating}
 
 
+\usepackage{comment} 
+
 \begin{document}
 
-\title{Phydra v1 - an open-source toolbox for flexible and reproducible marine ecosystem modeling in Python}
+\title{Phydra 0.1: an open source Python library for flexible, modular and reproducible marine ecosystem modeling based on ordinary differential equations}
 
 
 % \Author[affil]{given_name}{surname}
@@ -127,32 +129,51 @@
 
 \begin{abstract} [Just collecting ideas:] 
 
-Phytoplankton modeling is central to understanding the biogeochemical cycles driving the earth system.
+Marine ecosystem modeling is central to understanding the biogeochemical cycles driving the earth system. 
 
-Phydra is an object-oriented Python framework for developing marine ecosystem models in a flexible modular structure. Phydra provides a library of pre-built model components..
+These models can have highly variable complexity, both in terms of mechanistic and spatial resolution. 
+No consensus in terms of adequate model complexity and formulation has been reached, although there are many canonical model structures used and modified.
 
-As an extension of the xarray-simlab package, phydra is embedded in the python scientific ecosystem and provides a collection of tool-sets for rapid prototyping, analysis \& visualisation of models. 
+This paper introduces Phydra, an open-source library for marine ecosystem modeling built with the object-oriented modeling framework Xarray-simlab-ode (XSO), with the goal to support efficient, flexible and easily reproducible development of models based on ordinary differential equations. 
 
-Phydra is an open-source object-oriented python package for modeling marine ecosystems, based on the xarray-simlab framework, with the goal to support efficient, open and easily reproducible model development. 
+Phydra provides pre-built models and model components that can be modified and assembled to complex ecosystem models. 
 
-The library provides pre-built model components that can be used to assemble complex marine ecosystem models. All basic processes can be adapted and modified using python to describe different and more complex ecosystems. 
+All basic processes can be adapted and modified in simple Python to describe different and more complex ecosystems. The first release focuses on zero-dimensional phytoplankton models, but models of higher dimensionality are also possible.
 
-Phydra provides an abstract framework to define systems of ordinary or partial differential equations, that can be translated and used with different solver systems the Python scientific ecosystem provides.
+Xarray data-structure, self-documenting workflow, ease of sharing models, as well as input and output.
 
-Equation terms are building blocks that can be combined in a modular way.
+Phydra is embedded in the Python scientific ecosystem and is natively compatible with many tools for prototyping, analysis \& visualisation of models.
 
-Python code handles model initialisation and passes the complex and efficient solving to dedicated 
+This paper presents the general structure of Phydra, the usage of xarray-simlab-ode and the workflow of developing model applications of varying complexity.
 
-Here, we demonstrate the usage of the phydra v1 package in a simple NPZD setting and to showcase the flexibility, in a more complex size based trophic structure model. Both in slab physics.
+Phydra, as well as all models and other work presented here is available open-source and can be used by the scientific community to build, modify, run and test ODE-based models. The Phydra standard library aspect, can collaborate share model functions mechanisms, really focus on science instead of fixing bugs.. 
 
-The utility of the phydra package is here shown via three model implementations. Two models from literature are recreated, and the flexible nature of this package allows a combination of as a third example. 
+Comprehensive documentation is available online.
+
+
+
+
+
+% Through the combination of the XSO framework and the Phydra library, a high level of customisation and flexibility is combined with less boilerplate code and technical setup.
+
+%Phydra is a Python package, embedded in the Python scientific ecosystem and is natively compatible with many tools for prototyping, analysis \& visualisation of models.
+
+%, allowing modelers to simplify the model construction and focus on the scientific questions.
+
+%Xarray-simlab-ODE provides a framework based on compact python classes and custom variables to define systems of ordinary or partial differential equations, that can be used with different solvers.
+
+
+%Here, we demonstrate the usage of the phydra v1 package in a simple NPZD setting and to showcase the flexibility, in a more complex size based trophic structure model. Both in slab physics.
+
+%The utility of the phydra package is here shown via three model implementations. Two models from literature are recreated, and the flexible nature of this package allows a combination of as a third example. 
 \end{abstract}
 
 
 \copyrightstatement{TEXT} %% This section is optional and can be used for copyright transfers.
 
-
-\introduction  %% \introduction[modified heading if necessary]
+%%% added Section for editing purposes, later simply use \introduction
+\section{Introduction}
+%\introduction  %% \introduction[modified heading if necessary]
 
 % introduction should be adundantly clear with no unecessary details!
 % can also mention open source, but just high-level summaries, same on phydra details, no detail in intro
@@ -161,11 +182,10 @@ The utility of the phydra package is here shown via three model implementations.
 % 2nd Section:
 % Background, theoretical framework. Specifics here!
 
-\textit{Note: intro so far only rough points and relevant sections from my master thesis}
-
 % FIRST SECTION: general info - Biogeochemical role of phytoplankton
 
 %- P1: why phytoplankton important?
+\subsection{Models of marine ecosystems}
 - major primary producers ocean ecosystem, understanding important, global change (important part of climate models)
 
 These microorganisms form the basis of the food webs, and contribute roughly half of the oxygen in our atmosphere through photo- synthesis \citep{Field2009}.
@@ -179,7 +199,8 @@ Originating from several major phyla, there are estimated to be at least 25,000 
 
 - complex system --> complex models?! dealing with highly dimensional models \citep{Dutkiewicz2020DimensionsDiversity}
 
-\subsection{Phytoplankton modeling: From NPZD to DARWIN}
+
+%  \subsection{Phytoplankton modeling: From NPZD to DARWIN}
 %- P2: why people model phytoplankton? (what are the types of model we use? npzd, pft, size, darwin, etc.)
 - based on ordinary diff equations!
 
@@ -189,7 +210,9 @@ Originating from several major phyla, there are estimated to be at least 25,000 
 
 Given the complexity of the ocean ecosystem, it is necessary to aggregate our knowledge of the many smaller parts into comprehensive ecological models in order to understand the full-scale implications. Computational models of phytoplankton growth have been developed since the 1970s and have greatly increased in sophistication and complexity since then, co-evolving with the rise in computational resources. Ecosystem modelling started with simple box-model descriptions of a few trophic levels. These were the nutrient-phytoplankton-zooplankton (NPZ) and nutrient-phytoplankton-zooplankton-detritus (NPZD) models, which succeeded in reproducing the basic bloom dynamics observed in the temperate ocean \citep{Evans1985ACycles, Fasham1990a}. 
 
-\subsection{Running before we can walk}
+% \subsection{Running before we can walk}
+% INSTEAD OF SUBSECTIONS; THESE ARE SIMPLY PARAGRAPHS
+
 %- P3: all these different models, what is the problem? [Motivation for a better toolkit]
 The simplicity of an NPZD model, where each of the four ecosystem components is represented by a single state variable, can be criticised as oversimplifying the complexity of a natural plankton community.
 
@@ -216,7 +239,10 @@ ALTHOUGH, actually often very similar in nature and underlying technical process
 "easy to use, open source, easy to modify, toolbox"
 - python Pangeo software ecosystem (jupyter, xarray, zarr)
 
-\subsection{Collaborative modelling using open source solution}
+
+\subsection{Open, flexible \& collaborative modeling}
+
+%\subsection{Collaborative modelling using open source solution}
 %- P4: Here's my solution! Here I present flexible model framework. explain basic structure and function
 
 % can also mention open source, but just high-level summaries, same on phydra details, no detail in intro
@@ -243,8 +269,14 @@ Why python? -> most popular programming language, rich scientific user community
 Many large physical and ecological models are to this day written in FORTRAN. Due to the statically-typed nature it is more computationally efficient particularly for larger models. Yet despite it's speed, FORTRAN remains less accessible to scientists and usage and literacy of Python in the scientific community far exceeds that of FORTRAN.
 Phydra is a project to bridge the gap between older, but more efficient ecosystem model code written in low-level languages like C++ and FORTRAN and the flexibility and usability of modern high-level programming languages. Python is a free and open-source language that is flexible, popular and has gained wide use in the scientific community. By being written in Python, Phydra can interact with a rich environment of popular scientific and numerical packages, and e.g. tool for machine learning. 
 
+
+\subsection{Aims}
 % AIM for phydra:
 Why Phydra? -> collaborative development and open science are central to the Python project, no such previous tool available, but seems very much needed (see previous problems!)
+
+Phydra is a library for those starting out with marine ecosystem modeling and starting point for scientific exploration.
+
+Phydra for now only includes code that uses xarray-simlab-ode framework, but this does not have to be fixed and could very well be extended to include other implementations of models.
 
 % AIM for this paper! qualify limits
 "In this paper, we (a) describe modeling approach, (b) apply modeling approach in 3 examples"
@@ -277,23 +309,60 @@ Andrew's comments: (THIS IS METHODS)
 \end{comment}
 
  %% \ SECTION 2
-\section{The Phydra package: structure \& features} \label{Section:phydrapackage}
+\section{Phydra: structure \& features} \label{Section:phydrapackage}
+
+\subsection{General structure}
 % 2nd Section:
 % Background, theoretical framework. Specifics here!
+GENERAL STRUCTURE:
+- Components
+- Models
+- Example Notebooks
+
 
 Phydra is an open-source object-oriented Python package for building models of marine ecosystems, with the aim to support efficient, open and easily reproducible development. 
 
-In the current version Phydra includes a set of building blocks that can be combined to 0-dimensional ecosystem models of variable complexity. The building-blocks are written as process classes which are the modular unit of the model framework. A Phydra model instance includes processes handling the solver and model assembly, as well as processes defining state variables, forcing parameters and their interactions (i.e. fluxes). State variables can be defined as unique instances, but also as functional groups (essentially an array of state variables), and Phydra provides functions capable of flexibly handling multi-dimensional interactions between model components. The implementation and testing of more complex ecosystem descriptions is the natural application of such a package, which is demonstrated in the three use cases presented in Section \ref{Section:UseCases}. The current version of Phydra does not support including spatial dimension, but this would be a logical next step in development.
+In the current version Phydra includes a set of building blocks that can be combined to 0-dimensional ecosystem models of variable complexity. The building-blocks are written as process classes which are the modular unit of the model framework. 
+A Phydra model instance includes processes handling the solver and model assembly, as well as processes defining state variables, forcing parameters and their interactions (i.e. fluxes). State variables can be defined as unique instances, but also as functional groups (essentially an array of state variables), and Phydra provides functions capable of flexibly handling multi-dimensional interactions between model components. 
+
+The implementation and testing of more complex ecosystem descriptions is the natural application of such a package, which is demonstrated in the three use cases presented in Section \ref{Section:UseCases}. The current version of Phydra does not support including spatial dimension, but this would be a logical next step in development.
 
 A typical model development workflow using Phydra would assemble a model instance from the basic building-blocks: Processes defining state variables, forcings and fluxes. At model initialisation, the framework checks dependencies between processes and stores the model instance as an Model object. Following, at model setup the user provides all necessary parameters and desired model output, from which the framework creates a labelled dataset object. This step-wise process allows running the model instance with a specific setup, or a range of different setups at model runtime. The model setup data structure is used as the blueprint for storing model output. Upon calling the runtime function with the specific model instance and setup, a "filled-out" dataset is returned containing model setup parameters and model output in labelled dimensions. The resulting dataset is compatible with packages for data analysis and visualisation from the Python scientific ecosystem. Storage of labelled multi-dimensional model output to the NetCDF file format is natively supported.
 The model construction process is self-documenting and provides an interface for iterative modification, both to more complex and simpler model constructs. The specific steps of model development are presented in further detail below.
 
 The Phydra package is built on the wealth of functionality created by the open-source scientific Python community. The two packages xarray-simlab and GEKKO form the technical foundation of Phydra. Xarray-simlab provides the flexible model framework and GEKKO an efficient solver of large models. Below we describe how Phydra leverages these open-source projects to provide a tool-set to construct, modify, solve, analyse and share marine ecosystem models. 
 
+\subsection{Scope and limitations}
 
-\subsection{Python backend: xarray-simlab-ode}
-% PUT THIS IN THE APPENDIX, don't explain other peoples work that is explained elsewhere better
+Situated in complexity between GUI tools that allow drag and drop, and custom model scripts. The combination of phydra as a library and xarray-simlab-ode as a framework aims to reduce the boilerplate code necessary to write computational models in Python.
+The modeling process can be approached from two levels of complexity, models can be assembled and executed from pre-built components, and model objects can be shared and supplied with custom parameters for further testing. More advanced users can easily build their own components or modify mathematical functions where necessary.
+
+The object-oriented structure of Phydra allows users to extend certain base processes to provide the desired functionality. 
+
+Similar to how a forcing process can easily be sub-classed to supply a different type of forcing to the environment, other processes can be easily modified to have a different function, as long as the interaction between state variables matches with the dimensions and overall structure of the components involved. 
+
+% OPEN SOURCE CONTRIBUTION 
+Phydra (like Xarray-simlab and GEKKO) is an open-source project. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. Please read the contributing guidelines on the Github repository for further details.
+
+\subsection{Installing and running Phydra}
+The Phydra package is available via the Python pip package manager, but we encourage using Conda as a package manager that is provided with the scientific Anaconda Python distribution.
+Please follow the up-to-date instructions on the Github repository for installation of Phydra and its dependencies.
+
+% CONDA NAME DROP
+Since Python and the dependencies of Phydra are constantly developed further, we will provide instructions to install a fully compatible virtual environment with the Conda package manager separate from a users standard Python installation. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter environment that is available via Conda. For more complex and larger model runs on servers Python scripts are preferable.
+
+
+\section{The backend framework: xarray-simlab-ode}
+% don't explain other peoples work that is explained elsewhere better
 % stay away from vague and overspecific language!
+\begin{comment}
+%This is the abstract of the citation below, Bovy 2018 : Xarray-simlab.. many useful points here that I should adapt!
+In geosciences as well as in many other scientific domains, researchers rely more and more on the use of computer models to better understand complex phenomena. Yet, as new simulation experiments are designed and tested, the growing development of these models often leads to "monolithic" codes and i/o interfaces of increasing complexity, raising issues of maintainability and error-proneness. To prevent these issues while still encouraging experimentation, we have developed a generic tool named xarray-simlab (https://github.com/benbovy/xarray-simlab). This open-source Python package provides both a lightweight framework for building and/or customizing models from pluggable components and an extension of xarray (a popular package for n-dimensional labeled arrays, based on the netCDF data model) to easily setup and run simulations. The advantage of Python is here twofold: (1) often viewed as a " glue " language, it is easy to warp in Python existing codes that are written in compiled languages such as C, C++ or Fortran and (2) we can work in an interactive environment and leverage a very large ecosystem of scientific libraries not only for analyzing or visualizing model outputs, but also for building and running models, which may greatly reduce the friction that is usually introduced by command-line interfaces. The framework allows to build models very quickly and dynamically from many components by automating aspects such as workflow dependencies and model input detection. It has also potential to automate other aspects like parallel execution of model components, command-line interface and/or graphical interface. It aims to ultimately help researchers forget technical aspects and stay focused on scientific developments. Although this tool is not restricted to any specific domain, we show how we have successfully used xarray-simlab to build, inspect and explore an extensible model of landscape evolution.
+\end{comment}
+
+
+Xarray-simlab-ode (XSO) is a generic framework for building computational models based on ordinary differential equations (ODEs) and a Xarray extension for running simulations. XSO is used by Phydra to create a high-level and modular interface with little effort
+
 
 The library of modular processes and the user interface are based on the Xarray-simlab Python package \citep{Bovy2018Xarray-simlab:Interactively}. Xarray-simlab provides a generic framework for building computational models in a modular fashion and an extension for storing model parameters, running simulations and storing output using the xarray.Dataset structure. Xarray provides an efficient and labelled multi-dimensional storage format, that is integrated with functionality for easy plotting, post-processing and storing of model output. Xarray.Datasets are easily converted to Netcdf files, a commonly used file format for biogeochemical data and large model output. 
 
@@ -308,63 +377,77 @@ Utilizing GEKKO as a backend solver within the xarray-simlab framework, we can c
 
 Both of Xarray-simlab and GEKKO are relatively young  Python packages and actively under development, which provides some challenges, but also allows for constant improvements to the functionality that Phydra provides.
 
-\subsection{Phydra building-blocks}
-
-Phydra provides a library of model building-blocks that can be used to assemble complex marine ecosystem models. The library is ordered into different logical components of a marine ecosystem model, 
-
-- state variables
-- forcings
-- fluxes
-
-additionally all of the above components need to be modified to handle more than scalar dimensions.
-The current version of Phydra provides components handling arrays of state variables. These are instead defined in functional group processes, that require a parameter at model setup to set the number of state variables contained. All state variables within a functional group share fluxes, but model setup allows initializing separate parameters for each state variable. Additionally more complex functional group parameterizations can be initialized with separate functions.
-
-The flexible functional group dimensionality adds another level of complexity to flux processes, so that the Phydra library provides additional fluxes especially equipped to handle groups of state variables. Both provide the same interface at model setup, where a label can reference a single state variable or a functional group.
-
-The open-source code allows users to easy develop or modify processes to describe a specific ecosystem. The ordering of the building-blocks is not an implicit order, self-written building blocks can blur the boundaries and combine different functions.
-
-The first version of the library will contain all processes needed to create the three model use cases presented in Section \ref{Section:UseCases}. Users of Phydra are very welcome to provide their own use cases to the standard library in a collaborative effort to support efficient, open and easily reproducible marine ecosystem model development.
-
-\subsubsection{Solver backend} \label{Section:SolverBackend}
 
 - solving backend
 
 - provides specific functions to handle, state vars, forcing and store intermediate fluxes in the form of mathematical ordinary differential equations. SV.dt() == equation
 
-\subsubsection{State variables \& functional groups} \label{Section:StateVariables}
 
-- state variables (handle initializing SVs based on backend, and label and storage, as well as assembling model equations)
+\subsection{Component building-blocks}
+
+%%% TWO-COLUMN TABLE
+%
+%t
+\begin{table*}[t]
+\caption{Types of variables that can be used in xarray-simlab-ode}
+\begin{tabular}{l c r}
+\tophline
+Variable type &  Function & Usage \\
+%
+\middlehline
+State variable & Defines time-dependent variable in model that is affected by fluxes & Class attribute \\
+Forcing & Defines external time-dependent variable in model & Class attribute, requires setup function \\
+Parameter & Model parameter to be used in fluxes and setup functions & Class attribute \\
+Flux & Defines part of mathematical function acting on state variables & Function decorator \\
+%
+\bottomhline
+\end{tabular}
+\belowtable{} % Table Footnotes
+\end{table*}
+%
+
+- state variables
+required inputs, required \& optional arguments (e.g. dims, flux), usage
 
 An ecosystem model tracks chemical compounds as well as organisms via state variables. These state variables can define completely different components of a model, or represent a functional group. Components within Phydra are defined at this higher level and can contain a single state variable or an array of state variables that share common fluxes with differing parameterisation. Each state variable is added to the model with a specific label that is used to reference this component in all processes affecting or dependent on it. 
 
-The actual dimensions of a functional group are initialized after passing a parameter at model setup. This has been designed for easily testing different levels of ecosystem complexity. As shown in the second use case, where this is useful is in setting up phytoplankton size classes in trait-based models. All phytoplankton state variables grow on a common nutrient, but uptake parameters are related to allometries of cell size. A phytoplankton functional group could be initialized, with a certain size range and number of state variables. Parameters are dynamically initialized based on the size provided by the component. 
+The actual dimensions of a functional group are initialized after passing a parameter at model setup. This has been designed for easily testing different levels of ecosystem complexity.
 
 In addition to size, the component could be modified to include information on units or other specific parameters relevant to the model. The added flexible dimensionality of components was designed with the current issues in marine ecosystem model in mind. The effects of different levels of complexity, in the number and definition of phytoplankton functional types (PFT) for example, is not routinely tested in marine ecosystem models. Phydra provides a framework that allows for easy testing through flexible modification of such model complexity at model setup.
 
 The first release of Phydra supports only scalar and one-dimensional array implementations of state variables, but extending this to 2- and 3-dimensional flexibility is a high development priority. 
+!or!
+Dimensionality in state variables can be used to model functional groups or classes, as well as systems of higher dimensionality. At its current version Phydra provides only zero-dimensional models, but models of higher-dimension would be a clear next step in further development.
 
-\subsubsection{Forcings} \label{Section:ForcingSection}
+- forcings
 
-- forcings (handle initializing Params, time-varying or constant, based on external data or mathematical functions, that can be referenced and used in other processes, store labelled values of their values)
+Forcings are defined as providing an external constant or time-varying parameter to the model. These parameters can be used in fluxes that reference the forcing type,
 
-Forcings are defined as providing an external constant or time-varying parameter to the model. These parameters can be used in fluxes that reference the forcing type, but are most often used in conjunction with an environment that takes the specific type of forcing as an input. Included with this version of Phydra we have the necessary forcing types that have to be supplied to the provided environments. For a chemostat model, this is a source concentration of a component in the medium, as well as a flow rate of the system. The slab-ocean Environment interfaces with forcings describing the concentration of a component below the mixed layer, movement of the mixed layer depth (MLD), irradiance at surface and temperature within the mixed layer. There are basic methods supplied to create either constant forcing or values over time based on mathematical functions. Additionally a base forcing can be modified by a user to provide any external data, which can then be used by other processes in the library. The flexible class-based structure allows a process inheriting from the base MLD forcing process to be recognised as an MLD forcing in the fluxes and processes of our model.
+handle initializing Params, time-varying or constant, based on external data or mathematical functions, that can be referenced and used in other processes, store labelled values of their values
 
-\subsubsection{Fluxes}
+- parameters
 
-- fluxes (take labels at model setup, that reference state variables or forcing, and use them to define fluxes based on mathematical functions in python syntax, store labelled values of their intermediate values)
-    - fluxes are further separated into fluxes affecting a single state variable (closure or input fluxes),two state variables (exchange fluxes),
-    
+- fluxes
+
 The previous building blocks for state variables and forcings create the structure of the model, but when solved at this stage there would be no meaningful simulation. In order to define exchanges of matter between components flux processes are added to our model instance, defining the affected components via labels at model setup.
-There are multiple types of fluxes provided as base classes in the library. These base classes are defined by the type of interaction between components. Single fluxes provide loss or gain processes to a single variable, such as sinking or influx from outside the ecosystem. In order to simplify creating common forcing fluxes, a single flux process can take list of affected components as input at model setup. An example for more complex flux type are exchange fluxes, where a flux affects one component as a source and another as a sink. These can be set up with flexible dimensionality of components. Grazing fluxes are a slightly more complicated subclass of a grid-wise flux, as ingestion is usually normalized by total prey availability, so all forcing interactions need to be calculated in a dynamically generated matrix of all prey items consumed by a component.
+There are multiple types of fluxes provided in the library. 
 
-The calculation of a primary producers growth rate is usually one of the more complex fluxes in a marine ecosystem, perhaps second to grazing formulations. In the most simple case the growth of phytoplankton in our slab model would be an exchange flux from the component that grows, dependent on a saturating Monod (or Michealis-Menten) function of a resource concentration. There is no distinction between the rate of nutrient uptake and the assimilation of these nutrients. We can add this simplified relationship to our model using the MonodGrowth process, which is applied in our second use case. At model setup the user only needs to provide the label of the resource that is consumed and the component that is growing, in addition to parameters such as the half-saturation constant for uptake, to have this growth function implemented.
-More complex representations of growth in marine ecosystem models track additional factors limiting growth. In our first use case, phytoplankton growth is limited by nutrient uptake, according to Monod, as well as temperature and light-availability in the mixed layer. These additional growth limiting factors are included in the library as a MonodLightTempGrowth process, that inherits the forcing for average temperature in the mixed layer and PAR at surface from the slab environment.
+take labels at model setup, that reference state variables or forcing, and use them to define fluxes based on mathematical functions in python syntax, store labelled values of their intermediate values
 
-To provide an easily accessible library of common mathematical formulations used in marine ecosystem models, Phydra contains a separate module (i.e. python script) that stores these functions as basic python functions.
+Dimensions can be of any number, however the solvers might run into trouble at very complex models. 
+
+For now, dimensions have to be fixed and named at process creation (ACTUALLY THEY DON'T, can provide list of dims!)
+% TODO: check if I can make all components of flexible dimensionality so that they work in all models!
+
+Single fluxes provide loss or gain processes to a single variable, such as sinking or influx from outside the ecosystem. In order to simplify creating common forcing fluxes, a single flux process can take list of affected components as input at model setup. An example for more complex flux type are exchange fluxes, where a flux affects one component as a source and another as a sink. These can be set up with flexible dimensionality of components. Grazing fluxes are a slightly more complicated subclass of a grid-wise flux, as ingestion is usually normalized by total prey availability, so all forcing interactions need to be calculated in a dynamically generated matrix of all prey items consumed by a component.
+
+
+The open-source code allows users to easy develop or modify processes to describe a specific ecosystem.
+
+The first version of the library will contain all processes needed to create the three model use cases presented in Section \ref{Section:UseCases}. Users of Phydra are very welcome to provide their own functions and classes to the standard library in a collaborative effort to support efficient, open and easily reproducible marine ecosystem model development.
+
 - provides a robust, documented peer-reviewed code basis for more complex mathematical formulations
 - this allows easy testing and plotting of functional responses, exploring structural underpinnings of model
-
-
 
 
 \subsection{Model development workflow}
@@ -374,21 +457,13 @@ To provide an easily accessible library of common mathematical formulations used
 %%f
 \begin{figure*}[t]
 \includegraphics[width=12cm]{Figures/firstdraft_schematics/00_schematics_Package.pdf}
-\caption{\textit{This is slightly outdated, and will need to be updated to represent the latest version of the workflow (once the code base is fixed).} The phydra package is embedded within the xarray-simlab framework. phydra contains a library of physical settings (1), components (i.e. state variables) (2), fluxes (3) and forcing variables (4), that can be combined and reused to create an xarray-simlab model instance. Xarray-simlab provides the functionality to define the model (5) from processes in the phydra library, supply parameters and create an xarray input (6), then run the model (7) and the resulting output is dynamically stored in another xarray, with fully labelled dimensions and containing all parameters.}
+\caption{Schematic of package structure. Xarray-simlab-ode, an extension of Xarray-Simlab, provides the framework. Phydra is a library of functional components, that can be used, extended and modified. A typical workflow would consist of (1) Choosing a pre-existing model, modifying a model or creating a new model from components. (2) This model has to be setup with the correct labels and parameters, and a solver is chosen. (3) The model can be run efficiently, all input and output data is contained in Xarray datasets (4)  that can be conveniently stored or shared. (5) Model output can be conveniently analysed and visualized in the pre-existing scientific python ecosystem.}
 \label{Figure:phydraschematics}
 \end{figure*}
-
 
 Phydra is a tool-box for marine ecosystem modeling, that is freely extensible by a user to be applied to many different use cases. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on creating the most appropriate model structure and parameterisation for the specific scientific hypothesis that is being investigated. 
 
 Constructing marine ecosystem models in Phydra is by design a flexible process, but the user can follow a general workflow of assembling models from the library of processes. This workflow is visualized in Figure \ref{Figure:phydraschematics} and will be further explained below.
-
-\subsubsection{Installing and running Phydra}
-The Phydra package is available via the Python pip package manager, but we encourage using Conda as a package manager that is provided with the scientific Anaconda Python distribution.
-Please follow the up-to-date instructions on the Github repository for installation of Phydra and its dependencies.
-
-% CONDA NAME DROP
-Since Python and the dependencies of Phydra are constantly developed further, we will provide instructions to install a fully compatible virtual environment with the Conda package manager separate from a users standard Python installation. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter environment that is available via Conda. For more complex and larger model runs on servers Python scripts are preferable.
 
 
 \subsubsection{Model creation}
@@ -422,7 +497,7 @@ The model setup created in the previous step already contains the necessary para
 
 - GEKKO does as of yet not provide an adaptive step size solver like odeint, but I have created a feature request and talked to the developers. This will very likely be included in future versions.
 
-\subsubsection{Model Diagnostics and additional functionality}
+\subsubsection{Model diagnostics and additional functionality}
 
 - If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes. The magnitude of the fluxes can then easily be plotted...
 
@@ -432,85 +507,577 @@ The model setup created in the previous step already contains the necessary para
 
 - Model optimisation (i.e. parameter fitting) is well supported by the GEKKO backend. I will run some tests, and if it works very well, it might make sense to include it in this publication, since it is a major strong point for using Phydra.
 
-\subsubsection{Modification and further development}
-
-The object-oriented structure of Phydra allows users to extend certain base processes to provide the desired functionality. 
-
-Similar to how a forcing process can easily be sub-classed to supply a different type of forcing to the environment, other processes can be easily modified to have a different function, as long as the interaction between state variables matches with the dimensions and overall structure of the components involved. 
-
-% OPEN SOURCE CONTRIBUTION 
-Phydra (like Xarray-simlab and GEKKO) is an open-source project. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. Please read the contributing guidelines on the Github repository for further details.
 
 %% END OF SECTION 2
 \clearpage
 
-\textit{Note: I have already written a lot of text here, then moved it to the Appendix and started writing again. I was experimenting with ways to present model structure, and currently the most finished is Use Case 1. It should be relatively easy to implement the same type of presentation for the other use cases, once the common structure is set. For a concise and complete overview of the models, please see the appendix. Sorry for the half-baked text, it probably doesn't make sense to review it in detail. Once the model example code is fully done (within the next weeks) I should be able to write this down a lot more easily.}
+
 
  %% \ SECTION 3
-\section{Use cases} \label{Section:UseCases}
+\section{Model use cases included with Phydra 0.1} \label{Section:UseCases}
 % STAY AS FAR AS POSSIBLE AWAY FROM SPECIFIC PHYDRA/XARRAY_SIMLAB_ODE IMPLEMENTATION (I:E: LABELS ETC:) JUST TALK ABOUT COMPONENTS IF NECESSARY::
 
-To showcase the utility of Phydra, we present three model use cases of varying complexity. In this section, we present simplified descriptions of model structure and mechanisms, following the model development workflow presented in Section \ref{Section:phydrapackage}.
-Per use case, we first describe the generic physical environment employed. The environment collects the model components and computes common forcing fluxes. After describing the model components and what they represent, we move on to describe the fluxes that define the interactions between components. Finally, setup \& parameters for the model runtime are presented and simulation results are shown.
+- included in first release are a collection of models and model components
 
-For a complete structure-independent mathematical description of the presented models please see Appendix 1. Additionally model and analysis code for all use cases is publicly available as documented interactive Jupyter notebooks in the Phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}). 
+To showcase the utility of Phydra, we present three model use cases of varying complexity. In this section, we present simplified descriptions of model structure and mechanisms, as well as parameterizations and model results. Per use case, we highlight a modification to the model that uses the functionality of the XSO framework.
 
-\subsection{A simple chemostat model}
-TEXT
+- For Use Case 1 we will show full model setup, including variables, passing parameters, etc.
+- The others will be presented more schematically, without complete mentions of all variables, but for all models full documented code is available, with exact code used for presented model runs and plots.
 
-\subsubsection{Description}
-% really present a concise and to the point model description here, as would be in any other model publication.
+[This should be using the visualisation tool of xarray-simlab, that i need to modify to hide the backend of XSO (e.g. solver, etc.)]
 
-\subsubsection{Implementation}
+- full model code, parameters, runs, code for plots etc. is available online for free
+Additionally model and analysis code for all use cases is publicly available as documented interactive Jupyter notebooks in the Phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}). 
+
+
+
+\subsection{Model use case 1: Phytoplankton growth in a chemostat}
+\begin{comment}
+- IDEA: instead of Droop modification, run model at flow rate vs nut concentration grid and plot steady state biomass, then do same for periodic (mean nut vs flow rate) OR periodic mean vs amplitude = biomass OR 
+- IDEA: can i use GEKKO optimization to match parameters for constant forcing, and then check if sinusoidal forcing deviates for the two different model formulations?
+- IDEA: maybe remove the Sinusoidal Forcing bit? or focus on that instead of Droop? this double mod seems a bit complicated to present
+\end{comment}
+
+- Chemostats, a.k.a. continuous cultures, have been regularly used in exploring properties of phytoplankton! Seminal studies of Droop on nutrient uptake were performed using chemostats. \citep{Droop1968VitaminLutheri} 
+- Very simple test-bed for more complex model setups (see Use Case 3)
+
+- Here: Very simple model construct, phytoplankton growing on single nutrient, Monod uptake, linear flow rate
+The simple model of \citet{Monod1942RecherchesBacteriennes}, devised to describe bacterial growth, assumes the growth rate is proportional to the nutrient uptake rate.
+
+- first we check the model at constant flow rate and nutrient concentration, then (in order to show added value of framework) we add sinusoidal nutrient concentration and compare
+
+- then the next modification is converting from Monod to Droop model formulation, which can be achieved by replacing two components
+A more complex description of growth is the model devised by \citet{Droop1968VitaminLutheri}, where an internal nutrient quota is tracked and nutrient uptake and growth are decoupled. 
+
+In the following use case we will show the definition of both of these models for growth of phytoplankton on a single nutrient in a chemostat environment. 
+-The forcing will be both constant and sinusoidal
+
+
+%%f
+\begin{figure}[t]
+\includegraphics[width=8.3cm]{Figures/firstdraft_schematics/01_schematics_Chemostat.pdf}
+\caption{Model schematic of chemostat model. (a) Monod representation of phytoplankton feeding on a nutrient. (b) Droop representation of phytoplankton growth, including an added state variable for internal quota.}
+\label{Figure:ModelSchematics_1}
+\end{figure}
+
+\subsubsection{Model formulation - Monod}
+The model is schematized in !Figure (a). It uses nitrogen as its currency (quantities are measured in units of $\mu mol$ N $m^{-3}$, or $\mu M$), with state variables for dissolved nutrients ($N$) and phytoplankton ($P$). The physical environment is a highly simplified flow-through system, corresponding to a laboratory chemostat setup. Growth medium with nutrient concentration $N_0$ flows into the system at rate $f$. The model components ($N$ \& $P$) flow out of the system at that same rate.
+
+Nutrient limitation of phytoplankton growth ($\gamma$) is described via Monod kinetics \citep{Monod1942RecherchesBacteriennes}.
+\begin{equation}
+    \gamma = \frac{N}{k + N} 
+\end{equation}
+where $k$ is the half-saturation constant. $N$ is ambient nutrient concentration in the medium.
+The realized growth rate is a product of the nutrient-limiting term $\gamma$ and the maximum growth rate $\mu^\emptyset$.
+Pathways relating to detrital matter, mortality and regeneration are not resolved. 
+
+The model equations are as follows:
+\begin{equation}
+    \frac{d N}{d t} = 
+    f N^\emptyset % Nutrient mixing
+    -  \mu^\emptyset \frac{N}{k + N} 
+    - f N
+\end{equation}
+
+%PHYTOPLANKTON
+\begin{equation}
+    \frac{d P}{d t} =
+    \mu^\emptyset \frac{N}{k + N} 
+    - f P
+\end{equation}
+
+\subsubsection{Implementation - Monod}
+% IDEA: instead of showing any code, show this also as a schematic (essentially the "map" of components and their variables) for the first simple example, I could show all steps of the process as well as the variables, etc. for the two more complex ones, I could isntead only show the name of the component in a box, and how they are interconnected (leaving out backend stuff)
+The Monod model was implemented...
+
+The above model can be separated into a few components:
+State variables: N, P
+Forcings: N0
+Fluxes: Growth (N->P), Influx (N0->N), Outflux(N,P->)
+This model can be implemented exactly like this in XSO, using 6 components. See the schematic (TODO!).
+
+- Parameters were chosen to represent a standard range, for specific applications and model to data comparisons these parameters should be checked again..
+
+# table of parameters # here?
+
+
+- In order to run this model at periodic forcing we can simply exchange the Forcing component, from ConstantForcing to SinusoidalForcing.
+
+
+\subsubsection{Model formulation - Droop}
+This modified version of the previous model is schematized in !Figure (b). In addition to dissolved nutrients ($N$) and phytoplankton ($P$) the model tracks the internal nutrient quota of phytoplankton ($Q$). Similarly to $N$ and $P$, $Q$ flows out of the model system at the rate $f$.
+
+In this version of the model, nutrient uptake and phytoplankton growth are decoupled, according to Droop \citep{Droop1968VitaminLutheri}.
+Nutrient uptake by phytoplankton ($v$) is still described via Michealis-Menten (or Monod) kinetics, but this is now assembled to the internal nutrient quota $Q$:
+\begin{equation}
+    v = v_{max} \frac{N}{k + N} 
+\end{equation}
+where $k$ is the half-saturation constant for uptake, $v_{max}$ is the maximum uptake rate and $N$ is external nutrient concentration in the medium.
+
+The growth rate of phytoplankton is not dependent on $N$, but on $Q$, the minimum internal nutrient quota $q_{min}$ instead and the growth rate at infinite quota $\mu_\infty$.
+\begin{equation}
+    \mu = \mu_\infty (1 - \frac{q_{min}}{Q})
+\end{equation}
+
+Apart from this added complication of nutrient uptake and growth, the previous model is not further modified.
+
+The model equations are as follows:
+\begin{equation}
+    \frac{d N}{d t} = 
+    f N^\emptyset % Nutrient mixing
+    -  v_{max} \frac{N}{k + N} 
+    - f N
+\end{equation}
+
+\begin{equation}
+    \frac{d Q}{d t} = 
+    v_{max} \frac{N}{k + N} 
+    - \mu_\infty (1 - \frac{q_{min}}{Q})
+    - f Q
+\end{equation}
+
+%PHYTOPLANKTON
+\begin{equation}
+    \frac{d P}{d t} =
+    \mu_\infty (1 - \frac{q_{min}}{Q})
+    - f P
+\end{equation}
+
+\subsubsection{Implementation - Droop}
+%DO THIS LAST FOR ALL EXAMPLES! FIRST GO THROUGH THE UN_CODEY STUFF
+
 % here present the implementation as is used in phydra
 
+% show pseudocode for this model, and the developmental steps
+
+
+The above model can be separated into a few components:
+State variables: N, P, Q
+Forcings: N0
+Fluxes: Uptake (N->Q), Growth (Q->P), Influx (N0->N), Outflux(N,P,Q->)
+This model can be implemented exactly like this in XSO, using 7 components. See the schematic (TODO!).
+- Because they are invariably linked, we can initialize P and Q together in the same component. This would allow easyily adding another phytoplankton with its own quota state variable, simply by adding another instance of the DroopPhyto component. There is no limit to the number of state variables intialized per component.. but of course it make sense to separate them for flexibility where appropriate.
+
+- Parameters were chosen to represent a standard range, for specific applications and model to data comparisons these parameters should be checked again..
+
+# table of parameters # here?
+
+- In order to run this model at periodic forcing we can simply exchange the Forcing component, from ConstantForcing to SinusoidalForcing.
+
 \subsubsection{Results}
-TEXT
+
+- When run over a period of 10 days the model quickly reaches a steady state under constant forcing
+- and shows an oscillating behaviour following the sinusoidal forcing 
+- differences between Monod and Droop? 
+-- Of course added state variable.. uptake and growth are decoupled, so uptake is much faster in Droop.. onset of growth is faster.
+-- steady state biomass slightly lower, of course due to Qmin, always retain some biomass in internal pool, not in biomass
+-- growth is faster, but shape of growth curve is very similar <- growth speed highly dependent on parameters!
+-- in sinusoidal case, q shows dampened oscillations as it varies only slightly rises above Qmin
+
+- many more interesting checks and runs could be done, this is very simple example, and showcasing the ease of creating and modifying models using XSO and Phydra
+
+%%f
+\begin{figure}[t]
+\includegraphics[width=8.3cm]{Figures/firstdraft_plots/01_chemostat_output.pdf}
+\caption{Model output for the four chemostat model scenarios. (a) Monod - constant, (b) Monod - sinusoidal, (c) Droop - constant, (d) Droop sinusoidal}
+\label{Figure:ResultsChemostat}
+\end{figure}
 
 
-\subsection{An NPZD slab model: EMPOWER}
+
+
+
+
+
+\subsection{Model use case 2: An NPZD slab model - EMPOWER}
 Our second use case presents a classical NPZD model embedded in a slab-ocean physical setting. The simplified two-layer structure provides a zero-dimensional and mechanistically simple description of physical processes affecting euphotic ecosystems in the open ocean. The classical structure lends itself well as an efficient physical test-bed for more complicated ecosystem descriptions and is often used as a teaching example.
 
 The presented model is an implementation of the elegant EMPOWER model, as presented by \citet{Anderson2015c}. 
-See Figure \ref{Figure:phydraschematics_1} (a) for a schematic of the model structure and please refer to Appendix 1.1 for the full system of equations.
+See Figure \ref{Figure:phydraschematics_1} (a) for a schematic of the model structure.
+
+- Originally written in R as a script, modular structure achieved through hard-coded flags.
+- We wanted to adapt the model to the flexible modular structure of XSO, very powerful test-bed for plankton modeling. That can also be used as a teaching tool and to explore formulations and parameters..
+
+- Many different functions for different ecological processes exist, e.g. for light harvesting.
+- Inspired by the comparison of light regimes in the original EMPOWER paper, we show how we rebuilt the model using XSO framework in Phydra. Now structure is modular, and does not require specific flags, can be used with many different solvers (no explicit for loop!) .. is it more efficient? (need to test!)
+- Many other modifications are possible, and should be tested against different parameterizations.. ideally parameters grounded in physiology.
+
 
 \subsubsection{Description}
 % really present a concise and to the point model description here, as would be in any other model publication.
+For the first use case we have implemented a traditional NPZD ecosystem model as presented in Figure \ref{Figure:phydraschematics_1} (a) with a nutrient $N$ (in this case nitrate), phytoplankton $P$, zooplankton $Z$ and detritus $D$ as state variables. The first use case model employs slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of two layers. A biologically inert deep ocean is situated below a well mixed upper layer of variable depth that contains the ecosystem. The general model structure is adapted from the EMPOWER model presented by \citet{Anderson2015c} with simplifications to the treatment of light in the model and it's parameterisation. 
+Modifications were aimed at simplifying the description of physical forcings and phytoplankton growth. The model is driven by empirical forcing describing the depth of the mixed layer ($H$), average temperature of the mixed layer ($T$), photosynthetically active radiation at the surface ($I$) and nutrient concentration in the deep layer ($N^\emptyset$) 
 
-\subsubsection{Implementation}
+% Nutrient dynamics
+The zero-dimensional physical slab setting describes two vertical layers of which the deeper layer supplies nutrients to the upper layer, whilst other components are mixed to the deep layer and lost from the system.
+The magnitude of mixing is described by the coefficient $K$:
+
+\begin{equation}
+    K = \frac{h^{+} + \kappa}{H}
+\end{equation}
+
+Constant diffusive mixing is parameterized by $\kappa$. Variable mixing is a function of the change in MLD over time $h = \frac{d}{d t} H$. The derivative of MLD ($h$) is positive when the mixed layer deepens. The function $h^{+}$ defines the effects of entrainment and detrainment due to the changes in MLD as $h^{+} = \max(0, \ h)$. When the mixed layer shallows, $h^{+}$ does not modify $K$ (i.e. returns 0 instead of a negative value), based on the assumption that detrainment of mass and the increase in concentration due to the reduced volume of the mixed layer are balanced \citep{Evans1985ACycles}. 
+
+%\subsubsection{Nutrients}
+Dissolved inorganic nitrogen in the mixed layer ($N$) is supplied via mixing, zooplankton excretion and detritus remineralisation.
+Nutrients are entrained from the bottom layer. Mixing of nutrients is a positive term adding to $N$ along the gradient between $N^\emptyset$ and $N$. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth, which is the only loss term.
+
+%\subsubsection{Phytoplankton}
+Phytoplankton biomass ($P$) increases through temperature-dependent, light- \& nutrient-limited growth. The growth rate ($\mu^{P}$) is the product of a maximum growth rate ($\mu^{\emptyset}$) and the growth-dependencies on temperature ($\gamma^{T}$), light ($\gamma^{I}$) and nutrients ($\gamma^{N}$): 
+
+\begin{equation}
+    \mu^{P} = \mu^{\emptyset} \ \gamma^{T} \ \gamma^{I} \ \gamma^{N}
+\end{equation}
+
+$T$ is the average temperature of the mixed layer in \unit{\degree C}, as supplied from model forcing. Temperature dependence of the growth rate ($\gamma^{T}$) is calculated via the Eppley curve \citep{Eppley1972TemperatureSea}, with an exponential equivalent to a $Q_{10}$ of 1.895.
+
+\begin{equation}
+    \gamma^{T} = \exp{(0.063 \ T)} \label{mumax}
+\end{equation}
+
+The light-limiting term $\gamma^{I}$ represents growth-dependence on total light ($I$) available to phytoplankton the upper mixed layer. We use a simplified form of Steele's formulation to describe light-limitation of phytoplankton growth in the mixed layer, as adapted from \citet{Acevedo-Trejos2016} and originally described in \citet{Steele1962EnvironmentalSea}.
+
+\begin{equation}
+    \gamma^{I} = \frac{1}{H} \int_{0}^{H}\left[ \frac{I(z)}{I^{opt}} \cdot \exp{\left( 1 - \frac{I(z)}{I^{opt}} \right) }  \right]dz \label{steele1}
+\end{equation}
+
+Where $I^{opt}$ is the light level at which photosynthesis saturates and $I(z)$ is the irradiance at depth $z$.
+The irradiance forcing $I$ is a temporally and spatially averaged monthly climatology of photosynthetically active radiation (PAR) at the surface. 
+
+Attenuation of $I$ at depth $z$ in the mixed layer is calculated according to the Lambert-Beer equation:
+
+\begin{equation}
+    I(z) = I \ \exp{(-k^{PAR} \ z)} \label{beer}
+\end{equation}
+
+The attenuation coefficient $k^{PAR}$ is the sum of the attenuation coefficient of seawater $k^w$ and that of phytoplankton biomass $k^c$, which is multiplied by the current phytoplankton biomass $P$:
+
+\begin{equation}
+    k^{PAR} = k^w + k^c \cdot P
+\end{equation}
+
+Combining the equations and integrating across the mixed layer, the numerical solution for the integrated light-limiting term affecting phytoplankton growth is calculated. Integrated values within the mixed layer larger than the optimal irradiance will limit growth, to model effects of photo-inhibition \citep{Steele1962EnvironmentalSea}.
+This simple implementation uses only one parameter to describe light limitation of phytoplankton growth, which is $I^{opt}$. This is a highly simplified treatment of light in a slab model. A more realistic representation of light-limited growth would include chlorophyll-to-biomass ratios and related parameters and functions. See \citet{Anderson2015c} for an insightful discussion of light-limitation in slab models.
+
+Nutrient limitation of phytoplankton growth $\gamma^N$ is described by the Michaelis-Menten (or Monod) equation.
+
+\begin{equation}
+    \gamma^N = \frac{N}{k^N + N}
+\end{equation}
+
+where $k^N$ is the half-saturation constant for nutrient uptake. $N$ is the ambient nutrient concentration, in this case of dissolved inorganic nitrogen (DIN). In this simple model there is no distinction between nutrient uptake and assimilation of nutrient via growth.
+
+Non-grazing mortality of phytoplankton is described by both a linear $m^P$ and a quadratic factor $m^{P2}$ \citep{Yool2011Medusa-1.0:Domain}. The former accounts for natural mortality and excretion. Quadratic mortality describes density-dependent loss processes, which can be caused by viral infection. All non-grazing loss terms feed into the detritus pool.
+
+%\subsubsection{Zooplankton}
+Grazing by zooplankton occurs on both phytoplankton and detritus. The grazing function is a Holling Type 3 grazing response as presented in \citet{Anderson2015c}:
+
+\begin{equation}
+    G^P = \mu^Z \left( \frac{ \hat{\phi}^P P}{(k^Z)^2 + \hat{\phi}^D D +\hat{\phi}^P P}  \right) Z
+\end{equation}
+where $\hat{\phi}^P$ = $\phi^P \ P$, $\hat{\phi}^D$ = $\phi^D \ D$.
+
+This formulation describes the total biomass of phytoplankton that is grazed $G^P$. Parameter $\mu^Z$ is the maximum ingestion rate for a food source, in this case both phytoplankton and detritus. 
+The grazing preference parameters $\phi^P$ and $\phi^D$ do not represent a discrete fraction of the amount grazed in the diet relative to the environment. Instead, this amount is represented by the ratio of $\hat{\phi}^P$ and $\hat{\phi}^D$. 
+The half-saturation constant for grazing $k^Z$ is similarly an arbitrary parameter, that scales the density-dependent half-saturation constant $k^P$ for grazing on phytoplankton based on the choice of $\phi^P$, with the relationship $k^P$ = $\sqrt{\frac{(k^Z)^2 }{ \phi^P}}$.
+
+
+Similarly the detritus grazing flux is defined as:
+
+\begin{equation}
+    G^D = \mu^Z \left( \frac{ \hat{\phi}^D D}{(k^Z)^2 + \hat{\phi}^D D +\hat{\phi}^P P}  \right) Z
+\end{equation}
+
+This sigmoidal response includes passive prey switching via an interference effect, where the increase in biomass of one prey slightly reduces the intake of other prey. In contrast to other grazing formulations \citep[e.g.][]{Fasham1990a}, the prey switching mechanism does not create sub-optimal feeding, where an increase in biomass of less common prey can decreases the total grazing flux \citep{Gentleman2003a}.
+
+Zooplankton ingestion of prey does not directly convert to biomass gained however. The total biomass grazed ($G^P + G^D$) is split three ways between zooplankton growth (to $Z$), excretion of dissolved nutrients (to $N$) and egestion of faecal matter \& particles (to $D$). Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G^P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\epsilon$ and $\beta$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton \citep{Straile1997GrossGroup}. The fraction of $G^P$ egested to $D$ (e.g. as faecal pellets) is calculated via $1-\beta$. 
+
+Similar to phytoplankton mortality, the linear mortality factor $m^Z$ parameterizes natural mortality and excretion and feeds into the pool of detritus. The quadratic factor $m^{Z2}$ describes higher order predation on zooplankton and is removed from the system. 
+
+
+%\subsubsection{Detritus}
+Detritus concentration in the upper layer ($D$) is supplied by all mortality of phytoplankton, linear zooplankton mortality and zooplankton egestion (e.g. faecal pellets). The loss terms are remineralisation, zooplankton grazing, mixing and an additional sinking flux. 
+
+Detritus is remineralised at a constant rate $m^D$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate of $v^D$. This term is added to describe the fast export of larger detritus particles below the mixed layer. 
+
+%\subsubsection{Model equations}
+The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase1symbols}. See \citet{Anderson2015c} for a more detailed discussion of model structure and formulation.
+
+\begin{equation}
+    \frac{d N}{d t} = 
+    K (N^\emptyset - N) % Nutrient mixing
+    + \beta(1 - \epsilon)(G^P + G^D) % Unassimilated grazing by Z
+    + m^D \ D % Remineralisation of D
+    - \mu^{P} \ P % Phytoplankton gains
+\end{equation}
+
+%PHYTOPLANKTON
+\begin{equation}
+    \frac{d P}{d t} =
+    \mu^{P} \ P  % Phytoplankton gains
+    - m^P \ P % Linear mortality
+    - m^{P2} \ (P)^2 % Quadratic mortality
+    - G^P % Z grazing
+    - K \ P % Phytoplankton mixing
+\end{equation}
+
+%ZOOPLANKTON
+\begin{equation}
+    \frac{d Z}{d t} =
+    \beta \ \epsilon(G^P + G^D) % Assimilated grazing
+    - m^Z \ Z % Linear mortality
+    - m^{Z2} \ (Z)^2 % Quadratic mortality
+    - K \ Z % Zooplankton mixing
+\end{equation}
+
+%DETRITUS
+\begin{equation}
+    \frac{d D}{d t} = 
+    m^P \ P % Linear mortality
+    + m^{P2} \ (P)^2 % Quadratic mortality
+    + m^Z \ Z % Linear mortality
+    + (1 - \beta)(G^P + G^D) % Unassimilated grazing by Z
+    - G^D % Z grazing on D
+    - m^D \ D % Remineralisation of D
+    - K \ D % Mixing of D
+    - \frac{v^D}{H} \ D % Sinking of D
+\end{equation}
+
+
+%%f
+\begin{figure}[t]
+\includegraphics[width=8.3cm]{Figures/firstdraft_schematics/02_schematics_EMPOWER.pdf}
+\caption{Model schematic of NPZD slab model for example 1. Model structure and parameterisation is adapted
+from \citet{Anderson2015c}}
+\label{Figure:ModelSchematics_2}
+\end{figure}
+
+
+%% HERE SLAB OUTPUT
+
+\subsubsection{Implementation / modification}
 % here present the implementation as is used in phydra
+% IDEA: instead of showing any code, show this also as a schematic (essentially the "map" of components and their variables) for the first simple example, I could show all steps of the process as well as the variables, etc. for the two more complex ones, I could isntead only show the name of the component in a box, and how they are interconnected (leaving out backend stuff)
+The model was implemented as follows...
+(- more simplified description of model, less detailed schematics due to size contraints)
+
+$$HERE$$ need to edit this to large table, for all models $$HERE$$
+The above model can be separated into a few components:
+State variables: N, P, D, Z
+Forcings: N0, SST, MLD, Temp, I0(calculated from location)
+Fluxes: Uptake (N->Q), Growth (Q->P), Influx (N0->N), Outflux(N,P,Q->)
+This model can be implemented exactly like this in XSO, using X components. See the schematic (TODO!).
+
+
+- parameters are completely adapted from Anderson et al.
+- four locations from original paper are adapted, exact same forcing is used (see forcing figure!)
+- Verification data is different from original paper, chlorophyll MODIS climatology and WOA 2018 nutrient data (Nitrogen) + MLD climatology.
+
+
+% DO I NEED A NEW SUBSECTION FOR FORCING? HOW TO DO THIS?
+%%f
+\begin{figure*}[t]
+\includegraphics[width=15cm]{Figures/firstdraft_plots/02_EMPOWER_forcing.pdf}
+\caption{Forcing is shown for the four locations: Mixed Layer Depth (MLD), Nitrate below the Mixed Layer ($N_0$), Photosynthetically Active Radiation (PAR) and temperature averaged across the Mixed Layer ($T_{MLD}$). Mixed layer depth and temperature data from Anderson et al. 2015. Nutrient forcing is a function of depth for locations Biotrans and India, and a constant value for Papa and Kerfix. Irradiance is calculated as a function of latitude.}
+\label{Figure:EMPOWERforcing}
+\end{figure*}
+
+technical stuff:
+- however we modified the explicit time-step (in a for-loop) scheme to fully integrated functions, that can be computed irrespective of time step size. This makes the functions and code easier to read and modify.
+
+- showcase "batch" execution, can run all 4 location models in parallel. Output is stored as one Xarray, with additional dimension coordinate that differentiates between locations..
+
+
+
+
 
 \subsubsection{Results}
 % show model results and discuss 
+- 
 
 
-\subsection{An complex size-based NPZ model: ASTroCAT}
+%% HERE SLAB OUTPUT
+%%f
+\begin{figure*}[t]
+\includegraphics[width=15cm]{Figures/firstdraft_plots/02_EMPOWER_lightcomp.pdf}
+\caption{Comparative slab model runs, EMPOWER model locations and forcing. Three layer model of light attenuation in the mixed layer is thick line. Single layer model is dashed line. Verification data for Nitrogen in the upper mixed layer is taken from WOA 2018. Phytoplankton verification data is monthly climatology derived from MODIS aqua observations, C-to-Chlorophyll ratio of 75 is assumed in model and used to calculate conversion, in addition to a Redfield ratio of 16:1 for C-to-N.}
+\label{Figure:ResultsEMPOWER}
+\end{figure*}
 
-From an attempt at describing an oceanic physical setting with a highly simplified ecosystem, we move to a simplified laboratory setting with a complex description of a size-structured ecosystem. The model structure for the second use case was adapted from \cite{Banas2011b}. See Figure \ref{Figure:phydraschematics_1} (b) for a schematic of the model structure. 
 
-- Chemostats, a.k.a. continuous cultures, have been regularly used in exploring properties of phytoplankton! Seminal studies of Droop on nutrient uptake were performed using chemostats. \citep{Droop1968VitaminLutheri} 
-- also to this day, still an interesting, very simple setting for phytoplankton models
 
+\subsection{Model use case 3: A complex size-based NPZ model - ASTroCAT}
+
+From an attempt at describing an oceanic physical setting with a highly simplified ecosystem, we move to a simplified laboratory setting with a complex description of a size-structured ecosystem. The model structure for the second use case was adapted from \cite{Banas2011b}. See Figure \ref{Figure:phydraschematics_1} for a schematic of the model structure. 
+
+- Banas publication features extended investigation of model dynamics, also under variable forcing, and stochastic grazing, etc. but here we focus on the simplest setup under constant forcing.
+- simple box model, many processes not resolved
+
+
+- allometric phytoplankton growth and zooplankton grazing, one level of trophic interaction highly resolved
 Size is called a "master-trait" in the trait-based description of plankton ecology, allowing modellers and ecologist to describe the diverse plankton community along one continuous axis. (This is of course an oversimplification, and it takes careful consideration of the choice of allometries and often a combination of functional properties and size classes to achieve a more realistic representation of natural phytoplankton assemblages.)
 
-See Figure \ref{Figure:phydraschematics_1} (b) for a schematic of the model structure. See Appendix 1.2 for the full system of equations.
+- results in system with emergent properties
+
+- XSO framework, allows adding dimensions to state variables, has (Numpy) vectorization capabilities built in, the model can be initialized with a flexible number of size classes of phytoplankton and zooplankton (always equal number though, for this model)
+
+- We showcase this feature by running the model with 2 to 50 clones and comparing bulk phytoplankton biomass between runs
+
 
 
 \subsubsection{Description}
 % really present a concise and to the point model description here, as would be in any other model publication.
 
-\subsubsection{Implementation}
+For the second use case we have implemented a size-spectral NPZ ecosystem model as presented in Figure \ref{Figure:phydraschematics_1} (b) with a nutrient $N$ (in this case nitrate), multiple size classes of both phytoplankton $P_i$ and zooplankton $Z_j$ as state variables. 
+This model use case employs a simple chemostat as physical setting. A flow-through culture, where organisms grow in a bottle with a continuous influx of a nutrient solution. At the same rate all components of the bottle flow out of the system, so that volume remains constant over time.
+Model structure and parameterisation is adapted from the ASTroCAT model \citep{Banas2011b}, with slight modifications to the physical environment and parameterisation. 
+
+The model describes a size-structured community of phytoplankton and zooplankton, with each state variable defined by their equivalent spherical diameter (ESD). In model runs presented in this paper, we follow \citet{Banas2011b} in running simulations with 40 size classes of equally log-spaced ESD of $P$ (1 to 20 \unit{\mu m}), and 40 matching classes of $Z$ (2.1 to 460  \unit{\mu m}). 
+The model can be defined with any number of size classes within meaningful boundaries of the allometric parameterisation. Size classes are denoted by the subscript $i$ for phytoplankton and $j$ for zooplankton. In the implementation of a size-spectral model by \citeauthor{Banas2011b} the food-web is implicitly made up of matching pairs of $P_i$ and $Z_j$, to avoid creating classes at the ends of the size spectrum that are artificially released or suppressed by grazing pressure.
+
+%\subsubsection{Nutrient}
+Dissolved inorganic nitrogen (DIN) in the model system ($N$) is supplied from influx of medium (with nutrient concentration $N^\emptyset$) at a constant rate $f$ and the fraction of grazed biomass that is excreted by $Z$. The concentration $N^\emptyset$ and the flow rate $f$ determine the total nutrient supply to the system. At the same rate $N$ is flowing out from the system. Zooplankton excretion is a recycled term, that also adds back into the pool of $N$. The major loss term to $N$ is phytoplankton growth.
+
+%\subsubsection{Phytoplankton}
+Phytoplankton biomass $P$ increases through  nutrient-limited growth. Nutrient limitation of phytoplankton growth $\gamma_i^N$ is described by the Michaelis-Menten (or Monod) equation:
+
+\begin{equation}
+    \gamma_i^N =  \frac{N}{k_i^N + N} 
+\end{equation}
+
+where $k_i^N$ is the size-dependent half-saturation constant. $N$ is ambient nutrient concentration in the medium.
+
+Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_i^{\emptyset}$. This accounts for natural mortality and excretion.
+
+%\subsubsection{Zooplankton}
+Zooplankton size class $j$ grazing on phytoplankton size class $i$ is calculated by
+\begin{equation}
+    G_{ij}^P = \mu_j^Z \ \frac{ \phi_{ij} \cdot P_i }{ k_j^Z + \sum_{i}(\phi_{ij} \cdot P_i) } \ Z_j
+\end{equation}
+where $\mu_j^Z$ is the size-dependent maximum ingestion rate, $k_j^Z$ is the prey half-saturation level and $\phi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.
+
+Prey preference is assumed to vary with phytoplankton size $size_i^{P}$ in a log-Gaussian distribution around an optimal prey size for each grazer $size_j^{opt}$.
+
+\begin{equation}
+    \phi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size_i^{P}) - log_{10}(size_j^{opt}) }{ \Delta size^{P} } \right) \right]
+\end{equation}
+Where $\Delta size^{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m)}, that controls the width of the Gaussian distribution.
+
+Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G^P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\beta$ and $\epsilon$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton  \citep{Straile1997GrossGroup}. The fraction of $G^P$ egested (e.g. as faecal pellets) is calculated via $1-\beta$, which in the current model setup is assumed to be exported quickly in the flow-through setting and lost from the system. 
+
+Zooplankton experiences quadratic mortality according to the parameter $m^{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
+
+
+%\subsubsection{Model equations}
+The rates of change of the state variables are described by the following set of equations. See \citet{Banas2011b} for a more detailed discussion of model structure and formulation.
+
+\begin{equation}
+    \frac{d N}{d t} = 
+    f \ N^\emptyset % Nutrient mixing
+    +  \beta (1 - \epsilon) \sum_{j} \sum_{i} G_{ij}^P % Unassimilated grazing by Z
+    - \sum_{i} ( \mu_i^{\emptyset} \ \gamma_i^N \ P_i) % Phytoplankton gains
+\end{equation}
+
+%PHYTOPLANKTON
+\begin{equation}
+    \frac{d P_i}{d t} =
+    \mu_i^{\emptyset} \  \gamma_i^N \   P_i  % Phytoplankton gains
+    - m^P  \ \mu_i^{\emptyset} \ P_i % Linear mortality
+    - \sum_{j} G_{ij}^P % Z grazing
+\end{equation}
+
+%ZOOPLANKTON
+\begin{equation}
+    \frac{d Z_j}{d t} =
+    \beta \ \epsilon \ \sum_{i} G_{ij}^P % Assimilated grazing
+    - m^{Z2} \ Z_j \ \sum_{j} Z_j  % Quadratic mortality
+\end{equation}
+
+
+
+\begin{table*}[t]
+\caption{Allometric parameterisations and empirical parameter values employed in use case 2, adapted from \citet{Banas2011b}.}
+\begin{tabular}{l l l l l}
+Empirical fit & Applicability & Source \\
+\tophline
+$\mu_i^{\emptyset} = (2.6 \ d^{-1}) \left( \frac{size_i^{P}}{1\mu m} \right)^{-0.45}$ & Phytoplankton 1-100 ESD \unit{\mu m} & Tang(1995) \\
+$k_i^N = (0.1 \ \unit{µM \ N})\left( \frac{size_i^{P}}{1\mu m} \right)$ & Phytoplankton 1-100 ESD \unit{\mu m} & Eppley et al. (1969) \\
+
+$\mu_j^Z = (26 \ d^{-1})\left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
+
+$k_j^Z = 3 \ \unit{µM \ N} $ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
+
+$size_j^{opt} = (0.65 \ \unit{\mu m})\left( \frac{size^i_{P}}{1\mu m} \right)^{0.56}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1994) \\
+$\Delta size^{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994)  \\
+\middlehline
+
+\bottomhline
+\end{tabular}
+\belowtable{TODO: the sources need to be added properly! for now just text..} % Table Footnotes
+%\label{appendix:table:usecase2parameters}
+\end{table*}
+%
+
+%%f
+\begin{figure}[t]
+\includegraphics[width=8.3cm]{Figures/firstdraft_schematics/03_schematics_ASTroCAT.pdf}
+\caption{Model schematic of size-structured $NP_{40}Z_{40}$ trophic model. Model structure and parameterisation is adapted from \citet{Banas2011b}.}
+\label{Figure:ModelSchematics_3}
+\end{figure}
+
+\subsubsection{Implementation  / modification}
 % here present the implementation as is used in phydra
+
+Dimensionality of state variables (this functionality in XSO) is useful is in setting up phytoplankton size classes in trait-based models. All phytoplankton state variables grow on a common nutrient, but uptake parameters are related to allometries of cell size. A phytoplankton functional group is initialized, with a certain size range and number of state variables. Parameters are dynamically initialized based on the size provided by the component. 
 
 \subsubsection{Results}
 TEXT
 
+%%f
+\begin{figure}[t]
+\includegraphics[width=8.3cm]{Figures/firstdraft_plots/03_ASTroCAT_N50P50Z.pdf}
+\caption{Nutrient concentration and biomass under steady nutrient forcing in model run resolving 50 size classes. Size classes are log-spaced in a range of 1 to 20 and 2.16 to 420. (a) Nutrient concentration over time. (b) Phytoplankton biomass by size class over 10 years of model time evolution. (c) Zooplankton time evolution over the same period.}
+\label{Figure:ResultsASTroCAT_1}
+\end{figure}
 
 
+%%f
+\begin{figure}[t]
+\includegraphics[width=8.3cm]{Figures/firstdraft_plots/03_ASTroCAT_sizeclassrange.pdf}
+\caption{Comparative runs of varying number of size-classes. (a) Mean biomass of phytoplankton over the last year of a ten year run over a range of 2 to 50 size-classes of Phytoplankton and Zooplankton. Standard deviation is plotted in red. Grey crosses mark runs not otherwise shown, colored dots correspond to exemplary runs. (b) Exemplary model runs. Sum of phytoplankton biomass is shown over a ten year run.}
+\label{Figure:ResultsASTroCAT_2}
+\end{figure}
+
+
+%%% added Section for editing purposes, later simply use \conclusions
+\section{Conclusions}
 \conclusions  %% \conclusions[modified heading if necessary]
 % Place this project in the wider open science ecosystem, outlook on further developments
 
+% ANDREWS COMMENTS
+make the main points again (from intro)
+old school modeling can be done better
+show that I am moving in a direction that other people are! Brian Rose climlab, etc.
 
+- This is a first step in the direction
+
+- package architecture should be merged with other open-source python efforts (veros-bgcm, BGC-val)
+
+- xsimlab is a powerful framework that is actively developed further, more added compatibilities possible
+- same goes for xarray-simlab-ode, e.g. solvers, visualization, optimization of model construction & execution in backend
+
+e.g. next steps: 1. add 1D, 2D, 3D models 2. add agent-based models using xarray-simlab framework (could use the same pool of functions, compability could be established with backend code!)
+
+- Python lends itself well to interface with legacy fortran code, can make marine 3d modeling much more accessible without loosing performance or accuracy
+
+- want to make the first step, hoping that people will adopt and contribute
+
+- any modeler willing to use phydra will probably have to write his own processes, and this is also the intention. Object oriented structure still highly simplifies collaboration with non-modelers or people not versed in higher-level python. Higher transparency and collaboration between modelers as well, since same code base and similar 
+
+- clearly: should add 1D -> 3D example models in the future
+
+
+%% END OF SECTION CONCLUSIONS
 
 
 
@@ -579,21 +1146,21 @@ TEXT
 
 %% The reference list is compiled as follows:
 
-\begin{thebibliography}{}
+%\begin{thebibliography}{}
 
-\bibitem[AUTHOR(YEAR)]{LABEL1}
-REFERENCE 1
+%\bibitem[AUTHOR(YEAR)]{LABEL1}
+%REFERENCE 1
 
-\bibitem[AUTHOR(YEAR)]{LABEL2}
-REFERENCE 2
+%\bibitem[AUTHOR(YEAR)]{LABEL2}
+%REFERENCE 2
 
-\end{thebibliography}
+%\end{thebibliography}
 
 %% Since the Copernicus LaTeX package includes the BibTeX style file copernicus.bst,
 %% authors experienced with BibTeX only have to include the following two lines:
 %%
-%% \bibliographystyle{copernicus}
-%% \bibliography{example.bib}
+\bibliographystyle{copernicus}
+\bibliography{references.bib}
 %%
 %% URLs and DOIs can be entered in your BibTeX file as:
 %%

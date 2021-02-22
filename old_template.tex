@@ -1264,7 +1264,7 @@ The rates of change of the state variables are described by the following set of
 
 \caption{ Definition of symbols employed in use case 1 appendix. (\unit{\mu M \ N} = \unit{mmol \ Nitrogen \ m^{-3}}) }
 
-\begin{tabular}{l l l}
+\begin{tabular}{l c r}
 Symbol & Meaning & Unit\\
 \tophline
 \tophline
@@ -1318,6 +1318,62 @@ $m^{Z2}$ & quadratic mortality of zooplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}}
 \end{table*}
 
 
+\begin{table*}[t]
+
+\caption{ Definition of symbols employed in use case 1 appendix. (\unit{\mu M \ N} = \unit{mmol \ Nitrogen \ m^{-3}}) }
+
+\begin{tabular}{l c r}
+Symbol & Meaning & Unit\\
+\tophline
+%\tophline
+State variables:\\
+%\middlehline
+$N$ & concentration of nutrient in the upper mixed layer & \unit{\mu M \ N} \\
+$P$ & concentration of phytoplankton biomass in the upper mixed layer & \unit{\mu M \ N} \\
+$Z$ & concentration of zooplankton biomass in the upper mixed layer & \unit{\mu M \ N} \\
+$D$ & concentration of detritus in the upper mixed layer & \unit{\mu M \ N} \\
+
+Forcings:\\
+%\middlehline
+$N^\emptyset$ & nutrient concentration right below mixed layer & \unit{\mu M \ N} \\
+$H$ & depth of the upper mixed layer (MLD) & \unit{m} \\
+$h^+$ & positive derivative of H(t) & \unit{m \ d^{−1}}  \\
+$I$ & irradiance at the surface & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}} \\
+$T$ & temperature of the upper mixed layer & \unit{\degree C} \\
+Processes:\\
+%\middlehline
+$K$ & material exchange between mixed and bottom layer & \unit{m \ d^{-1}} \\
+$\gamma_T$ & temperature dependency of phytoplankton growth & dimensionless \\
+$\gamma_I$ & light limitation of phytoplankton growth &  dimensionless\\
+$\gamma_N$ & nutrient limitation of phytoplankton growth & dimensionless \\
+$G_P$ & total biomass of phytoplankton grazed by zooplankton & \unit{\mu M \ N} \\
+$G_D$ & total biomass of detritus grazed by zooplankton & \unit{\mu M \ N} \\
+Parameters: \\
+%\middlehline
+$\kappa$ & constant mixing parameter & \unit{m \ d^{−1}}  \\
+$v^D$ & additional sinking parameter & \unit{m \ d^{−1}}  \\
+$\mu^\emptyset$ & maximum phytoplankton growth rate & \unit{d^{−1}}  \\
+$I^{opt}$ & constant mixing parameter & \unit{\mu mol \ photons \ m^{-2} \ s^{-1}}  \\
+$k^w$ & light attenuation constant of sea water & \unit{m^{−1}}  \\
+$k^c$ & light attenuation constant of phytoplankton biomass & \unit{m^{−1}}  \\
+$k^N$ & half-saturation constant for nutrient uptake & \unit{\mu M \ N}  \\
+$\mu^Z$ & maximum ingestion rate of zooplankton & \unit{d^{−1}}  \\
+$\phi_P$ & zooplankton grazing preference for phytoplankton & dimensionless \\
+$\phi_D$ & zooplankton grazing preference for zooplankton & dimensionless \\
+$k_Z$ & half-saturation constant for zooplankton intake & \unit{\mu M \ N} \\
+$\beta$ & absorption efficiency of zooplankton grazing &  dimensionless \\
+$\epsilon$ & net production efficiency of zooplankton grazing & dimensionless \\
+$m^D$ & remineralisation rate of detritus & \unit{d^{-1}} \\
+$m^P$ & linear mortality of phytoplankton & \unit{d^{-1}} \\
+$m^{P2}$ & quadratic mortality of phytoplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
+$m^Z$ & linear mortality of zooplankton & \unit{d^{-1}} \\
+$m^{Z2}$ & quadratic mortality of zooplankton & \unit{(\mu M \ N)^{-1} \ d^{-1}} \\
+%\middlehline
+%\bottomhline
+\end{tabular}
+%\label{appendix:table:usecase1symbols}
+%\belowtable{This is a test} % Table Footnotes
+\end{table*}
 
 \clearpage
 % appendix for Use Case 2
