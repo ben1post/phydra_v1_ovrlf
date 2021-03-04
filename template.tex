@@ -80,7 +80,7 @@
 
 \begin{document}
 
-\title{Phydra 0.1: an open source Python library for flexible, modular and reproducible marine ecosystem modeling based on ordinary differential equations}
+\title{Phydra 0.1: an open source Python library for flexible, modular and reproducible marine ecosystem modeling based on ordinary differential equations} 
 
 
 % \Author[affil]{given_name}{surname}
@@ -277,6 +277,16 @@ Why Phydra? -> collaborative development and open science are central to the Pyt
 Phydra is a library for those starting out with marine ecosystem modeling and starting point for scientific exploration.
 
 Phydra for now only includes code that uses xarray-simlab-ode framework, but this does not have to be fixed and could very well be extended to include other implementations of models.
+
+% AIM for XSO
+In order to provide phydra with a functional backend, we ended up developing our own framework: XSO
+Goals:
+- modular & flexible model structure (allows reuse of components, flexible routing between processes)
+- model implementation not dependent on specific solver (flexible solver backend)
+- 2 levels of complexity -> model assembly and component construction
+found Xarray-simlab as basis, provides many benefits, but not optimized for models based on differential equations -> based on step-wise calculations
+-> Benjamin Post developed Xarrray-simlab-ode (XSO) 
+
 
 % AIM for this paper! qualify limits
 "In this paper, we (a) describe modeling approach, (b) apply modeling approach in 3 examples"
@@ -546,21 +556,19 @@ The simple model of \citet{Monod1942RecherchesBacteriennes}, devised to describe
 
 - first we check the model at constant flow rate and nutrient concentration, then (in order to show added value of framework) we add sinusoidal nutrient concentration and compare
 
-- then the next modification is converting from Monod to Droop model formulation, which can be achieved by replacing two components
-A more complex description of growth is the model devised by \citet{Droop1968VitaminLutheri}, where an internal nutrient quota is tracked and nutrient uptake and growth are decoupled. 
 
-In the following use case we will show the definition of both of these models for growth of phytoplankton on a single nutrient in a chemostat environment. 
+In the following use case we will show the definition this models for growth of phytoplankton on a single nutrient in a chemostat environment. 
 -The forcing will be both constant and sinusoidal
 
 
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_schematics/01_schematics_Chemostat.pdf}
-\caption{Model schematic of chemostat model. (a) Monod representation of phytoplankton feeding on a nutrient. (b) Droop representation of phytoplankton growth, including an added state variable for internal quota.}
+\caption{Model schematic of chemostat model. Monod representation of phytoplankton feeding on a nutrient.}
 \label{Figure:ModelSchematics_1}
 \end{figure}
 
-\subsubsection{Model formulation - Monod}
+\subsubsection{Description}
 The model is schematized in !Figure (a). It uses nitrogen as its currency (quantities are measured in units of $\mu mol$ N $m^{-3}$, or $\mu M$), with state variables for dissolved nutrients ($N$) and phytoplankton ($P$). The physical environment is a highly simplified flow-through system, corresponding to a laboratory chemostat setup. Growth medium with nutrient concentration $N_0$ flows into the system at rate $f$. The model components ($N$ \& $P$) flow out of the system at that same rate.
 
 Nutrient limitation of phytoplankton growth ($\gamma$) is described via Monod kinetics \citep{Monod1942RecherchesBacteriennes}.
@@ -586,7 +594,7 @@ The model equations are as follows:
     - f P
 \end{equation}
 
-\subsubsection{Implementation - Monod}
+\subsubsection{Implementation}
 % IDEA: instead of showing any code, show this also as a schematic (essentially the "map" of components and their variables) for the first simple example, I could show all steps of the process as well as the variables, etc. for the two more complex ones, I could isntead only show the name of the component in a box, and how they are interconnected (leaving out backend stuff)
 The Monod model was implemented...
 
@@ -596,97 +604,31 @@ Forcings: N0
 Fluxes: Growth (N->P), Influx (N0->N), Outflux(N,P->)
 This model can be implemented exactly like this in XSO, using 6 components. See the schematic (TODO!).
 
-- Parameters were chosen to represent a standard range, for specific applications and model to data comparisons these parameters should be checked again..
-
-# table of parameters # here?
-
-
-- In order to run this model at periodic forcing we can simply exchange the Forcing component, from ConstantForcing to SinusoidalForcing.
-
-
-\subsubsection{Model formulation - Droop}
-This modified version of the previous model is schematized in !Figure (b). In addition to dissolved nutrients ($N$) and phytoplankton ($P$) the model tracks the internal nutrient quota of phytoplankton ($Q$). Similarly to $N$ and $P$, $Q$ flows out of the model system at the rate $f$.
-
-In this version of the model, nutrient uptake and phytoplankton growth are decoupled, according to Droop \citep{Droop1968VitaminLutheri}.
-Nutrient uptake by phytoplankton ($v$) is still described via Michealis-Menten (or Monod) kinetics, but this is now assembled to the internal nutrient quota $Q$:
-\begin{equation}
-    v = v_{max} \frac{N}{k + N} 
-\end{equation}
-where $k$ is the half-saturation constant for uptake, $v_{max}$ is the maximum uptake rate and $N$ is external nutrient concentration in the medium.
-
-The growth rate of phytoplankton is not dependent on $N$, but on $Q$, the minimum internal nutrient quota $q_{min}$ instead and the growth rate at infinite quota $\mu_\infty$.
-\begin{equation}
-    \mu = \mu_\infty (1 - \frac{q_{min}}{Q})
-\end{equation}
-
-Apart from this added complication of nutrient uptake and growth, the previous model is not further modified.
-
-The model equations are as follows:
-\begin{equation}
-    \frac{d N}{d t} = 
-    f N^\emptyset % Nutrient mixing
-    -  v_{max} \frac{N}{k + N} 
-    - f N
-\end{equation}
-
-\begin{equation}
-    \frac{d Q}{d t} = 
-    v_{max} \frac{N}{k + N} 
-    - \mu_\infty (1 - \frac{q_{min}}{Q})
-    - f Q
-\end{equation}
-
-%PHYTOPLANKTON
-\begin{equation}
-    \frac{d P}{d t} =
-    \mu_\infty (1 - \frac{q_{min}}{Q})
-    - f P
-\end{equation}
-
-\subsubsection{Implementation - Droop}
-%DO THIS LAST FOR ALL EXAMPLES! FIRST GO THROUGH THE UN_CODEY STUFF
-
-% here present the implementation as is used in phydra
-
-% show pseudocode for this model, and the developmental steps
-
-
-The above model can be separated into a few components:
-State variables: N, P, Q
-Forcings: N0
-Fluxes: Uptake (N->Q), Growth (Q->P), Influx (N0->N), Outflux(N,P,Q->)
-This model can be implemented exactly like this in XSO, using 7 components. See the schematic (TODO!).
-- Because they are invariably linked, we can initialize P and Q together in the same component. This would allow easyily adding another phytoplankton with its own quota state variable, simply by adding another instance of the DroopPhyto component. There is no limit to the number of state variables intialized per component.. but of course it make sense to separate them for flexibility where appropriate.
+- Technical feature to explain: List-input for variable - used in Outflux component. It would be possible to add two model components for each variable that flows out, but tidier and more efficient to allow list input, Flux is computed in vectorized fashion in backend -> highly more efficient for many variables or larger dimensions.
 
 - Parameters were chosen to represent a standard range, for specific applications and model to data comparisons these parameters should be checked again..
 
 # table of parameters # here?
 
 - In order to run this model at periodic forcing we can simply exchange the Forcing component, from ConstantForcing to SinusoidalForcing.
+
 
 \subsubsection{Results}
 
 - When run over a period of 10 days the model quickly reaches a steady state under constant forcing
 - and shows an oscillating behaviour following the sinusoidal forcing 
-- differences between Monod and Droop? 
--- Of course added state variable.. uptake and growth are decoupled, so uptake is much faster in Droop.. onset of growth is faster.
--- steady state biomass slightly lower, of course due to Qmin, always retain some biomass in internal pool, not in biomass
--- growth is faster, but shape of growth curve is very similar <- growth speed highly dependent on parameters!
--- in sinusoidal case, q shows dampened oscillations as it varies only slightly rises above Qmin
 
 - many more interesting checks and runs could be done, this is very simple example, and showcasing the ease of creating and modifying models using XSO and Phydra
 
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_plots/01_chemostat_output.pdf}
-\caption{Model output for the four chemostat model scenarios. (a) Monod - constant, (b) Monod - sinusoidal, (c) Droop - constant, (d) Droop sinusoidal}
+\caption{Model output for the four chemostat model scenarios. (a) Monod - constant, (b) Monod - sinusoidal}
 \label{Figure:ResultsChemostat}
 \end{figure}
 
 
-
-
-
+% NOTE: I DO NOT WANT A DISCUSSION HERE; BECAUSE THAT IS NOT THE POINT OF THE PAPER! IT SHOULD PRESENT TeCHNICAL FRAMEWORK AND IMPLEMENTATION; NOT DISCUSS MODEL Output.. still limitied discussion necessary in the "Result" sections per Use Case
 
 
 \subsection{Model use case 2: An NPZD slab model - EMPOWER}
@@ -705,7 +647,7 @@ See Figure \ref{Figure:phydraschematics_1} (a) for a schematic of the model stru
 
 \subsubsection{Description}
 % really present a concise and to the point model description here, as would be in any other model publication.
-For the first use case we have implemented a traditional NPZD ecosystem model as presented in Figure \ref{Figure:phydraschematics_1} (a) with a nutrient $N$ (in this case nitrate), phytoplankton $P$, zooplankton $Z$ and detritus $D$ as state variables. The first use case model employs slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of two layers. A biologically inert deep ocean is situated below a well mixed upper layer of variable depth that contains the ecosystem. The general model structure is adapted from the EMPOWER model presented by \citet{Anderson2015c} with simplifications to the treatment of light in the model and it's parameterisation. 
+For the first use case we have implemented a traditional NPZD ecosystem model as presented in Figure \ref{Figure:phydraschematics_1} (a) with a nutrient $N$ (in this case nitrate), phytoplankton $P$, zooplankton $Z$ and detritus $D$ as state variables. The first use case model employs slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of two layers. A biologically inert deep ocean is situated below a well mixed upper layer of variable depth that contains the ecosystem. The general model structure is adapted from the EMPOWER model presented by \citet{Anderson2015c}.
 Modifications were aimed at simplifying the description of physical forcings and phytoplankton growth. The model is driven by empirical forcing describing the depth of the mixed layer ($H$), average temperature of the mixed layer ($T$), photosynthetically active radiation at the surface ($I$) and nutrient concentration in the deep layer ($N^\emptyset$) 
 
 % Nutrient dynamics
@@ -757,6 +699,9 @@ The attenuation coefficient $k^{PAR}$ is the sum of the attenuation coefficient 
 \end{equation}
 
 Combining the equations and integrating across the mixed layer, the numerical solution for the integrated light-limiting term affecting phytoplankton growth is calculated. Integrated values within the mixed layer larger than the optimal irradiance will limit growth, to model effects of photo-inhibition \citep{Steele1962EnvironmentalSea}.
+
+$$ALSO! SHOW 3-layer MLD! explain and show equations$$ *here #TODO
+
 This simple implementation uses only one parameter to describe light limitation of phytoplankton growth, which is $I^{opt}$. This is a highly simplified treatment of light in a slab model. A more realistic representation of light-limited growth would include chlorophyll-to-biomass ratios and related parameters and functions. See \citet{Anderson2015c} for an insightful discussion of light-limitation in slab models.
 
 Nutrient limitation of phytoplankton growth $\gamma^N$ is described by the Michaelis-Menten (or Monod) equation.
@@ -855,23 +800,39 @@ from \citet{Anderson2015c}}
 
 %% HERE SLAB OUTPUT
 
-\subsubsection{Implementation / modification}
+\subsubsection{Implementation}
 % here present the implementation as is used in phydra
 % IDEA: instead of showing any code, show this also as a schematic (essentially the "map" of components and their variables) for the first simple example, I could show all steps of the process as well as the variables, etc. for the two more complex ones, I could isntead only show the name of the component in a box, and how they are interconnected (leaving out backend stuff)
 The model was implemented as follows...
 (- more simplified description of model, less detailed schematics due to size contraints)
 
+- we followed EMPOWER model structure, but technical implementation using XSO is quite different: we modified the explicit time-step (in a for-loop) scheme to fully integrated functions, that can be computed irrespective of time step size. This makes the functions and code easier to read and modify.
+- Model code is not directly tied to integration or time-step scheme, everything flexible!
+
+
 $$HERE$$ need to edit this to large table, for all models $$HERE$$
 The above model can be separated into a few components:
 State variables: N, P, D, Z
 Forcings: N0, SST, MLD, Temp, I0(calculated from location)
-Fluxes: Uptake (N->Q), Growth (Q->P), Influx (N0->N), Outflux(N,P,Q->)
+Fluxes: Uptake (N->P), Growth (P->Z,N,D GGE), Upwelling (N0-MLD>N), Mixing(N,P,Z->),..
 This model can be implemented exactly like this in XSO, using X components. See the schematic (TODO!).
 
+- Schematic of implementation is only shown simplified here, but full description and code available online! (and appendix?)
+
+- more complex model requires using features of XSO to have efficient code, e.g. one component calculating K, which is used in Mixing & Upwelling component. Also there is growth limitation, which is a multiplicative process of a few different factors (That are the results of "fluxes"). This can both be done using the $group$ variable type. EXPLAIN IT, Can have multiple levels, e.g. for temperature dependency here (could also have this in same process though!)
+
+- Again, use some list-input Variables. EXPLAIN GGE routing, and why it is done that way
+
+- Grazing function, allows for list input! Can vary and experiment with what Zooplankton grazes on. Implementation relatively simple because Z has no dimensions.
+
+- Complex calculation of light, via latitude. NOwadays also robust data from Satellite (which is already integrated climatology).. with modular structure complexity can easily be removed and other simpler forcing provided.. or light forcing can be calculated outside of model, and then passed to model fully integrated (this is what Phydra does) -> more efficient.
 
 - parameters are completely adapted from Anderson et al.
+* Table of Parameters here *
 - four locations from original paper are adapted, exact same forcing is used (see forcing figure!)
 - Verification data is different from original paper, chlorophyll MODIS climatology and WOA 2018 nutrient data (Nitrogen) + MLD climatology.
+
+- showcase "batch" execution, can run all 4 location models in parallel. Output is stored as one Xarray, with additional dimension coordinate that differentiates between locations..
 
 
 % DO I NEED A NEW SUBSECTION FOR FORCING? HOW TO DO THIS?
@@ -882,18 +843,26 @@ This model can be implemented exactly like this in XSO, using X components. See 
 \label{Figure:EMPOWERforcing}
 \end{figure*}
 
-technical stuff:
-- however we modified the explicit time-step (in a for-loop) scheme to fully integrated functions, that can be computed irrespective of time step size. This makes the functions and code easier to read and modify.
 
-- showcase "batch" execution, can run all 4 location models in parallel. Output is stored as one Xarray, with additional dimension coordinate that differentiates between locations..
+- modification:
 
+- Calculating light avaiability via Lambert-Beer for a single layer (MLD) is very rough approximation
+- Slab model is already strong simplification of ocean, but even within MLD light is attenuated quite differently. EMPOWER paper has an interesting discussion of this, and shows more complex treatments.
+- We have implemented one of the described formualtions: a three-layer MLD for light attenuation, 0-5, 5-25, >25 meters
+- can be even more complex, such as the described formulations treating spearate spectral bands.
+- decision of modeler how complex, how simple, depends on scientific question & location of model
 
 
 
 
 \subsubsection{Results}
 % show model results and discuss 
-- 
+- Recreating results of EMPOWER paper with our framework
+- Different integration routines, but output in high agreement (This should never change the model output!)
+- Different verification data, but generally same pattern, and agreeing well 
+
+- showing different light integration routine: as observed in EMPOWER, 3-layer light attenuation shows model results closer to data, particularly in location Papa
+
 
 
 %% HERE SLAB OUTPUT
@@ -1025,13 +994,37 @@ $\Delta size^{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994
 \label{Figure:ModelSchematics_3}
 \end{figure}
 
-\subsubsection{Implementation  / modification}
+\subsubsection{Implementation}
 % here present the implementation as is used in phydra
+Implementation is similar to Banas, but in Python, not Javascript/Processing. Model structure exactly the same.
+Using XSO framework we don't need to use any for-loops, can make use of vectorization.
 
-Dimensionality of state variables (this functionality in XSO) is useful is in setting up phytoplankton size classes in trait-based models. All phytoplankton state variables grow on a common nutrient, but uptake parameters are related to allometries of cell size. A phytoplankton functional group is initialized, with a certain size range and number of state variables. Parameters are dynamically initialized based on the size provided by the component. 
+
+$$HERE$$ need to edit this to large table, for all models $$HERE$$
+The above model can be separated into a few components:
+State variables: N, P, Z
+Forcings: N0 (very easy to go from constant to sinusoidal forcing)
+Fluxes: Uptake (N->Pp), Grazing (Pp->Zz + GGE->N,loss), Influx (N0->N)
+This model can be implemented exactly like this in XSO, using X components. See the schematic (TODO!).
+
+- Schematic of implementation is only shown simplified here, but full description and code available online! (and appendix?)
+
+- SV-Array functionality! Dimensionality of state variables (this functionality in XSO) is useful is in setting up phytoplankton size classes in trait-based models. All phytoplankton state variables grow on a common nutrient, but uptake parameters are related to allometries of cell size. A phytoplankton functional group is initialized, with a certain size range and number of state variables. Parameters are dynamically initialized based on the size provided by the component. 
+
+- Allometries are not built into model, to reduce complexity and increase flexibility.. instead they are provided as helper functions with Phydra -> can be used for any project! What is input variable in model is not size but the actual parameter. Model however does store the size variable, as this is required input for the Size-based SV component (additional param). This way users can store any necessary information with model data.. (this should also be xs.index, helps with plotting (TODO))
+
+- E.g. for mortality, intuitive writing of flux functions, because of vectorization: sum of Z can be computed against each Z, array is returned from function
+
+- Implementation of Grazing function is very complex, as many size classes create large complex matrix-wise interaction. With XSO computational optimization, we use vectorization again, and multi-dimensional flux! Works without problems, but need to keep attention to orientation and correct parsing of matrix (Could provide helper functions? -> think about it)
+
+- modification: very simple! use SV-Array component, and provide variable number of initial values in list, model automatically scales all other functions etc.
+
 
 \subsubsection{Results}
-TEXT
+- recreate dynamics observed using the same model by BANAS
+- showing oscillatory behaviour, emergent properties of complex food web (one level of trophic interaction)
+- modification: interesting effect of the number of size classes on model output and model stability.. seems to stabilize (but still vary) after 10-20 clones -> important fact for functional group type models! dynamics are an artifact of low resolution, not functional diversity. With increased resolution, more "predicatable" dynamics.
+
 
 %%f
 \begin{figure}[t]
