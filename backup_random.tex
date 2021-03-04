@@ -1,3 +1,91 @@
+%%% DROOP STUFF %%%%
+
+
+- then the next modification is converting from Monod to Droop model formulation, which can be achieved by replacing two components
+A more complex description of growth is the model devised by \citet{Droop1968VitaminLutheri}, where an internal nutrient quota is tracked and nutrient uptake and growth are decoupled. 
+
+
+\subsubsection{Model formulation - Droop}
+This modified version of the previous model is schematized in !Figure (b). In addition to dissolved nutrients ($N$) and phytoplankton ($P$) the model tracks the internal nutrient quota of phytoplankton ($Q$). Similarly to $N$ and $P$, $Q$ flows out of the model system at the rate $f$.
+
+In this version of the model, nutrient uptake and phytoplankton growth are decoupled, according to Droop \citep{Droop1968VitaminLutheri}.
+Nutrient uptake by phytoplankton ($v$) is still described via Michealis-Menten (or Monod) kinetics, but this is now assembled to the internal nutrient quota $Q$:
+\begin{equation}
+    v = v_{max} \frac{N}{k + N}
+\end{equation}
+where $k$ is the half-saturation constant for uptake, $v_{max}$ is the maximum uptake rate and $N$ is external nutrient concentration in the medium.
+
+The growth rate of phytoplankton is not dependent on $N$, but on $Q$, the minimum internal nutrient quota $Q_{min}$ instead and the growth rate at infinite quota $\mu_\infty$.
+\begin{equation}
+    \mu = \mu_\infty (1 - \frac{Q_{min}}{Q})
+\end{equation}
+
+Apart from this added complication of nutrient uptake and growth, the previous model is not further modified.
+
+The model equations are as follows:
+\begin{equation}
+    \frac{d N}{d t} = 
+    f N^\emptyset % Nutrient mixing
+    -  v_{max} \frac{N}{k + N} 
+    - f N
+\end{equation}
+
+\begin{equation}
+    \frac{d Q}{d t} = 
+    v_{max} \frac{N}{k + N} 
+    - \mu_\infty (1 - \frac{Q_{min}}{Q})
+    - f Q
+\end{equation}
+
+%PHYTOPLANKTON
+\begin{equation}
+    \frac{d P}{d t} =
+    \mu_\infty (1 - \frac{Q_{min}}{Q})
+    - f P
+\end{equation}
+
+\subsubsection{Implementation - Droop}
+%DO THIS LAST FOR ALL EXAMPLES! FIRST GO THROUGH THE UN_CODEY STUFF
+
+% here present the implementation as is used in phydra
+
+% show pseudocode for this model, and the developmental steps
+
+
+The above model can be separated into a few components:
+State variables: N, P, Q
+Forcings: N0
+Fluxes: Uptake (N->Q), Growth (Q->P), Influx (N0->N), Outflux(N,P,Q->)
+This model can be implemented exactly like this in XSO, using 7 components. See the schematic (TODO!).
+- Because they are invariably linked, we can initialize P and Q together in the same component. This would allow easyily adding another phytoplankton with its own quota state variable, simply by adding another instance of the DroopPhyto component. There is no limit to the number of state variables intialized per component.. but of course it make sense to separate them for flexibility where appropriate.
+
+- Parameters were chosen to represent a standard range, for specific applications and model to data comparisons these parameters should be checked again..
+
+# table of parameters # here?
+
+- In order to run this model at periodic forcing we can simply exchange the Forcing component, from ConstantForcing to SinusoidalForcing.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 %%% TABLES %%%%
 
 \begin{table*}[t]
