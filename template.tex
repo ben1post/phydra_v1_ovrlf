@@ -77,6 +77,7 @@
 
 
 \usepackage{comment} 
+\usepackage{enumerate}
 
 \begin{document}
 
@@ -250,7 +251,7 @@ ALTHOUGH, actually often very similar in nature and underlying technical process
 
 The tools used in academic computational modeling show a growing gap to the software ecosystems for data analysis. Perhaps in part due to the smaller user base, the former often have a steeper learning curve, are less accessible to novice users and can result in convoluted workflows. The latter is evolving rapidly towards more interactive and streamlined workflows.
 
-Implementations of marine ecosystem models often evolve organically to higher complexities at the expense of their readability, which may compromise sustainability in the long term. In particularly, simplifying already complex models is not always simple and easy.
+Implementations of marine ecosystem models often evolve organically to higher complexities at the expense of their readability, which may compromise sustainability in the long term. In particularly, simplifying already complex models is not always possible or simple.
 
 There are already some great modeling frameworks aimed to address the two issues above in the Python Scientific ecosystem (e.g., Climlab, CliMT/Simpl, Landlab), but there is to our knowledge no project to establish such a modeling framework in marine ecosystem modeling. \textit{[Not sure if this is true!]}
 
@@ -267,7 +268,7 @@ Why python? -> most popular programming language, rich scientific user community
 - This is also due to the dynamic interpretation of python, which makes python slower, but python is rapidly developing and leveraging other lower level language for speed. Also has growing functionality for parallelisation of code execution which is very relevant to large multi-dimensional marine ecosystem model use cases. 
 
 Many large physical and ecological models are to this day written in FORTRAN. Due to the statically-typed nature it is more computationally efficient particularly for larger models. Yet despite it's speed, FORTRAN remains less accessible to scientists and usage and literacy of Python in the scientific community far exceeds that of FORTRAN.
-Phydra is a project to bridge the gap between older, but more efficient ecosystem model code written in low-level languages like C++ and FORTRAN and the flexibility and usability of modern high-level programming languages. Python is a free and open-source language that is flexible, popular and has gained wide use in the scientific community. By being written in Python, Phydra can interact with a rich environment of popular scientific and numerical packages, and e.g. tool for machine learning. 
+Phydra is a project to bridge the gap between older, but more efficient ecosystem model code written in low-level languages like C++ and FORTRAN and the flexibility and usability of modern high-level programming languages. Python is a free and open-source language that is flexible, popular and has gained wide use in the scientific community. By being written in Python, Phydra can interact with a rich environment of popular scientific and numerical packages, and e.g. tools for machine learning. 
 
 
 \subsection{Aims}
@@ -551,10 +552,10 @@ For the first use case, a simple chemostat model, we present the full implementa
 \label{Figure:ModelSchematics_1}
 \end{figure}
 
-Chemostats are a commonly used experimental setup for studying the dynamics of planktonic microorganisms under controlled laboratory settings. With a constant influx of medium containing nutrients that is matched by a constant outflow rate of the medium from the system, scientists can grow microorganisms under constant abiotic conditions. Seminal advancements in the study of marine ecosystems, in particular the mechanisms and dynamics of phytoplankton growth, were made by scientists using chemostats \citep[e.g.][]{Droop1968VitaminLutheri}. Although chemostat systems are not commonly found in nature, some oceanic upwelling systems can be approximated with such a simple model \citep{Haefner2005ModelingApplications}.
+Chemostats are a commonly used experimental setup for studying the dynamics of planktonic microorganisms under controlled laboratory settings. With a constant influx of medium containing nutrients that is matched by a constant outflow rate of the medium from the system, scientists can grow microorganisms under constant abiotic conditions. Seminal advancements in the study of marine ecosystems, in particular the mechanisms and dynamics of phytoplankton growth, were made by scientists using chemostats \citep[e.g.,][]{Droop1968VitaminLutheri}. Although chemostat systems are not commonly found in nature, some oceanic upwelling systems can be approximated with such a simple model \citep{Haefner2005ModelingApplications}.
 
 We chose a chemostat setting for the first use case model, due to the relatively simple mathematics that can describe such a flow-through system. It lends itself well as a test-bed for complex ecosystem model formulations. The presented model is a very simple construct, of a single phytoplankton state variable growing on a single nutrient with Monod kinetics. The Monod model, devised to describe bacterial growth, assumes that phytoplankton growth rate is proportional to the nutrient uptake rate \citep{Monod1942RecherchesBacteriennes}.
-It is the canonical formulation used in most marine ecosystem models to this day, although it is not without caveats \citep{Hellweger2017a}. More complex treatments of growth have been developed, most notably the Droop model \citep[e.g.][]{Droop1968VitaminLutheri}, however we chose to present the simplest possible ecosystem formulation to present the technical framework employed in the Phydra library.
+It is the canonical formulation used in most marine ecosystem models to this day, although it is not without caveats \citep{Hellweger2017a}. More complex treatments of growth have been developed, most notably the Droop model \citep[e.g.,][]{Droop1968VitaminLutheri}, however we chose to present the simplest possible ecosystem formulation to present the technical framework employed in the Phydra library.
 
 To showcase the flexibility of using the XSO framework, we show the simplicity of adding a different forcing, here a sinusoidal varying nutrient concentration in the supplied medium.
 
@@ -566,21 +567,21 @@ Nutrient limitation of phytoplankton growth ($\gamma$) is described via Monod ki
     \gamma = \frac{N}{k + N} 
 \end{equation}
 where $k$ is the half-saturation constant. $N$ is ambient nutrient concentration in the medium.
-The realized growth rate is a product of the nutrient-limiting term $\gamma$ and the maximum growth rate $\mu^\emptyset$.
+The realized growth rate is a product of the nutrient-limiting term $\gamma$ and the maximum growth rate $\mu_{max}$.
 Pathways relating to detrital matter, mortality and regeneration are not resolved. 
 
 The model equations are as follows:
 \begin{equation}
     \frac{d N}{d t} = 
-    f N^\emptyset % Nutrient mixing
-    -  \mu^\emptyset \frac{N}{k + N} 
+    f N_0 % Nutrient mixing
+    -  \mu_{max} \frac{N}{k_N + N} 
     - f N
 \end{equation}
 
 %PHYTOPLANKTON
 \begin{equation}
     \frac{d P}{d t} =
-    \mu^\emptyset \frac{N}{k + N} 
+    \mu_{max} \frac{N}{k_N + N} 
     - f P
 \end{equation}
 
@@ -597,8 +598,44 @@ The model equations are as follows:
 The Monod model was implemented using the XSO framework. In order to find a useful structuring of model components, we can separate the model into state variables, forcings and fluxes. For state variables we have the nutrient ($N$) and phytoplankton ($P$). The only forcing is the nutrient concentration of the external medium ($N_0$). Three fluxes can be separately defined: The inflow of the external medium, $P$ growing on $N$ and the outflow of both $N$ and $P$
 The model was implemented using these 6 separate model components as visualized in Figure \ref{Figure:CodeSchematics_1}.
 
-We start model construction from the list of state variables, forcings and fluxes mentioned before. To add state variables, we can simply use the \texttt{StateVariable} component, which defines a single variable. The name of the specific component is supplied at model creation, in this case we have one state variable for the nutrient and one for phytoplankton. The specific label that is used to link components with each other (e.g. \texttt{"N"} for nutrient) are supplied at model setup. 
-A XSO forcing variable requires a setup function that supplies the forcing to the framework. For a constant forcing we can use the supplied \texttt{ConstantForcing} component, which takes a parameter for the value of the forcing and returns a function simply returning this value at every evaluated time step. We link the created constant forcing to the \texttt{Inflow} component via its label \texttt{"N0"}. The \texttt{Inflow} component defines a rate parameter and via the supplied nutrient label \texttt{"N"} the value of \texttt{"N0"} is multiplied by the rate parameter and added to the nutrient state variable. Similarly, nutrient uptake and phytoplankton growth is defined via a single component, that takes as input the labels of the resource and consumer, as well as a maximum growth rate parameter and the half-saturation constant. 
+We start model construction from the list of state variables, forcings and fluxes mentioned before. Below we list the model components with a short explanation to their functionality and go through the XSO variable types used within:
+\begin{enumerate}
+    \item \texttt{StateVariable} defines a state variable locally within the component, and is implemented twice, for nutrient and phytoplankton respectively.
+    \begin{itemize}
+        \item \texttt{var}: A \texttt{xso.variable} that registers the state variable at model creation. At model setup the variable requires two inputs: The specific label used throughout the model to reference this state variable in other components and the initial value of this state variable.
+    \end{itemize}
+    
+    \item \texttt{ConstantForcing} creates and registers a constant forcing value, that can be referenced in other components. Here it is employed to create the forcing for the nutrient concentration ($N_0$).
+    \begin{itemize}
+        \item \texttt{forcing}: A \texttt{xso.forcing} that registers the forcing at model creation. The variable has to be initialized with a setup function within the same component. At model setup the specific forcing label used in the model has to be supplied ("N0" in this case).
+        \item \texttt{rate}: A \texttt{xso.parameter} whose value is supplied at model setup and is used within the forcing setup function.
+        \item \texttt{def forcing(time,*)}: This is a basic Python function defined within the component class, that is linked via its name to the forcing variable defined above. The asterisk is pseudo-code to reference the availability of all parameters defined in the component, specifically the \texttt{rate} parameter defined above. The setup function can include code to read or modify data, or calculate a specific time-dependent forcing. This forcing is then registered in the XSO framework, and will be called within the model backend when the forcing is referenced in other components.
+    \end{itemize}
+    
+    \item \texttt{Inflow} is our first component that defines a flux, in this case the constant input of medium with nutrient concentration $N_0$ into our medium.
+    \begin{itemize}
+        \item \texttt{resource}: A \texttt{xso.variable} with the argument \texttt{foreign=True}. At model setup this variable requires a single input, which is the label of the state variable that should be affected by the fluxes defined in the component. The other arguments that are necessary for this is \texttt{flux="inflow"}, referencing the flux defined below. By default the flux is adding to the state variable, but this can be modified by passing the argument \texttt{negative=True} if so required.
+        \item \texttt{forcing}: A \texttt{xso.forcing} with the argument \texttt{foreign=True}. Similar to the variable defined above, this forcing requires a label to the foreign forcing referenced here. It can be used as an argument in the flux function defined below.
+        \item \texttt{rate}: A \texttt{xso.parameter} whose value is supplied at model setup and is used within the flux function below.
+        \item \texttt{def inflow(*)}: A basic Python function decorated with \texttt{@xso.flux}. Through the flux argument supplied to \texttt{resource} it is linked via its name to the foreign state variable. The asterisk is pseudo-code to reference the availability of all parameters and forcings defined within the component, specifically we use the \texttt{rate} parameter and \texttt{forcing} defined above. This flux function consists of the basic mathematical calculation that defines the flux. For this simple constant input it calculates \texttt{forcing * rate} and adds that value to the state variable \texttt{resource}. With the labels and values supplied at model setup this flux returns $N_0 * 0.1$ at model runtime.
+    \end{itemize}
+    
+    \item \texttt{MonodComponent} is another component that defines a flux, in this case the constant input of medium with nutrient concentration $N_0$ into our medium.
+    \begin{itemize}
+        \item \texttt{resource}: A \texttt{xso.variable} with the argument \texttt{foreign=True}. 
+        \item \texttt{forcing}: A \texttt{xso.forcing} with the argument \texttt{foreign=True}. 
+        \item \texttt{rate}: A \texttt{xso.parameter} whose value is supplied at model setup and is used within the flux function below.
+        \item \texttt{def inflow(*)}: This is 
+    \end{itemize}
+    \item Phytoplankton growth
+    
+    \item Outflux
+\end{enumerate}
+
+
+The nutrient concentration in the external medium is supplied from the \texttt{ConstantForcing} component.A XSO forcing variable requires a setup function that supplies the forcing to the framework. For a constant forcing we can use the supplied \texttt{ConstantForcing} component, which takes a parameter for the value of the forcing and returns a function simply returning this value at every evaluated time step. We link the created constant forcing to the \texttt{Inflow} component via its label \texttt{"N0"}.
+
+The \texttt{Inflow} component defines a rate parameter and via the supplied nutrient label \texttt{"N"} the value of \texttt{"N0"} is multiplied by the rate parameter and added to the nutrient state variable. Similarly, nutrient uptake and phytoplankton growth is defined via a single component, that takes as input the labels of the resource and consumer, as well as a maximum growth rate parameter and the half-saturation constant. 
 
 The \texttt{Outflux} component shows off a feature of XSO, where fluxes affecting multiple variables in the same way allow for the definition of a list input to the variable at model setup. The flux function is computed for each supplied label in the list, and the XSO framework handles the routing of the flux values to their respective state variable. Particularly for models including many state variables, this feature simplifies the model creation and setup steps.
 
@@ -612,7 +649,7 @@ The \texttt{Outflux} component shows off a feature of XSO, where fluxes affectin
 Parameter & Description & Value & Units \\
 \middlehline
 
-$\mu^\emptyset$ & maximum growth rate & 1 & \unit{d^{-1}} \\
+$\mu_{max}$ & maximum growth rate & 1 & \unit{d^{-1}} \\
 $f$ & flow rate & 0.1 & \unit{d^{-1}}\\
 $k$ & half-saturation constant for nutrient uptake & 0.7 & \unit{µM \ N}\\
 
@@ -625,7 +662,7 @@ $k$ & half-saturation constant for nutrient uptake & 0.7 & \unit{µM \ N}\\
 
 To explore the basic dynamics, we chose parameters arbitrarily from standard ranges for exemplary model runs. See table \ref{Table:UseCase1Parameters} for the specific parameters values used. Initial values for the state variables $N$ and $P$ where set at 1 and 0.1 respectively. A more profound analysis would require testing parameter ranges, but for the simple demonstration we aim at here this should suffice.
 
-Also shown in Figure \ref{Figure:CodeSchematics_1} is the component that was used to modify the model from a system under constant forcing to periodic forcing. In order to run this model at periodic forcing we can simply exchange the Forcing component, from \texttt{ConstantForcing} to \texttt{SinusoidalForcing}. This specific component requires more input parameters, but otherwise the model creation and setup steps remain exactly the same. In fact there is the option to update the pre-existing model object and model setup object by simply supplying the \texttt{SinusoidalForcing} component for the \texttt{"N\_inflow"} component via the \texttt{model.update\_processes()} method and updating the corresponding parameters via \texttt{model\_setup.update\_vars()} functions supplied by the Xarray-Simlab framework that XSO extends. Such funtionality allows straightforward modification and testing of models.
+Also shown in Figure \ref{Figure:CodeSchematics_1} is the component that was used to modify the model from a system under constant forcing to periodic forcing. In order to run this model at periodic forcing we can simply exchange the Forcing component, from \texttt{ConstantForcing} to \texttt{SinusoidalForcing}. This specific component requires more input parameters, but otherwise the model creation and setup steps remain exactly the same. In fact there is the option to update the pre-existing model object and model setup object by simply supplying the \texttt{SinusoidalForcing} component for the \texttt{"N\_inflow"} component via the \texttt{model.update\_processes()} method and updating the corresponding parameters via \texttt{model\_setup.update\_vars()} functions supplied by the Xarray-Simlab framework that XSO extends. Such functionality allows straightforward modification and testing of models.
 
 \subsubsection{Results}
 
@@ -653,7 +690,7 @@ from \citet{Anderson2015c}. Boxes with black font represents state variables, wh
 \label{Figure:ModelSchematics_2}
 \end{figure}
 
-Our second use case presents a classical NPZD model embedded in a slab-ocean physical setting, as originated by \citet{Steele1962EnvironmentalSea}. The simplified two-layer structure provides a zero-dimensional and mechanistically simple description of physical processes affecting euphotic ecosystems in the open ocean. Major advancements in computational descriptions of our oceans were made using this setup \citep[e.g.][]{Evans1985ACycles, Fasham1990a} The classical structure lends itself well as an efficient physical test-bed for more complicated ecosystem descriptions and is often used as a teaching example as an entry point into marine ecosystem modeling \citep{Anderson2015c}.
+Our second use case presents a classical NPZD model embedded in a slab-ocean physical setting, as originated by \citet{Steele1962EnvironmentalSea}. The simplified two-layer structure provides a zero-dimensional and mechanistically simple description of physical processes affecting euphotic ecosystems in the open ocean. Major advancements in computational descriptions of our oceans were made using this setup \citep[e.g.,][]{Evans1985ACycles, Fasham1990a} The classical structure lends itself well as an efficient physical test-bed for more complicated ecosystem descriptions and is often used as a teaching example as an entry point into marine ecosystem modeling \citep{Anderson2015c}.
 The presented model is an implementation of the elegant EMPOWER model, as presented by \citet{Anderson2015c}. See Figure \ref{Figure:ModelSchematics_2} for a schematic of the model structure.
 
 The published model code was written as an R script, with some modifications allowed via user supplied flags. We updated the model code to the modular and flexible XSO framework, allowing for greater adaptability and experimentation on this classical structure.
@@ -662,37 +699,36 @@ Many NPZD-type models have been published over the years with a plethora of diff
 
 \subsubsection{Description}
 % really present a concise and to the point model description here, as would be in any other model publication.
-For the first use case we have implemented a traditional NPZD ecosystem model as presented in Figure \ref{Figure:ModelSchematics_2} with a nutrient $N$ (in this case nitrate), phytoplankton $P$, zooplankton $Z$ and detritus $D$ as state variables. The first use case model employs slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of two layers. A biologically inert deep ocean is situated below a well mixed upper layer of variable depth that contains the ecosystem. The model structure is adapted from the EMPOWER model presented by \citet{Anderson2015c}.
+For the second use case we have implemented a traditional NPZD ecosystem model as presented in Figure \ref{Figure:ModelSchematics_2}. It uses nitrogen as its currency (quantities are measured in units of $\mu mol$ N $m^{-3}$, or $\mu M$), with state variables for dissolved nutrients ($N$) and phytoplankton ($P$), zooplankton ($Z$) and detritus ($D$). The model employs slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of two layers. A biologically inert deep ocean is situated below a well mixed upper layer of variable depth that contains the ecosystem. The model structure, locations and parameters are adapted from the EMPOWER model presented by \citet{Anderson2015c}.
 
-The model is driven by empirical forcing describing the depth of the mixed layer ($H$), average temperature of the mixed layer ($T$), photosynthetically active radiation at the surface ($I$) and nutrient concentration in the deep layer ($N^\emptyset$) 
+The model is driven by empirical forcing describing the depth of the mixed layer ($H$), average temperature of the mixed layer ($T$), photosynthetically active radiation at the surface ($I$) and nutrient concentration in the deep layer ($N_0$) 
 
 % Nutrient dynamics
-The zero-dimensional physical slab setting describes two vertical layers of which the deeper layer supplies nutrients to the upper layer, whilst other components are mixed to the deep layer and lost from the system.
+The zero-dimensional slab setting describes two vertical layers of which the deeper layer supplies nutrients to the upper layer, whilst other components are mixed to the deep layer and lost from the system.
 The magnitude of mixing is described by the coefficient $K$:
 
 \begin{equation}
     K = \frac{h^{+} + \kappa}{H}
 \end{equation}
 
-Constant diffusive mixing is parameterized by $\kappa$. Variable mixing is a function of the change in MLD over time $h = \frac{d}{d t} H$. The derivative of MLD ($h$) is positive when the mixed layer deepens. The function $h^{+}$ defines the effects of entrainment and detrainment due to the changes in MLD as $h^{+} = \max(0, \ h)$. When the mixed layer shallows, $h^{+}$ does not modify $K$ (i.e. returns 0 instead of a negative value), based on the assumption that detrainment of mass and the increase in concentration due to the reduced volume of the mixed layer are balanced \citep{Evans1985ACycles}. 
+Constant diffusive mixing is parameterized by $\kappa$. Variable mixing is a function of the change in mixed layer depth (MLD) over time $h = \frac{d}{d t} H$. The derivative of MLD ($h$) is positive when the mixed layer deepens. The function $h^{+}$ defines the effects of entrainment and detrainment due to the changes in MLD as $h^{+} = \max(0, \ h)$. When the mixed layer shallows, $h^{+}$ does not modify $K$ (i.e. returns 0 instead of a negative value), based on the assumption that detrainment of mass and the increase in concentration due to the reduced volume of the mixed layer are balanced \citep{Evans1985ACycles}. 
 
 %\subsubsection{Nutrients}
 Dissolved inorganic nitrogen in the mixed layer ($N$) is supplied via mixing, zooplankton excretion and detritus remineralisation.
 Nutrients are entrained from the bottom layer. Mixing of nutrients is a positive term adding to $N$ along the gradient between $N_0$ and $N$. The general direction of transport is from a nutrient-rich bottom layer to the upper layer supporting phytoplankton growth, which is the only loss term for $N$.
 
 %\subsubsection{Phytoplankton}
-Phytoplankton biomass ($P$) increases through temperature-dependent, light- \& nutrient-limited growth. The growth rate ($\mu_{P}$) is the product of a temperature-dependent maximum growth rate ($\mu_P^{max}(T)$) and the growth-dependencies on light ($\gamma_{I}$) and nutrients ($\gamma_{N}$): 
+Phytoplankton biomass ($P$) increases through temperature-dependent, light- and nutrient-limited growth. The growth rate ($\mu_{P}$) is the product of a temperature-dependent maximum growth rate ($\mu_P^{max}(T)$) and the growth-dependencies on light ($\gamma^{I}$) and nutrients ($\gamma^{N}$): 
 
 \begin{equation}
-    \mu_{P} = \mu_P^{max}(T) \ \gamma_{I} \ \gamma_{N}
+    \mu_{P} = \mu_P^{max}(T) \ \gamma^{I} \ \gamma^{N}
 \end{equation}
 
-$T$ is the average temperature of the mixed layer in \unit{\degree C}, as supplied from model forcing. The maximum growth rate of phytoplankton $\mu_P^{max}(T)$ is equivalent to the temperature-dependent maximum photosynthetic rate $V_P^{max}(T)$. Temperature dependence is calculated via the Eppley curve \citep{Eppley1972TemperatureSea}, with an exponential equivalent to a $Q_{10}$ of 1.895.
+$T$ is the average temperature of the mixed layer in \unit{\degree C}, as supplied from model forcing. Under the assumption of balance growth, the maximum growth rate of phytoplankton $\mu_P^{max}(T)$ is equivalent to the temperature-dependent maximum photosynthetic rate $V_P^{max}(T)$. Temperature dependence is calculated via the Eppley curve \citep{Eppley1972TemperatureSea}, with an exponential equivalent to a $Q_{10}$ of 1.895.
 
 \begin{equation}
-    \gamma^{T} = V_P^{max}(T) \ 1.066^T
+    V_P^{max}(T) = V_P^{max}(0) \ 1.066^T
 \end{equation}
-
 
 Nutrient limitation of phytoplankton growth $\gamma^N$ is described by the Michaelis-Menten (or Monod) equation.
 
@@ -702,10 +738,6 @@ Nutrient limitation of phytoplankton growth $\gamma^N$ is described by the Micha
 
 where $k_N$ is the half-saturation constant for nutrient uptake. $N$ is the ambient nutrient concentration, in this case of dissolved inorganic nitrogen (DIN). In this simple model there is no distinction between nutrient uptake and assimilation of nutrient via growth.
 
-
-
-
-% THIS SHOULD BE SMITH!
 The light-limiting term $\gamma_{I}$ represents growth-dependence on total light ($I$) available to phytoplankton the upper mixed layer. We use Smith's formulation to calculate the photosynthetic rate of phytoplankton dependent on irradiance.
 
 \begin{equation}
@@ -717,7 +749,7 @@ Where $V_P^{max}$ is the maximum photosynthetic rage, $\alpha$ is the slope of t
 Attenuation of $I$ at depth $z$ in the mixed layer is calculated according to the Lambert-Beer equation:
 
 \begin{equation}
-    I(z) = I \ \exp{(-k_{PAR} \ z)} \label{beer}
+    I(z) = I \ \exp{(-k_{PAR} \ z)}
 \end{equation}
 
 The attenuation coefficient $k_{PAR}$ is the sum of the attenuation coefficient of seawater $k_w$ and that of phytoplankton biomass $k_c$, which is multiplied by the current phytoplankton biomass $P$:
@@ -727,39 +759,36 @@ The attenuation coefficient $k_{PAR}$ is the sum of the attenuation coefficient 
 \end{equation}
 
 Combining the equations and integrating across the mixed layer, the numerical solution for the integrated light-limiting term affecting phytoplankton growth is calculated.
-% Perhaps show full equation in appendix?
+% Perhaps show fully integrated equation in appendix?
 
 The modification we show here calculates light attenuation for a three-layer model of the mixed layer, as developed by \citet{Anderson1993APhotosynthesis}. This formulation calculates multiple $k_{PAR, i}$, with i = 1 for the top 5 \unit{m}, i = 2 for the depth range 5 - 23 \unit{m} and i = 3 for depths below 23 \unit{m}. The changing spectral properties of water are taken into account via polynomial coefficients ($b_{0,i}$ to $b_{5,i}$).
-
 \begin{equation}
     k_{PAR, i} = b_{0,i} + b_{1,i} C^{1/2} + b_{2,i} C + b_{3,i} C^{3/2} + b_{4,i} C^2 + b_{5,i} C^{5/2}
 \end{equation}
 where $C$ represents the pigment (chlorophyll) concentration. The values of the polynomial coefficients are given in the appendix.
 
-See \citet{Anderson2015c} for further discussion of the used formulations and a more in-depth presentation light-limitation in slab models.
+See \citet{Anderson2015c} for further discussion of the used formulations and a more in-depth presentation of light-limitation formulations.
 
-Non-grazing mortality of phytoplankton is described by both a linear $m^P$ and a quadratic factor $m^{P2}$ \citep{Yool2011Medusa-1.0:Domain}. The former accounts for natural mortality and excretion. Quadratic mortality describes density-dependent loss processes, which can be caused by viral infection. All non-grazing loss terms feed into the detritus pool.
+Non-grazing mortality of phytoplankton is described by both a linear $m_P$ and a quadratic factor $m_{P2}$ \citep{Yool2011Medusa-1.0:Domain}. The former accounts for natural mortality and excretion. Quadratic mortality describes density-dependent loss processes, which can be caused by viral infection. All non-grazing phytoplankton loss terms feed into the detritus pool.
 
 %\subsubsection{Zooplankton}
 Grazing by zooplankton occurs on both phytoplankton and detritus. The grazing function is a Holling Type 3 grazing response as presented in \citet{Anderson2015c}:
 
 \begin{equation}
-    G_P = \mu_Z \left( \frac{ \hat{\phi}_P P}{k_Z^2 + \hat{\phi}_D D +\hat{\phi}_P P}  \right) Z
+    G_P = \mu_Z \left( \frac{ \hat{\varphi}_P P}{(k_Z)^2 + \hat{\varphi}_D D +\hat{\varphi}_P P}  \right) Z
 \end{equation}
-where $\hat{\phi}_P$ = $\phi_P \ P$, $\hat{\phi}_D$ = $\phi_D \ D$.
+where $\hat{\varphi}_P$ = $\varphi_P \ P$, $\hat{\varphi}_D$ = $\varphi_D \ D$.
 
 This formulation describes the total biomass of phytoplankton that is grazed $G_P$. Parameter $\mu_Z$ is the maximum ingestion rate for a food source, in this case both phytoplankton and detritus. 
-The grazing preference parameters $\phi_P$ and $\phi_D$ do not represent a discrete fraction of the amount grazed in the diet relative to the environment. Instead, this amount is represented by the ratio of $\hat{\phi}_P$ and $\hat{\phi}_D$. 
-The half-saturation constant for grazing $k_Z$ is similarly an arbitrary parameter, that scales the density-dependent half-saturation constant $k_P$ for grazing on phytoplankton based on the choice of $\phi_P$, with the relationship $k_P$ = $\sqrt{\frac{k_Z^2 }{ \phi_P}}$.
-
+The grazing preference parameters $\varphi_P$ and $\varphi_D$ do not represent a discrete fraction of the amount grazed in the diet relative to the environment. Instead, this amount is represented by the ratio of $\hat{\varphi}_P$ and $\hat{\varphi}_D$. 
+The half-saturation constant for grazing $k_Z$ is an arbitrary parameter, that scales the density-dependent half-saturation constant $k_P$ for grazing on phytoplankton based on the choice of $\varphi_P$, with the relationship $k_P$ = $\sqrt{\frac{(k_Z)^2 }{\varphi_P}}$.
 
 Similarly the detritus grazing flux is defined as:
-
 \begin{equation}
-    G_D = \mu_Z \left( \frac{ \hat{\phi}_D D}{k_Z^2 + \hat{\phi}_D D +\hat{\phi}_P P}  \right) Z
+    G_D = \mu_Z \left( \frac{ \hat{\varphi}_D D}{(k_Z)^2 + \hat{\varphi}_D D +\hat{\varphi}_P P}  \right) Z
 \end{equation}
 
-This sigmoidal response includes passive prey switching via an interference effect, where the increase in biomass of one prey slightly reduces the intake of other prey. In contrast to other grazing formulations \citep[e.g.][]{Fasham1990a}, the prey switching mechanism does not create sub-optimal feeding, where an increase in biomass of less common prey can decreases the total grazing flux \citep{Gentleman2003a}.
+This sigmoidal response includes passive prey switching via an interference effect, where the increase in biomass of one prey slightly reduces the intake of other prey. In contrast to other grazing formulations \citep[e.g.,][]{Fasham1990a}, the prey switching mechanism does not create sub-optimal feeding, where an increase in biomass of less common prey can decreases the total grazing flux \citep{Gentleman2003a}.
 
 Zooplankton ingestion of prey does not directly convert to biomass gained however. The total biomass grazed ($G_P + G_D$) is split three ways between zooplankton growth (to $Z$), excretion of dissolved nutrients (to $N$) and egestion of faecal matter \& particles (to $D$). Zooplankton growth is a product of total biomass grazed ($G_P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G_P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\epsilon$ and $\beta$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton \citep{Straile1997GrossGroup}. The fraction of $G_P$ egested to $D$ (e.g. as faecal pellets) is calculated via $1-\beta$. 
 
@@ -768,7 +797,7 @@ Similar to phytoplankton mortality, the linear mortality factor $m_Z$ parameteri
 %\subsubsection{Detritus}
 Detritus concentration in the upper layer ($D$) is supplied by all mortality of phytoplankton, linear zooplankton mortality and zooplankton egestion (e.g. faecal pellets). The loss terms are remineralisation, zooplankton grazing, mixing and an additional sinking flux. 
 
-Detritus is remineralised at a constant rate $m^D$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate of $v^D$. This term is added to describe the fast export of larger detritus particles below the mixed layer. 
+Detritus is remineralised at a constant rate $m_D$ to $N$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate of $v_D$. This term is added to describe the fast export of larger detritus particles below the mixed layer. 
 
 %\subsubsection{Model equations}
 The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase1symbols}. See \citet{Anderson2015c} for a more detailed discussion of model structure and formulation.
@@ -776,42 +805,42 @@ The rates of change of the state variables are described by the following set of
 %Nutrient
 \begin{equation}
     \frac{d N}{d t} = 
-    K (N^\emptyset - N) % Nutrient mixing
-    + \beta(1 - \epsilon)(G^P + G^D) % Unassimilated grazing by Z
-    + m^D \ D % Remineralisation of D
-    - \mu^{P} \ P % Phytoplankton gains
+    K (N_0 - N) % Nutrient mixing
+    + \beta(1 - \epsilon)(G_P + G_D) % Unassimilated grazing by Z
+    + m_D \ D % Remineralisation of D
+    - \mu_{P} \ P % Phytoplankton gains
 \end{equation}
 
 %PHYTOPLANKTON
 \begin{equation}
     \frac{d P}{d t} =
-    \mu^{P} \ P  % Phytoplankton gains
-    - m^P \ P % Linear mortality
-    - m^{P2} \ (P)^2 % Quadratic mortality
-    - G^P % Z grazing
+    \mu_{P} \ P  % Phytoplankton gains
+    - m_P \ P % Linear mortality
+    - m_{P2} \ (P)^2 % Quadratic mortality
+    - G_P % Z grazing
     - K \ P % Phytoplankton mixing
 \end{equation}
 
 %ZOOPLANKTON
 \begin{equation}
     \frac{d Z}{d t} =
-    \beta \ \epsilon(G^P + G^D) % Assimilated grazing
-    - m^Z \ Z % Linear mortality
-    - m^{Z2} \ (Z)^2 % Quadratic mortality
+    \beta \ \epsilon(G_P + G_D) % Assimilated grazing
+    - m_Z \ Z % Linear mortality
+    - m_{Z2} \ (Z)^2 % Quadratic mortality
     - K \ Z % Zooplankton mixing
 \end{equation}
 
 %DETRITUS
 \begin{equation}
     \frac{d D}{d t} = 
-    m^P \ P % Linear mortality
-    + m^{P2} \ (P)^2 % Quadratic mortality
-    + m^Z \ Z % Linear mortality
-    + (1 - \beta)(G^P + G^D) % Unassimilated grazing by Z
-    - G^D % Z grazing on D
-    - m^D \ D % Remineralisation of D
+    m_P \ P % Linear mortality
+    + m_{P2} \ (P)^2 % Quadratic mortality
+    + m_Z \ Z % Linear mortality
+    + (1 - \beta)(G_P + G_D) % Unassimilated grazing by Z
+    - G_D % Z grazing on D
+    - m_D \ D % Remineralisation of D
     - K \ D % Mixing of D
-    - \frac{v^D}{H} \ D % Sinking of D
+    - \frac{v_D}{H} \ D % Sinking of D
 \end{equation}
 
 
@@ -825,11 +854,31 @@ The rates of change of the state variables are described by the following set of
 \label{Figure:CodeSchematics_2}
 \end{figure*}
 
-The model was implemented as follows...
-(- more simplified description of model, less detailed schematics due to size contraints)
+The NPZD slab model was implemented using the XSO framework. In order to find a useful structuring of model components, we can separate the model into state variables, forcings and fluxes. For state variables we have nutrient ($N$), phytoplankton ($P$), zooplankton ($Z$) and detritus ($D$). Forcings to the model are the mixed layer depth ($H$), nutrient concentration below the mixed layer ($N_0$), temperature in the mixed layer ($T$) and irradiance at surface ($I$). The model defines at least ten unique fluxes: Phytoplankton growth, zooplankton grazing, nutrient upwelling, mixing, sinking, remineralisation, in addition to four mortality terms.
+The amount of fluxes and interdependencies between the calculations require a more complex component structure than our first presented use case. The user needs to strike a balance between component refactoring and simplicity. Our goal was to allow for every individual ecologically relevant term to be exchangeable, for example each growth-limiting term was defined via an individual component. The "group variable" feature of the XSO framework allows for such a setup, so that as long as another flux defined in a component matches the group label in another component, it will be used for calculating the bulk flux defined there. The group variable can collect multiple fluxes to sum or multiply over, but it can also be used to split the calculation of a single flux between two components. This feature was used frequently to handle the complexity of the presented model, for further detail see the description below.
 
-- we followed EMPOWER model structure, but technical implementation using XSO is quite different: we modified the explicit time-step (in a for-loop) scheme to fully integrated functions, that can be computed irrespective of time step size. This makes the functions and code easier to read and modify.
-- Model code is not directly tied to integration or time-step scheme, everything flexible!
+- The modular nature of XSO allows reusing calculated terms in different fluxes using the group variable feature. 
+- more complex model requires using features of XSO to have efficient code, e.g. one component calculating K, which is used in Mixing \& Upwelling component. Also there is growth limitation, which is a multiplicative process of a few different factors (That are the results of "fluxes"). This can both be done using the $group$ variable type. EXPLAIN IT, Can have multiple levels, e.g. for temperature dependency here (could also have this in same process though!)
+
+The model was implemented using 23 separate model components as visualized in Figure \ref{Figure:CodeSchematics_2}. We chose to simplify the schematic by only showing the components with their respective labels, for a detailed view of each component please consult the Phydra repository on Github.
+
+The model processes and their respective components are listed below, with a short description of their function and application in the model:
+
+\begin{itemize}
+    \item \texttt{StateVariable}: This simple component defines a state variable within the XSO framework and was used to register the state variables $N$, $P$, $Z$ and $D$. At model creation the label of the component (e.g. "Nutrient") is supplied, while the label for the variable used to link fluxes to the variables (e.g. "N") is supplied at model setup.
+      
+    \item The calculation of mixing in this slab model takes the value of $H$ from the \texttt{MLDForcing} component, where the forcing is read from a file, interpolated and supplied via the label \texttt{"MLD"} to the framework. This forcing is supplied to the \texttt{Mixing\_K} component, where the mixing coefficient $K$ is calculated once and supplied to \texttt{SlabUpwelling} and \texttt{SlabMixing} via a group variable. This allows calculating $K$ only once per time-step for more efficient computation. \texttt{SlabUpwelling} takes calculates nutrient upwelling via the value of $K$ and the difference between the $N_0$ forcing and $N$. \texttt{SlabMixing} employs the list-input functionality described in the first use case, and calculates the effect of mixing on $P$, $Z$ and $D$. Finally, \texttt{SlabMixing} also receives the MLD forcing ($H$) from \texttt{MLDForcing} and calculates the sinking flux acting on $D$.
+    
+    \item Temperature-dependent, light- and nutrient-limited growth of phytoplankton is another model process that was implemented with multiple linked components, to allow for greater flexibility. \texttt{GrowthML} is the process that receives all the separate terms and calculates the net growth flux from a group variable. That group variable is added to from both the \texttt{SmithLightLim} component, calculating the integrated light limitation based on the maximum photosynthetic rate passed from \texttt{TempDepGrowth}, as well as the \texttt{MonodGrowthLim} component that calculates nutrient-limitation based on $N$. The forcing supplying irradiance at surface ($I$) is passed from the \texttt{PARForcing} component to \texttt{SmithLightLim}, similarly the temperature forcing ($T$) is supplied via the \texttt{SSTForcing} component to \texttt{TempDepGrowth}.
+    
+    \item The grazing flux is set up via two components, that are again linked via a group variable. Grazing is split into \texttt{HollingType3}, where the total grazing fluxes are calculated that subtract from $P$ and $D$, and \texttt{GrowthGrowthEfficiency}, which handles the routing of the total grazed biomass split into three fractions, which are $P$ assimilated to $Z$, egested to $D$ and excreted to $N$). To simplify the model setup, \texttt{HollingType3} was implemented with a list input for the resource variable, so that it would be simple to add or remove state variables from the zooplankton prey pool. The grazing preference is supplied as a list of the same dimension, where the order of values has to correspond to the order of supplied labels for the resource variable.
+    
+    \item Remineralisation is implemented using the component \texttt{LinearExchange}, which takes a source and sink variable as input, as well as a rate parameter ($m_D$ in this case).
+    
+    \item Mortality fluxes can similarly be implemented using basic components from the Phydra library. In fact we reuse the \texttt{LinearExchange} component for the linear mortality terms of $P$ and $Z$, both feeding into $D$. Quadratic phytoplankton mortality was implemented with the \texttt{QuadExchange} component, as it also feeds into $D$. Higher-order mortality of zooplankton is lost from the system and is implemented using the \texttt{QuadDecay} component.
+\end{itemize}
+
+- For the ecological description we followed the EMPOWER model structure, however the technical implementation using the XSO framework is quite different. The XSO framework defines functions irrespective of the specific time-step used for evaluation. This requires writing the functions without explicit time-steps. We appreciate the choice of transparently including the solving algorithm in the model code, however the present project aims at maximum flexibility. Different packaged and even custom coded model solving algorithms can be implemented via the backend Solver class by more advanced users.
 
 % Probably the forcing plot can go in the appendix?
 %%f
@@ -839,20 +888,12 @@ The model was implemented as follows...
 \label{Figure:EMPOWERforcing}
 \end{figure*}
 
-need to edit this to large table, for all models
-The above model can be separated into a few components:
-State variables: N, P, D, Z
-Forcings: N0, SST, MLD, Temp, I0(calculated from location)
-Fluxes: Uptake (N->P), Growth (P->Z,N,D GGE), Upwelling (N0-MLD>N), Mixing(N,P,Z->),..
-This model can be implemented exactly like this in XSO, using X components. See the schematic (TODO!).
+The forcing used in the presented model runs was adapted from 
+- four locations from original paper are adapted, exact same forcing is used (see forcing figure!)
+- Verification data is different from original paper, chlorophyll MODIS climatology and WOA 2018 nutrient data (Nitrogen) + MLD climatology.
 
-- Schematic of implementation is only shown simplified here, but full description and code available online! (and appendix?)
-
-- more complex model requires using features of XSO to have efficient code, e.g. one component calculating K, which is used in Mixing \& Upwelling component. Also there is growth limitation, which is a multiplicative process of a few different factors (That are the results of "fluxes"). This can both be done using the $group$ variable type. EXPLAIN IT, Can have multiple levels, e.g. for temperature dependency here (could also have this in same process though!)
-
-- Again, use some list-input Variables. EXPLAIN GGE routing, and why it is done that way
-
-- Grazing function, allows for list input! Can vary and experiment with what Zooplankton grazes on. Implementation relatively simple because Z has no dimensions.
+- talk about the problem with linearly interpolated forcing, as used in original EMPOWER
+- careful choice is necessary, model already calculates aggregate properties, both in spatial and temporal direction. Marked dynamics of model should not be an artifact of forcing interpolation method.
 
 - Complex calculation of light, via latitude. NOwadays also robust data from Satellite (which is already integrated climatology).. with modular structure complexity can easily be removed and other simpler forcing provided.. or light forcing can be calculated outside of model, and then passed to model fully integrated (this is what Phydra does) -> more efficient.
 
@@ -875,8 +916,8 @@ $m_P$ & linear P mortality & 0.015 & 0.015 & 0.015 & 0.015  & \unit{d^{−1}} \\
 $m_{P2}$ & quadratic P mortality & 0.025 & 0.025 & 0.025 & 0.025 & \unit{(µM \ N)^{-1} d^{−1}} \\
 $\mu_Z$ & Z max. ingestion rate & 1.0 & 1.0 & 1.25 & 2.0 & \unit{d^{−1}} \\
 $k_Z$ & Z half-saturation for intake & 0.6 & 0.6 & 0.6 & 0.6 & \unit{µM \ N} \\
-$\phi_P$ & grazing preference: P & 0.67 & 0.67 & 0.67 & 0.67 & \\
-$\phi_D$ & grazing preference: D & 0.33 & 0.33 & 0.33 & 0.33 & \\
+$\varphi_P$ & grazing preference: P & 0.67 & 0.67 & 0.67 & 0.67 & \\
+$\varphi_D$ & grazing preference: D & 0.33 & 0.33 & 0.33 & 0.33 & \\
 $\beta_Z$ & Z absorption efficiency & 0.69 & 0.69 & 0.69 & 0.69 &\\
 $k_{NZ}$ & Z net production efficiency & 0.75 & 0.75 & 0.75 &  0.75 &\\
 $m_Z$ & linear Z mortality  & 0.02 & 0.0 & 0.02 & 0.02 & \unit{d^{−1}} \\
@@ -892,12 +933,7 @@ $\theta_{chl}$& constant mixing parameter & 75 & 75 & 75 & 75 & \unit{g \ g^{−
 \end{table*}
 %
 
-- four locations from original paper are adapted, exact same forcing is used (see forcing figure!)
-- Verification data is different from original paper, chlorophyll MODIS climatology and WOA 2018 nutrient data (Nitrogen) + MLD climatology.
-
-- showcase "batch" execution, can run all 4 location models in parallel. Output is stored as one Xarray, with additional dimension coordinate that differentiates between locations..
-
-
+- showcase "batch" execution, can run all 4 location models from single model setup. Output is stored as one Xarray, with additional dimension coordinate that differentiates between locations.. allows easy analysis of parameter scans and bulk analysis of complicated model runs.
 
 - modification:
 
@@ -927,8 +963,6 @@ $\theta_{chl}$& constant mixing parameter & 75 & 75 & 75 & 75 & \unit{g \ g^{−
 
 
 
-
-
 \subsection{Model use case 3: A complex size-based NPZ model - ASTroCAT}
 
 From an attempt at describing an oceanic physical setting with a highly simplified ecosystem, we move to a simplified laboratory setting with a complex description of a size-structured ecosystem. The model structure for the second use case was adapted from \cite{Banas2011b}. See Figure \ref{Figure:ModelSchematics_3} for a schematic of the model structure. 
@@ -936,59 +970,55 @@ From an attempt at describing an oceanic physical setting with a highly simplifi
 - Banas publication features extended investigation of model dynamics, also under variable forcing, and stochastic grazing, etc. but here we focus on the simplest setup under constant forcing.
 - simple box model, many processes not resolved
 
-
 - allometric phytoplankton growth and zooplankton grazing, one level of trophic interaction highly resolved
 Size is called a "master-trait" in the trait-based description of plankton ecology, allowing modellers and ecologist to describe the diverse plankton community along one continuous axis. (This is of course an oversimplification, and it takes careful consideration of the choice of allometries and often a combination of functional properties and size classes to achieve a more realistic representation of natural phytoplankton assemblages.)
 
 - results in system with emergent properties
 
 - XSO framework, allows adding dimensions to state variables, has (Numpy) vectorization capabilities built in, the model can be initialized with a flexible number of size classes of phytoplankton and zooplankton (always equal number though, for this model)
-
 - We showcase this feature by running the model with 2 to 50 clones and comparing bulk phytoplankton biomass between runs
-
-
 
 \subsubsection{Description}
 % really present a concise and to the point model description here, as would be in any other model publication.
 
 For the second use case we have implemented a size-spectral NPZ ecosystem model as presented in Figure \ref{Figure:ModelSchematics_3} with a nutrient $N$ (in this case nitrate), multiple size classes of both phytoplankton $P_i$ and zooplankton $Z_j$ as state variables. 
 This model use case employs a simple box as physical setting. Inflow of nutrients is the only external input into the system, whilst mortality processes and a part of the grazing flux are removed from the system completely.
-Model structure and parameterisation is adapted from the ASTroCAT model \citep{Banas2011b}. 
+Model structure and parameterisation is adapted from the ASTroCAT model \citep{Banas2011b}.
 
 The model describes a size-structured community of phytoplankton and zooplankton, with each state variable defined by their equivalent spherical diameter (ESD). In model runs presented in this paper, we follow \citet{Banas2011b} in running simulations with 40 size classes of equally log-spaced ESD of $P$ (1 to 20 \unit{\mu m}), and 40 matching classes of $Z$ (2.1 to 460  \unit{\mu m}). 
 The model can be defined with any number of size classes within meaningful boundaries of the allometric parameterisation. Size classes are denoted by the subscript $i$ for phytoplankton and $j$ for zooplankton. In the implementation of a size-spectral model by \citeauthor{Banas2011b} the food-web is implicitly made up of matching pairs of $P_i$ and $Z_j$, to avoid creating classes at the ends of the size spectrum that are artificially released or suppressed by grazing pressure.
 
 %\subsubsection{Nutrient}
-Dissolved inorganic nitrogen (DIN) in the model system ($N$) is supplied from influx of medium (with nutrient concentration $N^\emptyset$) at a constant rate $f$ and the fraction of grazed biomass that is excreted by $Z$. The concentration $N^\emptyset$ and the flow rate $f$ determine the total nutrient supply to the system. At the same rate $N$ is flowing out from the system. Zooplankton excretion is a recycled term, that also adds back into the pool of $N$. The major loss term to $N$ is phytoplankton growth.
+Dissolved inorganic nitrogen (DIN) in the model system ($N$) is supplied from influx of medium (with nutrient concentration $N_0$) at a constant rate $f$ and the fraction of grazed biomass that is excreted by $Z$. The concentration $N_0$ and the flow rate $f$ determine the total nutrient supply to the system. At the same rate $N$ is flowing out from the system. Zooplankton excretion is a recycled term, that also adds back into the pool of $N$. The major loss term to $N$ is phytoplankton growth.
 
 %\subsubsection{Phytoplankton}
 Phytoplankton biomass $P$ increases through  nutrient-limited growth. Nutrient limitation of phytoplankton growth $\gamma_i^N$ is described by the Michaelis-Menten (or Monod) equation:
 
 \begin{equation}
-    \gamma_i^N =  \frac{N}{k_i^N + N} 
+    \gamma_i^N =  \frac{N}{k_N^i + N} 
 \end{equation}
 
-where $k_i^N$ is the size-dependent half-saturation constant. $N$ is ambient nutrient concentration in the medium.
+where $k_N^i$ is the size-dependent half-saturation constant. $N$ is ambient nutrient concentration in the medium.
 
-Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_i^{\emptyset}$. This accounts for natural mortality and excretion.
+Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_{max}^i$. This accounts for natural mortality and excretion.
 
 %\subsubsection{Zooplankton}
 Zooplankton size class $j$ grazing on phytoplankton size class $i$ is calculated by
 \begin{equation}
-    G_{ij}^P = \mu_j^Z \ \frac{ \phi_{ij} \cdot P_i }{ k_j^Z + \sum_{i}(\phi_{ij} \cdot P_i) } \ Z_j
+    G_P^{ij} = \mu_j^Z \ \frac{ \varphi_{ij} \cdot P_i }{ k_Z^j + \sum_{i}(\varphi_{ij} \cdot P_i) } \ Z_j
 \end{equation}
-where $\mu_j^Z$ is the size-dependent maximum ingestion rate, $k_j^Z$ is the prey half-saturation level and $\phi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.
+where $\mu_Z^j$ is the size-dependent maximum ingestion rate, $k_Z^j$ is the prey half-saturation level and $\varphi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.
 
-Prey preference is assumed to vary with phytoplankton size $size_i^{P}$ in a log-Gaussian distribution around an optimal prey size for each grazer $size_j^{opt}$.
+Prey preference is assumed to vary with phytoplankton size $size_{P}^i$ in a log-Gaussian distribution around an optimal prey size for each grazer $size_{opt}^j$.
 
 \begin{equation}
-    \phi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size_i^{P}) - log_{10}(size_j^{opt}) }{ \Delta size^{P} } \right) \right]
+    \varphi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size_P^i) - log_{10}(size_{opt}^j) }{ \Delta size_{P} } \right) \right]
 \end{equation}
-Where $\Delta size^{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m)}, that controls the width of the Gaussian distribution.
+Where $\Delta size_{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m)}, that controls the width of the Gaussian distribution.
 
-Zooplankton growth is a product of total biomass grazed ($G^P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G^P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\beta$ and $\epsilon$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton  \citep{Straile1997GrossGroup}. The fraction of $G^P$ egested (e.g. as faecal pellets) is calculated via $1-\beta$, which in the current model setup is assumed to be exported quickly in the flow-through setting and lost from the system. 
+Zooplankton growth is a product of total biomass grazed ($G_P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G_P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\beta$ and $\epsilon$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton  \citep{Straile1997GrossGroup}. The fraction of $G_P$ egested (e.g. as faecal pellets) is calculated via $1-\beta$, which in the current model setup is assumed to be exported quickly in the flow-through setting and lost from the system. 
 
-Zooplankton experiences quadratic mortality according to the parameter $m^{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
+Zooplankton experiences quadratic mortality according to the parameter $m_{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
 
 
 %\subsubsection{Model equations}
@@ -996,24 +1026,24 @@ The rates of change of the state variables are described by the following set of
 
 \begin{equation}
     \frac{d N}{d t} = 
-    f \ N^\emptyset % Nutrient mixing
-    +  \beta (1 - \epsilon) \sum_{j} \sum_{i} G_{ij}^P % Unassimilated grazing by Z
-    - \sum_{i} ( \mu_i^{\emptyset} \ \gamma_i^N \ P_i) % Phytoplankton gains
+    f \ N_0 % Nutrient mixing
+    +  \beta (1 - \epsilon) \sum_{j} \sum_{i} G_P^{ij} % Unassimilated grazing by Z
+    - \sum_{i} ( \mu_{max}^i \ \gamma_i^N \ P_i) % Phytoplankton gains
 \end{equation}
 
 %PHYTOPLANKTON
 \begin{equation}
     \frac{d P_i}{d t} =
-    \mu_i^{\emptyset} \  \gamma_i^N \   P_i  % Phytoplankton gains
-    - m^P  \ \mu_i^{\emptyset} \ P_i % Linear mortality
-    - \sum_{j} G_{ij}^P % Z grazing
+    \mu_{max}^i \  \gamma_i^N \   P_i  % Phytoplankton gains
+    - m_P  \ \mu_{max}^i \ P_i % Linear mortality
+    - \sum_{j} G_P^{ij} % Z grazing
 \end{equation}
 
 %ZOOPLANKTON
 \begin{equation}
     \frac{d Z_j}{d t} =
-    \beta \ \epsilon \ \sum_{i} G_{ij}^P % Assimilated grazing
-    - m^{Z2} \ Z_j \ \sum_{j} Z_j  % Quadratic mortality
+    \beta \ \epsilon \ \sum_{i} G_P^{ij} % Assimilated grazing
+    - m_{Z2} \ Z_j \ \sum_{j} Z_j  % Quadratic mortality
 \end{equation}
 
 
@@ -1022,7 +1052,7 @@ The rates of change of the state variables are described by the following set of
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_schematics/03_schematics_ASTroCAT.pdf}
-\caption{Model schematic of size-structured $NP_{40}Z_{40}$ trophic model. Model structure and parameterisation is adapted from \citet{Banas2011b}.}
+\caption{Model schematic of size-structured $NP_{i}Z_{j}$ trophic model. Model structure and parameterisation is adapted from \citet{Banas2011b}.}
 \label{Figure:ModelSchematics_3}
 \end{figure}
 
@@ -1031,19 +1061,16 @@ The rates of change of the state variables are described by the following set of
 Implementation is similar to Banas, but in Python, not Javascript/Processing. Model structure exactly the same.
 Using XSO framework we don't need to use any for-loops, can make use of vectorization.
 
-
-$$HERE$$ need to edit this to large table, for all models $$HERE$$
 The above model can be separated into a few components:
 State variables: N, P, Z
 Forcings: N0 (very easy to go from constant to sinusoidal forcing)
 Fluxes: Uptake (N->Pp), Grazing (Pp->Zz + GGE->N,loss), Influx (N0->N)
 This model can be implemented exactly like this in XSO, using X components. See the schematic (TODO!).
 
-
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_schematics/code_schematics/ASTroCAT.pdf}
-\caption{Schematic of use case 3 model as implemented in the XSO framework and included in the Phydra library. To simplify visualisation, only the XSO components with their labels and linkage are shown. Each component consist of a number of variables, forcings or parameters. Thick arrows indicate the flow of a flux between state variables. Dashed lines connecting processes indicate linkages between variables and forings, as well as group}
+\caption{Schematic of use case 3 model as implemented in the XSO framework and included in the Phydra library. To simplify visualisation, only the XSO components with their labels and linkage are shown. Each component consist of a number of variables, forcings or parameters. Thick arrows indicate the flow of a flux between state variables. Dashed lines connecting processes indicate linkages between variables and forcings, as well as group}
 \label{Figure:CodeSchematics_3}
 \end{figure*}
 
@@ -1064,15 +1091,15 @@ This model can be implemented exactly like this in XSO, using X components. See 
 \begin{tabular}{l c c c r}
 Empirical fit & Applicability & Source \\
 \tophline
-$\mu_i^{\emptyset} = (2.6 \ d^{-1}) \left( \frac{size_i^{P}}{1\mu m} \right)^{-0.45}$ & Phytoplankton 1-100 ESD \unit{\mu m} & Tang(1995) \\
-$k_i^N = (0.1 \ \unit{µM \ N})\left( \frac{size_i^{P}}{1\mu m} \right)$ & Phytoplankton 1-100 ESD \unit{\mu m} & Eppley et al. (1969) \\
+$\mu_{max}^i = (2.6 \ d^{-1}) \left( \frac{size_i^{P}}{1\mu m} \right)^{-0.45}$ & Phytoplankton 1-100 ESD \unit{\mu m} & Tang(1995) \\
+$k_N^i = (0.1 \ \unit{µM \ N})\left( \frac{size_i^{P}}{1\mu m} \right)$ & Phytoplankton 1-100 ESD \unit{\mu m} & Eppley et al. (1969) \\
 
-$\mu_j^Z = (26 \ d^{-1})\left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
+$\mu_Z^j = (26 \ d^{-1})\left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
 
-$k_j^Z = 3 \ \unit{µM \ N} $ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
+$k_Z^j = 3 \ \unit{µM \ N} $ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
 
-$size_j^{opt} = (0.65 \ \unit{\mu m})\left( \frac{size^i_{P}}{1\mu m} \right)^{0.56}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1994) \\
-$\Delta size^{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994)  \\
+$size_{opt}^j = (0.65 \ \unit{\mu m})\left( \frac{size_{P}^i}{1\mu m} \right)^{0.56}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1994) \\
+$\Delta size_{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994)  \\
 \middlehline
 
 \bottomhline
