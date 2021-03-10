@@ -595,7 +595,7 @@ The model equations are as follows:
 \label{Figure:CodeSchematics_1}
 \end{figure*}
 
-The Monod model was implemented using the XSO framework. In order to find a useful structuring of model components, we can separate the model into state variables, forcings and fluxes. For state variables we have the nutrient ($N$) and phytoplankton ($P$). The only forcing is the nutrient concentration of the external medium ($N_0$). Three fluxes can be separately defined: The inflow of the external medium, $P$ growing on $N$ and the outflow of both $N$ and $P$
+The Monod model was implemented using the XSO framework. In order to find a useful structuring of model components, we can separate the model into state variables, forcings and fluxes. For state variables we have the nutrient ($N$) and phytoplankton ($P$). The only forcing is the nutrient concentration of the external medium ($N_0$). Three fluxes can be separately defined: The inflow of the external medium, $P$ growing on $N$ and the outflow of both $N$ and $P$.
 The model was implemented using these 6 separate model components as visualized in Figure \ref{Figure:CodeSchematics_1}.
 
 We start model construction from the list of state variables, forcings and fluxes mentioned before. Below we list the model components with a short explanation to their functionality and go through the XSO variable types used within:
@@ -620,22 +620,22 @@ We start model construction from the list of state variables, forcings and fluxe
         \item \texttt{def inflow(*)}: A basic Python function decorated with \texttt{@xso.flux}. Through the flux argument supplied to \texttt{resource} it is linked via its name to the foreign state variable. The asterisk is pseudo-code to reference the availability of all parameters and forcings defined within the component, specifically we use the \texttt{rate} parameter and \texttt{forcing} defined above. This flux function consists of the basic mathematical calculation that defines the flux. For this simple constant input it calculates \texttt{forcing * rate} and adds that value to the state variable \texttt{resource}. With the labels and values supplied at model setup this flux returns $N_0 * 0.1$ at model runtime.
     \end{itemize}
     
-    \item \texttt{MonodComponent} is another component that defines a flux, in this case the constant input of medium with nutrient concentration $N_0$ into our medium.
+    \item \texttt{MonodGrowth} is another component that defines a flux, in this case the uptake of nutrient and growth of phytoplankton based on Monod kinetics.
     \begin{itemize}
-        \item \texttt{resource}: A \texttt{xso.variable} with the argument \texttt{foreign=True}. 
-        \item \texttt{forcing}: A \texttt{xso.forcing} with the argument \texttt{foreign=True}. 
-        \item \texttt{rate}: A \texttt{xso.parameter} whose value is supplied at model setup and is used within the flux function below.
-        \item \texttt{def inflow(*)}: This is 
+        \item \texttt{resource}: A \texttt{xso.variable} with the argument \texttt{foreign=True}. The flux \texttt{"uptake"} is linked via the \texttt{flux} argument with the option \texttt{negative=True} enabled. At model setup we supply the label \texttt{"N"}.
+        \item \texttt{consumer}: A \texttt{xso.variable} with the argument \texttt{foreign=True}. The flux \texttt{"uptake"} is linked via the \texttt{flux} argument. At model setup we supply the label \texttt{"P"}.
+        \item \texttt{halfsat}: A \texttt{xso.parameter} defining the half-saturation constant whose value is supplied at model setup and is used within the flux function below.
+        \item \texttt{mu}: A \texttt{xso.parameter} defining the phytoplankton growth rate whose value is supplied at model setup and is used within the flux function below.
+        \item \texttt{def uptake(*)}: This is Python function  decorated with \texttt{@xso.flux}. It is linked to the state variable defined as \texttt{resource} as negative term, and adds to the total flux of the state variable defined as \texttt{consumer} at model setup. The flux function returns a Monod function based on the values of \texttt{resource} and \texttt{consumer}, as well as the parameters \texttt{halfsat} and \texttt{mu} in the mathematical formulation $\mathit{mu} \frac{\mathit{resource}}{\mathit{halfsat}+\mathit{resource}} \mathit{consumer}$. With the labels supplied at model setup it returns $\mu \frac{N}{k_N+N} P$.
     \end{itemize}
-    \item Phytoplankton growth
     
-    \item Outflux
+    \item \texttt{Outflow} is final component defining a flux, specifically the outflow of both $N$ and $P$.
+        \begin{itemize}
+        \item \texttt{vars}: A \texttt{xso.variable} with the arguments \texttt{foreign=True} and \texttt{list\_input=True}. The flux is linked via \texttt{flux="outflow"} with the optional argument \texttt{negative=True} enabled. At model setup this variable requires a single input, which is a list of the labels of the state variables that are be affected by the flux defined in the component. Here we supply \texttt{["N","P"]}.
+        \item \texttt{rate}: A \texttt{xso.parameter} whose value is supplied at model setup and is used within the flux function below.
+        \item \texttt{def outflow(*)}: A basic Python function decorated with \texttt{@xso.flux}. The defined flux is computed individually for all state variables supplied to \texttt{vars}, but can be coded as a simple mathematical function with the framework handling the necessary routing. For this simple flux it calculates \texttt{vars * rate} and substracts that value from the state variables. With the labels and values supplied at model setup this flux returns $- N * 0.1$ acting on $N$ and $-P * 0.1$ acting on $P$ at model runtime.
+    \end{itemize}
 \end{enumerate}
-
-
-The nutrient concentration in the external medium is supplied from the \texttt{ConstantForcing} component.A XSO forcing variable requires a setup function that supplies the forcing to the framework. For a constant forcing we can use the supplied \texttt{ConstantForcing} component, which takes a parameter for the value of the forcing and returns a function simply returning this value at every evaluated time step. We link the created constant forcing to the \texttt{Inflow} component via its label \texttt{"N0"}.
-
-The \texttt{Inflow} component defines a rate parameter and via the supplied nutrient label \texttt{"N"} the value of \texttt{"N0"} is multiplied by the rate parameter and added to the nutrient state variable. Similarly, nutrient uptake and phytoplankton growth is defined via a single component, that takes as input the labels of the resource and consumer, as well as a maximum growth rate parameter and the half-saturation constant. 
 
 The \texttt{Outflux} component shows off a feature of XSO, where fluxes affecting multiple variables in the same way allow for the definition of a list input to the variable at model setup. The flux function is computed for each supplied label in the list, and the XSO framework handles the routing of the flux values to their respective state variable. Particularly for models including many state variables, this feature simplifies the model creation and setup steps.
 
@@ -979,7 +979,12 @@ Size is called a "master-trait" in the trait-based description of plankton ecolo
 - We showcase this feature by running the model with 2 to 50 clones and comparing bulk phytoplankton biomass between runs
 
 \subsubsection{Description}
-% really present a concise and to the point model description here, as would be in any other model publication.
+%%f
+\begin{figure}[t]
+\includegraphics[width=8.3cm]{Figures/firstdraft_schematics/03_schematics_ASTroCAT.pdf}
+\caption{Model schematic of size-structured $NP_{i}Z_{j}$ trophic model. Model structure and parameterisation is adapted from \citet{Banas2011b}.}
+\label{Figure:ModelSchematics_3}
+\end{figure}
 
 For the second use case we have implemented a size-spectral NPZ ecosystem model as presented in Figure \ref{Figure:ModelSchematics_3} with a nutrient $N$ (in this case nitrate), multiple size classes of both phytoplankton $P_i$ and zooplankton $Z_j$ as state variables. 
 This model use case employs a simple box as physical setting. Inflow of nutrients is the only external input into the system, whilst mortality processes and a part of the grazing flux are removed from the system completely.
@@ -1000,7 +1005,7 @@ Phytoplankton biomass $P$ increases through  nutrient-limited growth. Nutrient l
 
 where $k_N^i$ is the size-dependent half-saturation constant. $N$ is ambient nutrient concentration in the medium.
 
-Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_{max}^i$. This accounts for natural mortality and excretion.
+Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_{max}^i$. [add more detail here!] This accounts for natural mortality and excretion.
 
 %\subsubsection{Zooplankton}
 Zooplankton size class $j$ grazing on phytoplankton size class $i$ is calculated by
@@ -1049,24 +1054,7 @@ The rates of change of the state variables are described by the following set of
 
 
 
-%%f
-\begin{figure}[t]
-\includegraphics[width=8.3cm]{Figures/firstdraft_schematics/03_schematics_ASTroCAT.pdf}
-\caption{Model schematic of size-structured $NP_{i}Z_{j}$ trophic model. Model structure and parameterisation is adapted from \citet{Banas2011b}.}
-\label{Figure:ModelSchematics_3}
-\end{figure}
-
 \subsubsection{Implementation}
-% here present the implementation as is used in phydra
-Implementation is similar to Banas, but in Python, not Javascript/Processing. Model structure exactly the same.
-Using XSO framework we don't need to use any for-loops, can make use of vectorization.
-
-The above model can be separated into a few components:
-State variables: N, P, Z
-Forcings: N0 (very easy to go from constant to sinusoidal forcing)
-Fluxes: Uptake (N->Pp), Grazing (Pp->Zz + GGE->N,loss), Influx (N0->N)
-This model can be implemented exactly like this in XSO, using X components. See the schematic (TODO!).
-
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_schematics/code_schematics/ASTroCAT.pdf}
@@ -1074,7 +1062,52 @@ This model can be implemented exactly like this in XSO, using X components. See 
 \label{Figure:CodeSchematics_3}
 \end{figure*}
 
-- Schematic of implementation is only shown simplified here, but full description and code available online! (and appendix?)
+- The original model was implemented in an interactive GUI written in Processing 2, that was kindly supplied to the authors, still very worth checking out!
+
+Implementation is similar to Banas, but in Python, not Javascript/Processing. Model structure exactly the same.
+Using XSO framework we don't need to use any for-loops, can make use of vectorization.
+
+The above model can be separated into a few components:
+State variables: N, P, Z
+Forcings: N0
+Fluxes: Uptake (N->Pp), Grazing (Pp->Zz + GGE->N,loss), Influx (N0->N)
+This model can be implemented exactly like this in XSO, using X components. See the schematic (TODO!).
+
+- Schematic of implementation is only shown simplified here, but full description and code available online in the Phydra repository on Github!
+
+The model processes and their respective components are listed below, with a short description of their function and application in the model:
+
+\begin{enumerate}
+    \item State variables: 
+    \begin{itemize}
+        \item \texttt{StateVariable}: This is the same component used in the previous use cases. It registers the state variable for the ambient nutrient concentration ($N$). 
+        \item \texttt{SVArraySize}: This is an extension of the \texttt{StateVariable} component, that additionally defines a dimension for the state variable and stores the array of sizes via a parameter. The supplied dimension label allows initializing a state variable as an array within the XSO framework, that is also represented in the Xarray data structure of the model setup and output. The number of values in the state variable array can be supplied flexibly at model setup by passing a list or array of that dimension as initial values. Across the model the framework will check that labelled dimensions share the same number of values. The label of the state variable (\texttt{"P"} and \texttt{"Z"} in this case) remains a single string and can be used across the model to reference the entire array. In this model we can use the same component (with the same dimension label) to register $P_i$ and $Z_j$, as the model was constructed for both of these to share the same number of dimensions.
+    \end{itemize}
+
+    \item Nutrient influx: 
+    \begin{itemize}
+        \item \texttt{ConstantForcing}: This component registers the external nutrient forcing ($N_0$) and is the same component that was applied in the first use case model.
+        \item \texttt{Inflow}: The inflow flux is defined here, again this is the same implementation as in the first use case model. It adds to $N$ the flux defined as $N_0$ multiplied by a \texttt{rate} parameter. 
+    \end{itemize}
+    
+    \item Nutrient uptake and phytoplankton growth: 
+    \begin{itemize}
+        \item \texttt{MonodUptake}: Similar to the nutrient influx components, this is a copy of the same component used in the first use case model, with the modification that we supply a dimension label to the \texttt{consumer} state variable and the parameters for \texttt{halfsat} and \texttt{mu}. We supply the label \texttt{"P"} for the \texttt{consumer} state variable. To set up the allometric parameters for the maximum growth rate and half-saturation constant, we calculate the parameters outside of the model definition and supply the values as a list at model setup.
+    \end{itemize}
+    
+    \item Zooplankton grazing on phytoplankton: 
+    \begin{itemize}
+        \item \texttt{SizeBasedGrazing}: The grazing formulation for the multiple size classes of phytoplankton and zooplankton is the most complex function presented in our use cases. Care needs to be taken with proper handling of the dimensions within the function, but if it is done correctly the built-in vectorization of the XSO framework allows efficient calculation of the matrix-wise interaction for any number of size-classes. To improve the modularity of our implementation we split the calculation of the grazing matrix from the routing of the fluxes to their sources and sinks. This can be achieved via the group functionality of XSO, passing along the full matrix as a group variable to the \texttt{SizeBasedGrazing\_Fluxes} component. At model setup, the \texttt{SizeBasedGrazing} takes the label for resource and consumer, as well as the feeding preference matrix, the array of maximum ingestion rates and the single $k_Z$ parameter as input.
+        \item \texttt{SizeBasedGrazing\_Fluxes}: This component receives the full matrix of grazing fluxes ($P_i$ over $Z_j$) as a group variable from the \texttt{SizeBasedGrazing} component and allocates the summed up fluxes to the sources and sinks of the grazing flux. Summing over $Z_j$ yields the array of grazing fluxes subtracting from $P_i$, while summing over $P_i$ and multiplying by the assimilation coefficient $\epsilon$ yields the array of grazing fluxes assimilated to $Z_j$. Summing over the entire matrix and multiplying by $1 - f_{eg} - \epsilon$ yields the excreted biomass adding to $N$. At model setup, the component takes the respective labels of the state variables, as well as the parameters for $\epsilon$ and $f_{eg}$ as input.
+    \end{itemize}
+    
+        \item Zooplankton and phytoplankton mortality: 
+    \begin{itemize}
+        \item \texttt{LinearDecayDim}: Linear mortality of phytoplankton can be defined with the same component employed in the first use case, with the modification that a dimension label is supplied as an argument to the flux and state variable. 
+        \item \texttt{QuadDecayDim}: Similarly quadratic mortality of zooplankton is defined with a dimension label. The vectorization functionality allows defining the quadratic term as the sum of all zooplankton biomass, while still calculating over all zooplankton size classes.
+    \end{itemize}
+\end{enumerate}
+
 
 - SV-Array functionality! Dimensionality of state variables (this functionality in XSO) is useful is in setting up phytoplankton size classes in trait-based models. All phytoplankton state variables grow on a common nutrient, but uptake parameters are related to allometries of cell size. A phytoplankton functional group is initialized, with a certain size range and number of state variables. Parameters are dynamically initialized based on the size provided by the component. 
 
