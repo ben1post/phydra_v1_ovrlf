@@ -405,7 +405,7 @@ Both of Xarray-simlab and GEKKO are relatively young  Python packages and active
 - provides specific functions to handle, state vars, forcing and store intermediate fluxes in the form of mathematical ordinary differential equations. SV.dt() == equation
 
 
-\subsection{Component building-blocks}
+\subsection{Component building-blocks} \label{Section:ComponentBuildingBlocks}
 
 %%% TWO-COLUMN TABLE
 %
@@ -446,6 +446,12 @@ Dimensionality in state variables can be used to model functional groups or clas
 Forcings are defined as providing an external constant or time-varying parameter to the model. These parameters can be used in fluxes that reference the forcing type,
 
 handle initializing Params, time-varying or constant, based on external data or mathematical functions, that can be referenced and used in other processes, store labelled values of their values
+
+- forcing functions needs to take time as input, and return forcing value for that time
+- mention vectorization? this is important for it to work, but technical detail..
+- parameters defined within component can be used in both the setup function and the forcing function
+- if the forcing is based on data and not a mathematical function or constant value, it is necessary to perform some type of interpolation, if used with adaptive step-size solvers (like odeint)! choice of interpolation algorithm is up to user (we use \texttt{scipy.interpolate.splrep}, an algorithm to calculate the B-spline representation of a 1-D curve, in particular because it allows for periodic interpolation that is useful for yearly climatological forcing!
+
 
 - parameters
 
@@ -521,7 +527,7 @@ The model setup created in the previous step already contains the necessary para
 
 \subsubsection{Model diagnostics and additional functionality}
 
-- If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes. The magnitude of the fluxes can then easily be plotted...
+- If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes. The magnitude of the fluxes can then easily be plotted... much improved workflow over having to allocate all values to variables or large arrays to use later, makes checking model dynamics much easier
 
 - Xarray-simlab provides visualisation functions, that can be used to get a structured overview over all processes in a model instance. These are not optimized for the current structure though, as most dependencies between subprocesses are handled in the solver backend, not via explicit xarray-simlab process dependencies.
 
@@ -855,55 +861,96 @@ The rates of change of the state variables are described by the following set of
 \end{figure*}
 
 The NPZD slab model was implemented using the XSO framework. In order to find a useful structuring of model components, we can separate the model into state variables, forcings and fluxes. For state variables we have nutrient ($N$), phytoplankton ($P$), zooplankton ($Z$) and detritus ($D$). Forcings to the model are the mixed layer depth ($H$), nutrient concentration below the mixed layer ($N_0$), temperature in the mixed layer ($T$) and irradiance at surface ($I$). The model defines at least ten unique fluxes: Phytoplankton growth, zooplankton grazing, nutrient upwelling, mixing, sinking, remineralisation, in addition to four mortality terms.
-The amount of fluxes and interdependencies between the calculations require a more complex component structure than our first presented use case. The user needs to strike a balance between component refactoring and simplicity. Our goal was to allow for every individual ecologically relevant term to be exchangeable, for example each growth-limiting term was defined via an individual component. The "group variable" feature of the XSO framework allows for such a setup, so that as long as another flux defined in a component matches the group label in another component, it will be used for calculating the bulk flux defined there. The group variable can collect multiple fluxes to sum or multiply over, but it can also be used to split the calculation of a single flux between two components. This feature was used frequently to handle the complexity of the presented model, for further detail see the description below.
 
-- The modular nature of XSO allows reusing calculated terms in different fluxes using the group variable feature. 
-- more complex model requires using features of XSO to have efficient code, e.g. one component calculating K, which is used in Mixing \& Upwelling component. Also there is growth limitation, which is a multiplicative process of a few different factors (That are the results of "fluxes"). This can both be done using the $group$ variable type. EXPLAIN IT, Can have multiple levels, e.g. for temperature dependency here (could also have this in same process though!)
+The ecological description of our model system is adapted from the EMPOWER model, however the technical implementation using the XSO framework is quite different from the procedural R script that the model was implemented in by \citet{Anderson2015c}. Instead of using hard-coded flags to choose different ecological formulations, the XSO component structure provides open modularity and interchangeability. We appreciate the choice of transparently including the solving algorithm in the model code, however our project aims at maximum flexibility and usability. The XSO framework defines functions irrespective of the specific time-step used for evaluation and logically separates the solving algorithm from the model code into the XSO backend. This allows defining the model formulation irrespective of the complex nested for-loop structure used in the original implementation. Adding and removing state variables is also simplified, as allocating resources and storing variables in model output is handled by the framework based on the components defined at model creation.
+
+The amount of fluxes and interdependencies between the calculations in this model require a more complex component structure than our first presented use case. In model construction, we have to find a balance between component refactoring and structural simplicity. Our goal was to allow for every individual ecologically relevant term to be exchangeable, for example each growth-limiting term was defined via an individual component. The "group variable" feature of the XSO framework allows for such a setup, so that as long as another flux defined in a component matches the group label in another component, it will be used for calculating the bulk flux defined there. The group variable can collect multiple fluxes to sum or multiply over, but it can also be used to split the calculation of a single flux between two components.
+
+One particular example of this is that we implemented a component calculating the mixing coefficient $K$, which is computed there and passed along to calculate nutrient upwelling and the mixing fluxes of phytoplankton, zooplankton and detritus. Also there is growth limitation, which is a multiplicative process of a the growth limiting terms. Fluxes defined with a group label can in turn take a group variable as input, as was done with the temperature dependent maximum photosynthetic rate, which is passed along to calculate light limitation, which in turn is used to calculate the total growth flux. This feature was used frequently to handle the complexity of the presented model, for further detail see the description of the individual components below.
 
 The model was implemented using 23 separate model components as visualized in Figure \ref{Figure:CodeSchematics_2}. We chose to simplify the schematic by only showing the components with their respective labels, for a detailed view of each component please consult the Phydra repository on Github.
 
 The model processes and their respective components are listed below, with a short description of their function and application in the model:
 
-\begin{itemize}
-    \item \texttt{StateVariable}: This simple component defines a state variable within the XSO framework and was used to register the state variables $N$, $P$, $Z$ and $D$. At model creation the label of the component (e.g. "Nutrient") is supplied, while the label for the variable used to link fluxes to the variables (e.g. "N") is supplied at model setup.
-      
-    \item The calculation of mixing in this slab model takes the value of $H$ from the \texttt{MLDForcing} component, where the forcing is read from a file, interpolated and supplied via the label \texttt{"MLD"} to the framework. This forcing is supplied to the \texttt{Mixing\_K} component, where the mixing coefficient $K$ is calculated once and supplied to \texttt{SlabUpwelling} and \texttt{SlabMixing} via a group variable. This allows calculating $K$ only once per time-step for more efficient computation. \texttt{SlabUpwelling} takes calculates nutrient upwelling via the value of $K$ and the difference between the $N_0$ forcing and $N$. \texttt{SlabMixing} employs the list-input functionality described in the first use case, and calculates the effect of mixing on $P$, $Z$ and $D$. Finally, \texttt{SlabMixing} also receives the MLD forcing ($H$) from \texttt{MLDForcing} and calculates the sinking flux acting on $D$.
+\begin{enumerate}
+    \item State variables:
+    \begin{itemize}
+        \item \texttt{StateVariable}: This simple component defines a state variable within the XSO framework and was used to register the state variables $N$, $P$, $Z$ and $D$. At model creation the label of the component (e.g. "Nutrient") is supplied, while the label for the variable used to link fluxes to the variables (e.g. "N") is supplied at model setup.
+    \end{itemize}
     
-    \item Temperature-dependent, light- and nutrient-limited growth of phytoplankton is another model process that was implemented with multiple linked components, to allow for greater flexibility. \texttt{GrowthML} is the process that receives all the separate terms and calculates the net growth flux from a group variable. That group variable is added to from both the \texttt{SmithLightLim} component, calculating the integrated light limitation based on the maximum photosynthetic rate passed from \texttt{TempDepGrowth}, as well as the \texttt{MonodGrowthLim} component that calculates nutrient-limitation based on $N$. The forcing supplying irradiance at surface ($I$) is passed from the \texttt{PARForcing} component to \texttt{SmithLightLim}, similarly the temperature forcing ($T$) is supplied via the \texttt{SSTForcing} component to \texttt{TempDepGrowth}.
+    \item Slab-ocean forcings:
+    \begin{itemize}
+        \item \texttt{MLDForcing}
+        \item \texttt{N0Forcing}
+        \item \texttt{PARForcing}
+        \item \texttt{SSTForcing}
+    \end{itemize}
     
-    \item The grazing flux is set up via two components, that are again linked via a group variable. Grazing is split into \texttt{HollingType3}, where the total grazing fluxes are calculated that subtract from $P$ and $D$, and \texttt{GrowthGrowthEfficiency}, which handles the routing of the total grazed biomass split into three fractions, which are $P$ assimilated to $Z$, egested to $D$ and excreted to $N$). To simplify the model setup, \texttt{HollingType3} was implemented with a list input for the resource variable, so that it would be simple to add or remove state variables from the zooplankton prey pool. The grazing preference is supplied as a list of the same dimension, where the order of values has to correspond to the order of supplied labels for the resource variable.
+    \item Slab-ocean physics:
+    \begin{itemize}
+        \item \texttt{MLDForcing}: The calculation of mixing in this slab model takes the value of $H$ from the \texttt{MLDForcing} component, where the forcing is read from a file, interpolated and supplied via the label \texttt{"MLD"} to the framework. 
+        \item \texttt{MLDForcing}: This forcing is supplied to the \texttt{Mixing\_K} component, where the mixing coefficient $K$ is calculated once and supplied to \texttt{SlabUpwelling} and \texttt{SlabMixing} via a group variable. This allows calculating $K$ only once per time-step for more efficient computation. 
+        \item \texttt{SlabUpwelling} calculates nutrient upwelling via the value of $K$ and the difference between the $N_0$ forcing and $N$. 
+        \item \texttt{SlabMixing} employs the list-input functionality described in the first use case, and calculates the effect of mixing on $P$, $Z$ and $D$. Finally, \texttt{SlabMixing} also receives the MLD forcing ($H$) from \texttt{MLDForcing} and calculates the sinking flux acting on $D$.
+    \end{itemize}
     
-    \item Remineralisation is implemented using the component \texttt{LinearExchange}, which takes a source and sink variable as input, as well as a rate parameter ($m_D$ in this case).
+    \item Phytoplankton growth: Temperature-dependent, light- and nutrient-limited growth of phytoplankton is another model process that was implemented with multiple linked components, to allow for greater flexibility.
+    \begin{itemize}    
+        \item \texttt{GrowthML} is the process that receives all the separate terms and calculates the net growth flux from a group variable. 
+        \item \texttt{TempDepGrowth} calculates the maximum photosynthetic rate and passes the result along as a group variable to \texttt{SmithLightLim}. The temperature forcing ($T$) is supplied via the \texttt{SSTForcing} component.
+        \item \texttt{SmithLightLim} calculates the integrated light limitation based on the maximum photosynthetic rate passed from \texttt{TempDepGrowth}. The forcing of irradiance at surface ($I$) is passed from the \texttt{PARForcing} component.
+        \item \texttt{MonodGrowthLim} calculates nutrient-limitation dependent on the ambient nutrient concentration $N$ based on Monod kinetics. 
+    \end{itemize}
     
-    \item Mortality fluxes can similarly be implemented using basic components from the Phydra library. In fact we reuse the \texttt{LinearExchange} component for the linear mortality terms of $P$ and $Z$, both feeding into $D$. Quadratic phytoplankton mortality was implemented with the \texttt{QuadExchange} component, as it also feeds into $D$. Higher-order mortality of zooplankton is lost from the system and is implemented using the \texttt{QuadDecay} component.
-\end{itemize}
-
-- For the ecological description we followed the EMPOWER model structure, however the technical implementation using the XSO framework is quite different. The XSO framework defines functions irrespective of the specific time-step used for evaluation. This requires writing the functions without explicit time-steps. We appreciate the choice of transparently including the solving algorithm in the model code, however the present project aims at maximum flexibility. Different packaged and even custom coded model solving algorithms can be implemented via the backend Solver class by more advanced users.
+    \item Zooplankton grazing: The grazing flux is set up via two components, that are linked via a group variable.
+    \begin{itemize}    
+        \item \texttt{HollingType3} calculates the total grazing fluxes that subtract from $P$ and $D$. [Explain Holling Type 3 shortly]. \texttt{HollingType3} was implemented with a list input for the resource variable, so that it would be simple to add or remove state variables from the zooplankton prey pool. The grazing preference is supplied as a list of the same dimension, where the order of values has to correspond to the order of supplied labels for the resource variable. 
+        \item \texttt{GrowthGrowthEfficiency} receives the array of grazing fluxes ($P$ to $Z$ and $D$ to $Z$) and handles the routing of the total grazed biomass into three fractions, that are assimilated to $Z$, egested to $D$ and excreted to $N$ respectively.
+    \end{itemize}
+    
+    \item Detritus remineralisation:
+    \begin{itemize}
+        \item \texttt{LinearExchange} takes a source and sink variable as input, as well as a rate parameter ($m_D$ in this case) and transfers that fraction from $D$ to $N$.
+    \end{itemize}
+    
+    \item Mortality fluxes: Mortality fluxes can similarly be implemented using basic components from the Phydra library.
+    \begin{itemize}
+        \item \texttt{LinearExchange} calculates the linear mortality terms of $P$ and $Z$, both feeding into $D$. 
+        \item \texttt{QuadExchange} implements quadratic phytoplankton mortality, as it feeds into $D$. 
+        \item \texttt{QuadDecay} calculates higher-order mortality of zooplankton that is lost from the system.
+    \end{itemize}
+\end{enumerate}
 
 % Probably the forcing plot can go in the appendix?
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_plots/02_EMPOWER_forcing.pdf}
-\caption{Forcing is shown for the four locations: Mixed Layer Depth (MLD), Nitrate below the Mixed Layer ($N_0$), Photosynthetically Active Radiation (PAR) and temperature averaged across the Mixed Layer ($T_{MLD}$). Mixed layer depth and temperature data from Anderson et al. 2015. Nutrient forcing is a function of depth for locations Biotrans and India, and a constant value for Papa and Kerfix. Irradiance is calculated as a function of latitude.}
+\caption{Forcing is shown for the four locations: Mixed Layer Depth ($H$), Nitrate below the Mixed Layer ($N_0$), irradiance at surface ($I$) and temperature averaged across the mixed layer ($T$). Mixed layer depth and temperature data from Anderson et al. 2015. Nutrient forcing is a function of depth for locations Biotrans and India, and a constant value for Papa and Kerfix. Irradiance is calculated as a function of latitude.}
 \label{Figure:EMPOWERforcing}
 \end{figure*}
 
-The forcing used in the presented model runs was adapted from 
-- four locations from original paper are adapted, exact same forcing is used (see forcing figure!)
-- Verification data is different from original paper, chlorophyll MODIS climatology and WOA 2018 nutrient data (Nitrogen) + MLD climatology.
+We followed \citet{Anderson2015c} in running the model in four exemplary ocean stations (BIOTRANS, India, Papa and KERFIX). The NPZD slab model is driven by four periodic external forcings shown in figure \ref{Figure:EMPOWERforcing}, that follow the approach used in the original publication but were extracted from updated data sources. 
+The forcing for mixed layer depth ($H$) is taken from an updated version of the IFREMER MLD climatology  \citep{DeBoyerMontegut2004} including more data and using an optimized estimation of MLD, that was kindly supplied by Clement de Boyer Montegut.
+The nutrient concentration below the mixed layer ($N_0$) is calculated from a combination of the MLD climatology and depth-resolved climatology for nitrate in the World Ocean Atlas (WOA) 2018 \citep{Garcia2019WORLDSilicate}. The temperature of the mixed layer ($T$) similarly calculated using the MLD climatology and the temperature data of WOA 2018 \citep{Locarnini2019WorldTemperature}.
+The forcing for irradiance at surface ($I$) is calculated via a light submodel, that employs trigonometric/astronomical equations to calculate light climatology for a location, given the latitude and cloud fraction as input parameters. The specific model used by \citet{Anderson2015c} was adapted from \citet{Shine1984ParametrizationAlbedo}.
 
-- talk about the problem with linearly interpolated forcing, as used in original EMPOWER
-- careful choice is necessary, model already calculates aggregate properties, both in spatial and temporal direction. Marked dynamics of model should not be an artifact of forcing interpolation method.
+From satellite data we can retrieve actual measurements of photosynthetically active radiation for the locations, which removes the mathematical complexity of utilizing a light submodel. 
+%perhaps we can actually use satellite PAR for our model runs?? Will be much simpler to implement.
+Although not shown in this publication, Phydra includes a component that provides the satellite forcing for the four stations. The modular structure easily allows switching the \texttt{PARForcing} component from one forcing to the other.
 
-- Complex calculation of light, via latitude. NOwadays also robust data from Satellite (which is already integrated climatology).. with modular structure complexity can easily be removed and other simpler forcing provided.. or light forcing can be calculated outside of model, and then passed to model fully integrated (this is what Phydra does) -> more efficient.
+As detailed in section \ref{Section:ComponentBuildingBlocks}, forcing from data needs to be interpolated to be compatible with an adaptive step-wise solver such as SciPy's odeint algorithm used here. In the original EMPOWER implementation a linear interpolation method is used. In testing different interpolation methods, we found that smoothing the forcing will result in much less variable model output for the shown state variables. We follow \citet{Anderson2015c} in linearly interpolating our forcing, since we wanted to recreate the original model output. All forcing is taken from climatological data which is inherently smoothed and integrated both temporally and spatially, so the rapid changes in the derivative created via linear interpolation could be considered an artifact of the interpolation method, The authors wanted to note that choosing the interpolation method can have drastic effects on model output and needs to be considered carefully.
 
-- parameters are completely adapted from Anderson et al.
+
+Following \citet{Anderson2015c}, the model is compared to seasonal data for nitrate within the mixed layer and chlorophyll concentration at all four stations. We used updated versions of the original data sources to retrieve the verification data. Nitrate within the mixed layer is calculated from a combination of the WOA 2018 nitrate data and the IFREMER MLD Climatology used for the $N_0$ forcing. Chlorophyll data is from MODIS aqua chlorophyll climatology \citep{NASAGoddardSpaceFlightCenterOceanEcologyLaboratoryOceanBiologyProcessingGroup}. We did not follow the approach of taking a median year for chlorphyll data, since the forcing is also climatology data and we do not assume to be able to replicate particular biomass peaks of certain years. The climatological data follows the general pattern shown in the chlorophyll data used as verification data in the original paper.
+
+
+The parameters used in model runs are adapted from \citet{Anderson2015c}, see table \ref{Table:EMPOWERparams} for a complete list of parameters for all four stations.
 
 %%% TWO-COLUMN TABLE
 %
 %t
 \begin{table*}[t]
-\caption{Model parameters used in runs for use case 2: TODO: add all 4 locations}
+\caption{Model parameters used in runs for use case 2 for the four stations:}
 \begin{tabular}{l c c c c c r}
 \tophline
 Parameter & Description & BIOTRANS & India & Papa & KERFIX & Units \\
@@ -929,14 +976,16 @@ $\theta_{chl}$& constant mixing parameter & 75 & 75 & 75 & 75 & \unit{g \ g^{−
 
 \bottomhline
 \end{tabular}
-\belowtable{ These parameters were adapted from \citet{Anderson2015c} } % Table Footnotes
+\label{Table:EMPOWERparams}
+\belowtable{These parameters were adapted from \citet{Anderson2015c}} % Table Footnotes
 \end{table*}
 %
 
-- showcase "batch" execution, can run all 4 location models from single model setup. Output is stored as one Xarray, with additional dimension coordinate that differentiates between locations.. allows easy analysis of parameter scans and bulk analysis of complicated model runs.
+In the specific implementation for our model runs, we showcase the batch simulation feature of the XSO framework, which allows defining a new dimension at model setup and supplying a list of parameters for that dimension. In our case this additional dimension defines the four stations that we run the model. At model runtime the batch dimension is defined and the model is run for all stations from a single model setup file. Output is stored as one Xarray dataset in which each location can easily be retrieved via the defined dimension label.
+
+The modification of the model that we present shows 
 
 - modification:
-
 - Calculating light availability via Lambert-Beer for a single layer (MLD) is very rough approximation
 - Slab model is already strong simplification of ocean, but even within MLD light is attenuated quite differently. EMPOWER paper has an interesting discussion of this, and shows more complex treatments.
 - We have implemented one of the described formulations: a three-layer MLD for light attenuation, 0-5, 5-25, >25 meters
