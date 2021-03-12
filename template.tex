@@ -502,7 +502,7 @@ These labels will be the specific name of the process in this model instance. At
 
 When creating a model, the xarray-simlab framework automatically checks that all references between processes are fulfilled, orders the processes in their logical order of execution and returns a Phydra model object. This model object contains all processes in the model and allows the user to view all parameters required as input at model setup. The Phydra library provides several basic model objects, that can be modified by a user through a simple interface that allows removing, modifying or adding new processes.
 
-\subsubsection{Model setup}
+\subsubsection{Model setup} \label{Section:Workflow:ModelSetup}
 
 A Phydra model object is itself only a collection of abstract processes. In order to fully initialize a model that can be solved, the model object needs to be supplied with a complete set of parameters.
 
@@ -601,7 +601,7 @@ The model equations are as follows:
 \label{Figure:CodeSchematics_1}
 \end{figure*}
 
-The Monod model was implemented using the XSO framework. In order to find a useful structuring of model components, we can separate the model into state variables, forcings and fluxes. For state variables we have the nutrient ($N$) and phytoplankton ($P$). The only forcing is the nutrient concentration of the external medium ($N_0$). Three fluxes can be separately defined: The inflow of the external medium, $P$ growing on $N$ and the outflow of both $N$ and $P$.
+The chemostat model was implemented using the XSO framework. In order to find a useful structuring of model components, we can separate the model into state variables, forcings and fluxes. For state variables we have the nutrient ($N$) and phytoplankton ($P$). The only forcing is the nutrient concentration of the external medium ($N_0$). Three fluxes can be separately defined: The inflow of the external medium, $P$ growing on $N$ and the outflow of both $N$ and $P$.
 The model was implemented using these 6 separate model components as visualized in Figure \ref{Figure:CodeSchematics_1}.
 
 We start model construction from the list of state variables, forcings and fluxes mentioned before. Below we list the model components with a short explanation to their functionality and go through the XSO variable types used within:
@@ -880,10 +880,10 @@ The model processes and their respective components are listed below, with a sho
     
     \item Slab-ocean forcings:
     \begin{itemize}
-        \item \texttt{MLDForcing}
+        \item \texttt{MLDForcing} $$
         \item \texttt{N0Forcing}
         \item \texttt{PARForcing}
-        \item \texttt{SSTForcing}
+        \item \texttt{SSTForcing} $$
     \end{itemize}
     
     \item Slab-ocean physics:
@@ -981,51 +981,31 @@ $\theta_{chl}$& constant mixing parameter & 75 & 75 & 75 & 75 & \unit{g \ g^{−
 \end{table*}
 %
 
-In the specific implementation for our model runs, we showcase the batch simulation feature of the XSO framework, which allows defining a new dimension at model setup and supplying a list of parameters for that dimension. In our case this additional dimension defines the four stations that we run the model. At model runtime the batch dimension is defined and the model is run for all stations from a single model setup file. Output is stored as one Xarray dataset in which each location can easily be retrieved via the defined dimension label.
+The batch dimension feature of the XSO model setup function presented in section \ref{Section:Workflow:ModelSetup} was utilized here. It allows defining a new dimension at model setup and supplying a list of values for a specific parameter. In our case this additional dimension defines the four stations via the specific forcing and the parameters $V_P^{max}$, $\alpha$, $\mu_Z$ and $m_Z$ that \citet{Anderson2015c} varied between the locations. At runtime the model is solved individually for each set of parameters in the supplied lists and output is returned in a single Xarray dataset. The model output for each station can then be easily retrieved via the dimension label. In our presentation we limited ourselves to recreating the model runs shown in the original publication, but this feature also lends itself well for parameter scans and further testing of the model.
 
-The modification of the model that we present shows 
-
-- modification:
-- Calculating light availability via Lambert-Beer for a single layer (MLD) is very rough approximation
-- Slab model is already strong simplification of ocean, but even within MLD light is attenuated quite differently. EMPOWER paper has an interesting discussion of this, and shows more complex treatments.
-- We have implemented one of the described formulations: a three-layer MLD for light attenuation, 0-5, 5-25, >25 meters
-- can be even more complex, such as the described formulations treating separate spectral bands.
-- decision of modeler how complex, how simple, depends on scientific question \& location of model
-
-
-
+\citet{Anderson2015c} included a detailed discussion of the treatment of light in a slab model. From the formulations presented in the original paper we adapted two implementations of the analytic depth integral of light. These are a simple Beer's law, which parameterizes light attenuation with a single attenuation coefficient for the entire mixed layer, as well as the more complex piecewise description originally presented in \citet{Anderson1993APhotosynthesis}, which evaluates light attenuation for three discrete depth intervals within the mixed layer as a function of chlorophyll concentration with specific polynomial coefficients for each interval. Model results for both approaches are shown and compared below.
 
 \subsubsection{Results}
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_plots/02_EMPOWER_lightcomp.pdf}
-\caption{Comparative slab model runs, EMPOWER model locations and forcing. Three layer model of light attenuation in the mixed layer is thick line. Single layer model is dashed line. Verification data for Nitrogen in the upper mixed layer is taken from WOA 2018. Phytoplankton verification data is monthly climatology derived from MODIS aqua observations, C-to-Chlorophyll ratio of 75 is assumed in model and used to calculate conversion, in addition to a Redfield ratio of 16:1 for C-to-N.}
+\caption{Comparative slab model runs, EMPOWER model locations and forcing. Final year of a five year run. Three layer model of light attenuation in the mixed layer is thick line. Single layer model is dashed line. Verification data for Nitrogen in the upper mixed layer is taken from WOA 2018. Phytoplankton verification data is monthly climatology derived from MODIS aqua observations, C-to-Chlorophyll ratio of 75 is assumed in model and used to calculate conversion, in addition to a Redfield ratio of 16:1 for C-to-N.}
 \label{Figure:ResultsEMPOWER}
 \end{figure*}
 
-- Recreating results of EMPOWER paper with our framework
-- Different integration routines, but output in high agreement (This should never change the model output!)
-- HOWEVER, difference in output due to smoothing in forcing, we opted to recreate linear interpolation used in EMPOWER, however smoothing out forcing will result in less pronounced peaks (artifact or feature?)
-- Different verification data, but generally same pattern, and agreeing well 
+Model output for all state variables and the four stations is shown in figure \ref{Figure:ResultsEMPOWER}. Output of the model for both the simple and piecewise formulation of Beer's law are shown in solid and dashed lines respectively. 
+Despite the different technical implementation and solving algorithms employed here, the model output of our implementation closely matches the dynamics shown in the original paper. Since parameter tuning was performed by \citet{Anderson2015c}, the overall dynamics of nutrients and phytoplankton show a good agreement with the climatological data from the four stations. The more complicated piecewise Beer's law shows better agreement with the data, particularly for station Papa. This seems to be a result of greater light limitation of phytoplankton growth, as nutrient draw-down during growth periods is consistently lower when compared to the simple Beer's law.
 
-- showing different light integration routine: as observed in EMPOWER, 3-layer light attenuation shows model results closer to data, particularly in location Papa
-
+We show that our framework can recreate the model and results shown by \citet{Anderson2015c}, and present the model in a flexible modular framework, that allows further experimentation and testing of different model structures.
 
 
 \subsection{Model use case 3: A complex size-based NPZ model - ASTroCAT}
 
-From an attempt at describing an oceanic physical setting with a highly simplified ecosystem, we move to a simplified laboratory setting with a complex description of a size-structured ecosystem. The model structure for the second use case was adapted from \cite{Banas2011b}. See Figure \ref{Figure:ModelSchematics_3} for a schematic of the model structure. 
+From a model describing an oceanic physical setting with a relatively simple ecosystem, we move to a model with a simplified physical setting with a complex description of a size-structured ecosystem. The model structure for the second use case was adapted from the ATroCAT model \citep{Banas2011b}. The original publication features extended investigation of model dynamics, for example under variable forcing or with stochastic grazing parameters. We focus on the basic setup under constant forcing. It is a simple box model that features an allometric description of multiple size-classes of both phytoplankton growing on a single nutrient, as well as an equal amount of size-classes of zooplankton grazing on phytoplankton. This level of trophic interaction is highly resolved, but many other ecological processes are neglected, e.g. there is no detrital or regeneration pathway. Even in this simple box-model setting, the complex food web yields an emergent pattern of phytoplankton size diversity. 
 
-- Banas publication features extended investigation of model dynamics, also under variable forcing, and stochastic grazing, etc. but here we focus on the simplest setup under constant forcing.
-- simple box model, many processes not resolved
+Size is called a "master-trait" in the trait-based description of plankton ecology, allowing modellers and ecologist to describe the diverse plankton community along one continuous axis \citep{Litchman2008}. 
 
-- allometric phytoplankton growth and zooplankton grazing, one level of trophic interaction highly resolved
-Size is called a "master-trait" in the trait-based description of plankton ecology, allowing modellers and ecologist to describe the diverse plankton community along one continuous axis. (This is of course an oversimplification, and it takes careful consideration of the choice of allometries and often a combination of functional properties and size classes to achieve a more realistic representation of natural phytoplankton assemblages.)
-
-- results in system with emergent properties
-
-- XSO framework, allows adding dimensions to state variables, has (Numpy) vectorization capabilities built in, the model can be initialized with a flexible number of size classes of phytoplankton and zooplankton (always equal number though, for this model)
-- We showcase this feature by running the model with 2 to 50 clones and comparing bulk phytoplankton biomass between runs
+Combining the dimension functionality of the XSO framework with the built-in vectorization of model equations lends itself very well to implement such a model. Instead of defining state variable without dimensionality, as was done in the previous two use cases, we simply add a dimension label and can initialize and use the variable instead as an array of size-classes. The number of size-classes is inherently variable and can be set at model setup. We showcase this feature by running the model with 2 to 50 clones and comparing bulk phytoplankton biomass between runs.
 
 \subsubsection{Description}
 %%f
@@ -1035,45 +1015,42 @@ Size is called a "master-trait" in the trait-based description of plankton ecolo
 \label{Figure:ModelSchematics_3}
 \end{figure}
 
-For the second use case we have implemented a size-spectral NPZ ecosystem model as presented in Figure \ref{Figure:ModelSchematics_3} with a nutrient $N$ (in this case nitrate), multiple size classes of both phytoplankton $P_i$ and zooplankton $Z_j$ as state variables. 
-This model use case employs a simple box as physical setting. Inflow of nutrients is the only external input into the system, whilst mortality processes and a part of the grazing flux are removed from the system completely.
-Model structure and parameterisation is adapted from the ASTroCAT model \citep{Banas2011b}.
+For the second use case we have implemented a size-spectral NPZ ecosystem model as presented in Figure \ref{Figure:ModelSchematics_3}. It uses nitrogen as its currency (quantities are measured in units of $\mu mol$ N $m^{-3}$, or $\mu M$), with state variables for dissolved nutrient $N$ and multiple size classes of both phytoplankton $P_i$ and zooplankton $Z_j$. 
+This model use case employs a simple box as physical setting. Inflow of nutrients is the only external input into the system, whilst mortality processes and a part of the grazing flux are removed from the system completely. Model structure and parameterisation is adapted from the ASTroCAT model \citep{Banas2011b}.
 
-The model describes a size-structured community of phytoplankton and zooplankton, with each state variable defined by their equivalent spherical diameter (ESD). In model runs presented in this paper, we follow \citet{Banas2011b} in running simulations with 40 size classes of equally log-spaced ESD of $P$ (1 to 20 \unit{\mu m}), and 40 matching classes of $Z$ (2.1 to 460  \unit{\mu m}). 
-The model can be defined with any number of size classes within meaningful boundaries of the allometric parameterisation. Size classes are denoted by the subscript $i$ for phytoplankton and $j$ for zooplankton. In the implementation of a size-spectral model by \citeauthor{Banas2011b} the food-web is implicitly made up of matching pairs of $P_i$ and $Z_j$, to avoid creating classes at the ends of the size spectrum that are artificially released or suppressed by grazing pressure.
+The model describes a size-structured community of phytoplankton and zooplankton, with each state variable defined by their equivalent spherical diameter (ESD). In model runs presented in this paper, we follow \citet{Banas2011b} in running simulations with 40 size classes of equally log-spaced ESD of $P$ (1 to 20 \unit{\mu m}), and 40 matching classes of $Z$ (2.1 to 460  \unit{\mu m}). Additionally we perform an experiment where the number of size classes within these ranges is varied from 2 to 50.
+The model can be defined with any number of size classes within meaningful boundaries of the allometric parameterisation. Size classes are denoted by the subscript $i$ for phytoplankton and $j$ for zooplankton. In the implementation of a size-spectral model by \citeauthor{Banas2011b} the food-web is implicitly made up of matching pairs of $P_i$ and $Z_j$, to avoid creating classes within the size spectrum that are artificially released or suppressed by grazing pressure.
 
 %\subsubsection{Nutrient}
-Dissolved inorganic nitrogen (DIN) in the model system ($N$) is supplied from influx of medium (with nutrient concentration $N_0$) at a constant rate $f$ and the fraction of grazed biomass that is excreted by $Z$. The concentration $N_0$ and the flow rate $f$ determine the total nutrient supply to the system. At the same rate $N$ is flowing out from the system. Zooplankton excretion is a recycled term, that also adds back into the pool of $N$. The major loss term to $N$ is phytoplankton growth.
+Dissolved inorganic nitrogen (DIN) in the model system ($N$) is supplied from influx of medium with nutrient concentration $N_0$ at a constant rate $f$ and the fraction of grazed biomass that is excreted by $Z$. The concentration $N_0$ and the flow rate $f$ determine the total nutrient supply to the system. Zooplankton excretion is a recycled term, that also adds back into the pool of $N$. The only loss term of $N$ is phytoplankton growth.
 
 %\subsubsection{Phytoplankton}
-Phytoplankton biomass $P$ increases through  nutrient-limited growth. Nutrient limitation of phytoplankton growth $\gamma_i^N$ is described by the Michaelis-Menten (or Monod) equation:
+Phytoplankton biomass for each size class $P_i$ increases through nutrient-limited growth. Nutrient limitation of phytoplankton growth $\gamma_i^N$ is described by the Michaelis-Menten (or Monod) equation:
 
 \begin{equation}
     \gamma_i^N =  \frac{N}{k_N^i + N} 
 \end{equation}
 
-where $k_N^i$ is the size-dependent half-saturation constant. $N$ is ambient nutrient concentration in the medium.
+where $k_N^i$ is the size-dependent half-saturation constant and $N$ is ambient nutrient concentration in the medium.
 
-Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_{max}^i$. [add more detail here!] This accounts for natural mortality and excretion.
+Non-grazing mortality of phytoplankton is described the factor $m^P$ that is scaled by the maximum intrinsic growth rate $\mu_{max}^i$, so that $m^P \mu_{max}^i$ yields the specific mortality rate for each size class. This accounts for natural mortality and excretion.
 
 %\subsubsection{Zooplankton}
-Zooplankton size class $j$ grazing on phytoplankton size class $i$ is calculated by
+Zooplankton size class $Z_j$ grazing on phytoplankton size class $P_i$ is calculated by
 \begin{equation}
-    G_P^{ij} = \mu_j^Z \ \frac{ \varphi_{ij} \cdot P_i }{ k_Z^j + \sum_{i}(\varphi_{ij} \cdot P_i) } \ Z_j
+    G_P^{ij} = \mu_j^Z \ \frac{ \varphi_{ij} \cdot P_i }{ k_Z + \sum_{i}(\varphi_{ij} \cdot P_i) } \ Z_j
 \end{equation}
-where $\mu_Z^j$ is the size-dependent maximum ingestion rate, $k_Z^j$ is the prey half-saturation level and $\varphi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.
+where $\mu_Z^j$ is the size-dependent maximum ingestion rate, $k_Z$ is the prey half-saturation level and $\varphi_{ij}$ is the relative preference of $Z_j$ for prey type $P_i$.
 
 Prey preference is assumed to vary with phytoplankton size $size_{P}^i$ in a log-Gaussian distribution around an optimal prey size for each grazer $size_{opt}^j$.
-
 \begin{equation}
     \varphi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size_P^i) - log_{10}(size_{opt}^j) }{ \Delta size_{P} } \right) \right]
 \end{equation}
 Where $\Delta size_{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m)}, that controls the width of the Gaussian distribution.
 
-Zooplankton growth is a product of total biomass grazed ($G_P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G_P$ which is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$), while the rest is excreted as DIN (to $N$: \ $\beta (1-\epsilon)$). GGE specifically is the product of $\beta$ and $\epsilon$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton  \citep{Straile1997GrossGroup}. The fraction of $G_P$ egested (e.g. as faecal pellets) is calculated via $1-\beta$, which in the current model setup is assumed to be exported quickly in the flow-through setting and lost from the system. 
+Zooplankton growth is a product of total biomass grazed ($G_P$) and the net production efficiency parameter $\epsilon$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton  \citep{Straile1997GrossGroup}. Excretion of grazed biomass to $N$ is parameterized by $f_{eg}$ and another egested fraction that would feed into a detrital pool is lost from the system. Following \citet{Banas2011b} the grazing fractions are split equally ($\epsilon = f_{eg} = 1/3$).
 
 Zooplankton experiences quadratic mortality according to the parameter $m_{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
-
 
 %\subsubsection{Model equations}
 The rates of change of the state variables are described by the following set of equations. See \citet{Banas2011b} for a more detailed discussion of model structure and formulation.
@@ -1081,7 +1058,7 @@ The rates of change of the state variables are described by the following set of
 \begin{equation}
     \frac{d N}{d t} = 
     f \ N_0 % Nutrient mixing
-    +  \beta (1 - \epsilon) \sum_{j} \sum_{i} G_P^{ij} % Unassimilated grazing by Z
+    +  f_{eg} \ \sum_{j} \sum_{i} G_P^{ij} % Unassimilated grazing by Z
     - \sum_{i} ( \mu_{max}^i \ \gamma_i^N \ P_i) % Phytoplankton gains
 \end{equation}
 
@@ -1096,33 +1073,22 @@ The rates of change of the state variables are described by the following set of
 %ZOOPLANKTON
 \begin{equation}
     \frac{d Z_j}{d t} =
-    \beta \ \epsilon \ \sum_{i} G_P^{ij} % Assimilated grazing
+    \epsilon \ \sum_{i} G_P^{ij} % Assimilated grazing
     - m_{Z2} \ Z_j \ \sum_{j} Z_j  % Quadratic mortality
 \end{equation}
-
-
-
 
 \subsubsection{Implementation}
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_schematics/code_schematics/ASTroCAT.pdf}
-\caption{Schematic of use case 3 model as implemented in the XSO framework and included in the Phydra library. To simplify visualisation, only the XSO components with their labels and linkage are shown. Each component consist of a number of variables, forcings or parameters. Thick arrows indicate the flow of a flux between state variables. Dashed lines connecting processes indicate linkages between variables and forcings, as well as group}
+\caption{Schematic of use case 3 model as implemented in the XSO framework and included in the Phydra library. To simplify visualisation, only the XSO components with their labels and linkage are shown. Each component consist of a number of variables, forcings or parameters. Thick arrows indicate the flow of a flux to state variables. Dashed lines connecting processes indicate linkages between variables and forcings, as well as group}
 \label{Figure:CodeSchematics_3}
 \end{figure*}
 
-- The original model was implemented in an interactive GUI written in Processing 2, that was kindly supplied to the authors, still very worth checking out!
+The ASTroCAT model was implemented using the XSO framework. In order to find a useful structuring of model components, we can separate the model into state variables, forcings and fluxes. For state variables we have the nutrient ($N$), multiple size-classes of phytoplankton ($P_i$) and zooplankton ($Z_j$). The only forcing is the nutrient concentration of the external medium ($N_0$). At least 5 fluxes can be separately defined: The inflow of the external medium, $P_i$ growing on $N$, $Z_j$ grazing on $P_i$ and mortality terms for both $P_i$ and $Z_j$.
+The model was implemented using 10 XSO components as visualized in Figure \ref{Figure:CodeSchematics_3}. We chose to simplify the schematic by only showing the components with their respective labels. A detailed description of each component can be found in the Phydra repository on Github.
 
-Implementation is similar to Banas, but in Python, not Javascript/Processing. Model structure exactly the same.
-Using XSO framework we don't need to use any for-loops, can make use of vectorization.
-
-The above model can be separated into a few components:
-State variables: N, P, Z
-Forcings: N0
-Fluxes: Uptake (N->Pp), Grazing (Pp->Zz + GGE->N,loss), Influx (N0->N)
-This model can be implemented exactly like this in XSO, using X components. See the schematic (TODO!).
-
-- Schematic of implementation is only shown simplified here, but full description and code available online in the Phydra repository on Github!
+The original ASTroCAT model was implemented with an interactive graphical user interface showing beautiful animation of model output that was written in Processing 2 and kindly supplied by the author upon request. Our implementation in the XSO framework is technically quite similar to the original model code, with the major differences being the modular component structure and the use of vectorization instead of for-loops to define functions acting on the size-classes.
 
 The model processes and their respective components are listed below, with a short description of their function and application in the model:
 
@@ -1147,7 +1113,7 @@ The model processes and their respective components are listed below, with a sho
     \item Zooplankton grazing on phytoplankton: 
     \begin{itemize}
         \item \texttt{SizeBasedGrazing}: The grazing formulation for the multiple size classes of phytoplankton and zooplankton is the most complex function presented in our use cases. Care needs to be taken with proper handling of the dimensions within the function, but if it is done correctly the built-in vectorization of the XSO framework allows efficient calculation of the matrix-wise interaction for any number of size-classes. To improve the modularity of our implementation we split the calculation of the grazing matrix from the routing of the fluxes to their sources and sinks. This can be achieved via the group functionality of XSO, passing along the full matrix as a group variable to the \texttt{SizeBasedGrazing\_Fluxes} component. At model setup, the \texttt{SizeBasedGrazing} takes the label for resource and consumer, as well as the feeding preference matrix, the array of maximum ingestion rates and the single $k_Z$ parameter as input.
-        \item \texttt{SizeBasedGrazing\_Fluxes}: This component receives the full matrix of grazing fluxes ($P_i$ over $Z_j$) as a group variable from the \texttt{SizeBasedGrazing} component and allocates the summed up fluxes to the sources and sinks of the grazing flux. Summing over $Z_j$ yields the array of grazing fluxes subtracting from $P_i$, while summing over $P_i$ and multiplying by the assimilation coefficient $\epsilon$ yields the array of grazing fluxes assimilated to $Z_j$. Summing over the entire matrix and multiplying by $1 - f_{eg} - \epsilon$ yields the excreted biomass adding to $N$. At model setup, the component takes the respective labels of the state variables, as well as the parameters for $\epsilon$ and $f_{eg}$ as input.
+        \item \texttt{SizeBasedGrazing\_Fluxes}: This component receives the full matrix of grazing fluxes ($P_i$ over $Z_j$) as a group variable from the \texttt{SizeBasedGrazing} component and allocates the summed up fluxes to the sources and sinks of the grazing flux. Summing over $Z_j$ yields the array of grazing fluxes subtracting from $P_i$, while summing over $P_i$ and multiplying by the assimilation coefficient $\epsilon$ yields the array of grazing fluxes assimilated to $Z_j$. Summing over the entire matrix and multiplying by $f_{eg}$ yields the excreted biomass adding to $N$. At model setup, the component takes the respective labels of the state variables, as well as the parameters for $\epsilon$ and $f_{eg}$ as input.
     \end{itemize}
     
         \item Zooplankton and phytoplankton mortality: 
@@ -1156,48 +1122,45 @@ The model processes and their respective components are listed below, with a sho
         \item \texttt{QuadDecayDim}: Similarly quadratic mortality of zooplankton is defined with a dimension label. The vectorization functionality allows defining the quadratic term as the sum of all zooplankton biomass, while still calculating over all zooplankton size classes.
     \end{itemize}
 \end{enumerate}
+- Parameters were entirely adapted from \citet{Banas2011b}, see table \ref{Table:usecase3parameters} for all used parameter values.
 
+- Phytoplankton and zooplankton sizes are log-spaced.
 
-- SV-Array functionality! Dimensionality of state variables (this functionality in XSO) is useful is in setting up phytoplankton size classes in trait-based models. All phytoplankton state variables grow on a common nutrient, but uptake parameters are related to allometries of cell size. A phytoplankton functional group is initialized, with a certain size range and number of state variables. Parameters are dynamically initialized based on the size provided by the component. 
+- Allometries are not built into model, to reduce complexity and increase flexibility.. instead they are provided as helper functions with Phydra -> can be used for any project! What is input variable in model is not size but the actual parameter. Model however does store the size variable, as this is required input for the Size-based SV component (additional param). This way users can store any necessary information with model data..
 
-- Allometries are not built into model, to reduce complexity and increase flexibility.. instead they are provided as helper functions with Phydra -> can be used for any project! What is input variable in model is not size but the actual parameter. Model however does store the size variable, as this is required input for the Size-based SV component (additional param). This way users can store any necessary information with model data.. (this should also be xs.index, helps with plotting (TODO))
-
-- E.g. for mortality, intuitive writing of flux functions, because of vectorization: sum of Z can be computed against each Z, array is returned from function
-
-- Implementation of Grazing function is very complex, as many size classes create large complex matrix-wise interaction. With XSO computational optimization, we use vectorization again, and multi-dimensional flux! Works without problems, but need to keep attention to orientation and correct parsing of matrix (Could provide helper functions? -> think about it)
-
-- modification: very simple! use SV-Array component, and provide variable number of initial values in list, model automatically scales all other functions etc.
+- "Note that exponent relating relating optimum prey size to predator body size is far from 1, which is implicit assumption of models that use a constant predator-prey size ratio: most small grazers eat phytoplankton to their own size than large grazers do" [need to fix this in model code, currently relationship is 1 to 1]
 
 \begin{table*}[t]
-\caption{Allometric parameterisations and empirical parameter values employed in use case 3, adapted from \citet{Banas2011b}.}
-\begin{tabular}{l c c c r}
-Empirical fit & Applicability & Source \\
+\caption{Parameters and allometric functions used in use case 3.}
+\begin{tabular}{l c c r}
+Parameter & Description & Value & Units \\
 \tophline
-$\mu_{max}^i = (2.6 \ d^{-1}) \left( \frac{size_i^{P}}{1\mu m} \right)^{-0.45}$ & Phytoplankton 1-100 ESD \unit{\mu m} & Tang(1995) \\
-$k_N^i = (0.1 \ \unit{µM \ N})\left( \frac{size_i^{P}}{1\mu m} \right)$ & Phytoplankton 1-100 ESD \unit{\mu m} & Eppley et al. (1969) \\
+$f$ & Flow rate of external nutrient & 1 & \unit{d^{-1}} \\
+$N_0$ & External nutrient concentration & 1 & \unit{µM \ N} \\
+$k_Z$ & Prey half-saturation constant & 3 & \unit{µM \ N}\\
+$\Delta size_{P}$ & Prey size tolerance & 0.25 &  \\
+$m_P$ & Mortality fraction of $\mu_{max}^i$ for $P_i$ & 0.1 & \unit{d^{-1}}\\
+$\epsilon$ & Zooplankton growth efficiency & 0.33 & \\
+$f_{eg}$ & Fraction of grazing egested & 0.33 & \\
+\\
 
-$\mu_Z^j = (26 \ d^{-1})\left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
+$\mu_{max}^i$ & Maximum growth rate of $P_i$ & $ 2.6 \left( \frac{size_i^{P}}{1\mu m} \right)^{-0.45}$  & \unit{d^{-1}} \\
+$k_N^i$ & Nutrient half-saturation constant of $P_i$ & $ 0.1 \left( \frac{size_i^{P}}{1\mu m} \right)$ & \unit{µM \ N} \\
 
-$k_Z^j = 3 \ \unit{µM \ N} $ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1997) \\
+$\mu_Z^j$ & Maximum ingestion rate of $Z_j$ & $26 \left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ &\unit{µM \ N} \\
 
-$size_{opt}^j = (0.65 \ \unit{\mu m})\left( \frac{size_{P}^i}{1\mu m} \right)^{0.56}$ & Flagellates, dinoflagellates, ciliates, copepods & Hansen et al. (1994) \\
-$\Delta size_{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994)  \\
-\middlehline
+$size_{opt}^j$ &  & $0.65 \left( \frac{size_{P}^i}{1\mu m} \right)^{0.56}$ & \ \unit{µM \ N} \\
 
 \bottomhline
 \end{tabular}
-\belowtable{TODO: the sources need to be added properly! for now just text..} % Table Footnotes
-%\label{appendix:table:usecase2parameters}
+\belowtable{Sources for allometric functions: \citep{Tang1995TheRespiration, Eppley1969HalfSaturationPhytoplankton, Hansen1997ZooplanktonRange, Hansen1994a}} % Table Footnotes
+\label{Table:usecase3parameters}
 \end{table*}
 %
 
+- modification: very simple! use SV-Array component, and provide variable number of initial values in list, model automatically scales all other functions etc.
 
 \subsubsection{Results}
-- recreate dynamics observed using the same model by BANAS
-- showing oscillatory behaviour, emergent properties of complex food web (one level of trophic interaction)
-- modification: interesting effect of the number of size classes on model output and model stability.. seems to stabilize (but still vary) after 10-20 clones -> important fact for functional group type models! dynamics are an artifact of low resolution, not functional diversity. With increased resolution, more "predicatable" dynamics.
-
-
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_plots/03_ASTroCAT_N50P50Z.pdf}
@@ -1205,6 +1168,8 @@ $\Delta size_{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994
 \label{Figure:ResultsASTroCAT_1}
 \end{figure}
 
+- recreate dynamics observed using the same model by \citet{Banas2011b}.
+- showing oscillatory behaviour, emergent properties of complex food web (one level of trophic interaction)
 
 %%f
 \begin{figure}[t]
@@ -1213,33 +1178,42 @@ $\Delta size_{P} = 0.25 $ & Ciliates, nauplii, copepodites & Hansen et al. (1994
 \label{Figure:ResultsASTroCAT_2}
 \end{figure}
 
+- modification: interesting effect of the number of size classes on model output and model stability.. seems to stabilize (but still vary) after 10-20 clones -> important fact for functional group type models! dynamics are an artifact of low resolution, not functional diversity. With increased resolution, more "predictable" dynamics. This effect was already noted by \citet{Baird2007b}.
+
+- We have shown: Phydra/XSO can be used for complex ecosystem formulations and advanced size-based and functional group type models
 
 %%% added Section for editing purposes, later simply use \conclusions
 \section{Conclusions}
 %\conclusions  %% \conclusions[modified heading if necessary]
 % Place this project in the wider open science ecosystem, outlook on further developments
 
-% ANDREWS COMMENTS
 make the main points again (from intro)
+
+
+What is Phydra? What is XSO?
+
+
+Reiterate what we have written and the use cases shown
+
+
 old school modeling can be done better
 show that I am moving in a direction that other people are! Brian Rose climlab, etc.
 
 - This is a first step in the direction
 
-- package architecture should be merged with other open-source python efforts (veros-bgcm, BGC-val)
+- package architecture is heavily borrowing from other open-source python efforts (e.g. xarray-simlab, xarray, numpy, scipy,...) 
+- functionality can be merged with other open-source python projects (veros-bgcm, BGC-val)
 
 - xsimlab is a powerful framework that is actively developed further, more added compatibilities possible
-- same goes for xarray-simlab-ode, e.g. solvers, visualization, optimization of model construction \& execution in backend
-
-e.g. next steps: 1. add 1D, 2D, 3D models 2. add agent-based models using xarray-simlab framework (could use the same pool of functions, compability could be established with backend code!)
-
+- same goes for xarray-simlab-ode, e.g. solvers, visualization, optimization of model construction \& execution in backend - much potential to develop it further
 - Python lends itself well to interface with legacy fortran code, can make marine 3d modeling much more accessible without loosing performance or accuracy
 
 - want to make the first step, hoping that people will adopt and contribute
 
 - any modeler willing to use phydra will probably have to write his own processes, and this is also the intention. Object oriented structure still highly simplifies collaboration with non-modelers or people not versed in higher-level python. Higher transparency and collaboration between modelers as well, since same code base and similar 
 
-- clearly: should add 1D -> 3D example models in the future
+e.g. next steps: 1. add 1D, 2D, 3D models 2. add agent-based models using xarray-simlab framework
+
 
 
 %% END OF SECTION CONCLUSIONS
