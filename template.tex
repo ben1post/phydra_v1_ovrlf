@@ -81,7 +81,7 @@
 
 \begin{document}
 
-\title{Phydra 0.1: an open source Python library for flexible, modular and reproducible marine ecosystem modeling based on ordinary differential equations} 
+\title{Phydra 0.1: an open source Python library using the XSO framework for flexible, modular and reproducible marine ecosystem modeling based on ordinary differential equations} 
 
 
 % \Author[affil]{given_name}{surname}
@@ -135,7 +135,7 @@ Marine ecosystem modeling is central to understanding the biogeochemical cycles 
 These models can have highly variable complexity, both in terms of mechanistic and spatial resolution. 
 No consensus in terms of adequate model complexity and formulation has been reached, although there are many canonical model structures used and modified.
 
-This paper introduces Phydra, an open-source library for marine ecosystem modeling built with the object-oriented modeling framework Xarray-simlab-ode (XSO), with the goal to support efficient, flexible and easily reproducible development of models based on ordinary differential equations. 
+This paper introduces Phydra, an open-source library for marine ecosystem modeling built with the object-oriented modeling framework Xarray-simlab-ODE (XSO), with the goal to support efficient, flexible and easily reproducible development of models based on ordinary differential equations. 
 
 Phydra provides pre-built models and model components that can be modified and assembled to complex ecosystem models. 
 
@@ -326,22 +326,30 @@ Andrew's comments: (THIS IS METHODS)
 % 2nd Section:
 % Background, theoretical framework. Specifics here!
 GENERAL STRUCTURE:
-- Components
-- Models
-- Example Notebooks
+\begin{enumerate}
+    \item Components: XSO model component library
+    
+    
+    \item Models: Model objects constructed from component library
+    
+    
+    \item Example Notebooks: Exemplary model runs, incl. parameters and plots, using model library
+    
+\end{enumerate}
 
 
 Phydra is an open-source Python library, with the aim to support efficient, open and easily reproducible development of marine ecosystems. The models included in the first version of Phydra are constructed in the object-oriented XSO (short for Xarray-Simlab-ODE) framework, which was specifically developed for this purpose. 
 
-In the current version Phydra includes a set of building blocks that can be combined to 0-dimensional ecosystem models of variable complexity. 
-The building-blocks are written as compact python classes, referred to as model components in the XSO framework.
+- In the current version Phydra includes a set of building blocks that can be combined to 0-dimensional ecosystem models of variable complexity. 
+
+- The building-blocks are written as compact python classes, referred to as model components in the XSO framework.
 
 A Phydra model instance includes processes handling the solver and model assembly, as well as processes defining state variables, forcing parameters and their interactions (i.e. fluxes). State variables can be defined as unique instances, but also as functional groups (essentially an array of state variables), and Phydra provides functions capable of flexibly handling multi-dimensional interactions between model components. 
 
 XSO is not limited to applications in ecosystem models, and can be used flexibly for many different types of model setups based on ODEs. 
-- So another reason for having Phydra as a separate library, is to establish a common usage, e.g. for dimensions naming and component refacturing, so that developed models are automatically compatible with each other, to foster creative experimentation.
+- So another reason for having Phydra as a separate library, is to establish a common usage, e.g. for dimensions naming and component refactoring, so that developed models are automatically compatible with each other, to foster creative experimentation.
 
-The implementation and testing of more complex ecosystem descriptions is the natural application of such a package, which is demonstrated in the three use cases presented in Section \ref{Section:UseCases}. The current version of Phydra does include models with spatial dimensions, but this would be a logical next step in development.
+The implementation and testing of more complex ecosystem descriptions is the natural application of such a package, which is demonstrated in the three use cases presented in Section \ref{Section:UseCases}. 
 
 A typical model development workflow using Phydra would assemble a model instance from the basic building-blocks: XSO components defining state variables, forcings and fluxes. 
 
@@ -352,19 +360,23 @@ The model construction process is self-documenting, as parameters and model outp
 - XSO provides an interface for iterative modification, both to more complex and simpler model constructs and allows running parameter ranges as batches in parallel [NOTE: experimental feature, not yet tested!]. The specific steps of model development are presented in further detail in the section presenting the XSO framework.
 
 The Phydra package is built on the wealth of functionality created by the open-source scientific Python community. The package xarray-simlab forms the technical foundation of XSO, which also relies on exisiting ODE solver packages such as SciPy's odeint and APM GEKKO. XSO provides the flexible model framework and odeint an efficient solver of large models. 
+
+
 Below we describe how Phydra leverages these open-source projects to provide a tool-set to construct, modify, solve, analyse and share marine ecosystem models. 
 
 \subsection{Scope and limitations}
 
-Situated in complexity between GUI tools that allow drag and drop, and custom model scripts. The combination of phydra as a library and xarray-simlab-ode as a framework aims to reduce the boilerplate code necessary to write computational models in Python.
+Situated in complexity between GUI tools that allow drag and drop, and custom model scripts. The combination of phydra as a library and XSO as a framework aims to reduce the boilerplate code necessary to write computational models in Python.
+
+
 The modeling process can be approached from two levels of complexity, models can be assembled and executed from pre-built components, and model objects can be shared and supplied with custom parameters for further testing. More advanced users can easily build their own components or modify mathematical functions where necessary.
 
-The object-oriented structure of Phydra allows users to extend certain base processes to provide the desired functionality. 
+The object-oriented structure of the XSO framework allows users to extend certain base processes to provide the desired functionality. 
 
 Similar to how a forcing process can easily be sub-classed to supply a different type of forcing to the environment, other processes can be easily modified to have a different function, as long as the interaction between state variables matches with the dimensions and overall structure of the components involved. 
 
 % OPEN SOURCE CONTRIBUTION 
-Phydra (like Xarray-simlab and GEKKO) is an open-source project. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. Please read the contributing guidelines on the Github repository for further details.
+Phydra and XSO are open-source projects. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. Please read the contributing guidelines on the Github repository for further details.
 
 \subsection{Installing and running Phydra}
 The Phydra package is available via the Python pip package manager, but we encourage using Conda as a package manager that is provided with the scientific Anaconda Python distribution.
@@ -388,21 +400,16 @@ Xarray-simlab-ode (XSO) is a generic framework for building computational models
 
 The library of modular processes and the user interface are based on the Xarray-simlab Python package \citep{Bovy2018Xarray-simlab:Interactively}. Xarray-simlab provides a generic framework for building computational models in a modular fashion and an extension for storing model parameters, running simulations and storing output using the xarray.Dataset structure. Xarray provides an efficient and labelled multi-dimensional storage format, that is integrated with functionality for easy plotting, post-processing and storing of model output. Xarray.Datasets are easily converted to Netcdf files, a commonly used file format for biogeochemical data and large model output. 
 
-In addition to being an extension to xarray as a native storage solution, xarray-simlab provides the object-oriented framework for model building blocks, as well as the model setup and runtime user interface in Phydra. The building-blocks of the model are stored in decorated xarray-simlab process classes, which are slightly modified Python classes. Within these process classes, all functions related to model formulation are stored. The process class contains xarray-simlab variables that define dependencies or values, on which specific simulation functions act during model runtime. Currently supported are four simulation stages: initializing a process, running a function at the beginning or end of supplied model steps and a finalize stage called once at the end of model execution. At model initialisation the xarray-simlab framework automatically orders the processes according to their dependencies, and allows a model instance to be initialized with parameters and solved in a step-wise fashion. The Phydra library provides a set of processes as well as base classes that can be modified by the user.
+In addition to being an extension to xarray as a native storage solution, XSO provides the object-oriented framework for model building blocks, as well as the model setup and runtime user interface in Phydra. The building-blocks of the model are stored in decorated python classes, hereafter referred to as components. Within these components, all functions related to model formulation are stored. The component contaions XSO variables that define dependencies or values, on which specific simulation functions act during model runtime. At model initialisation the XSO framework automatically orders the processes according to their dependencies, and allows a model instance to be initialized with parameters and solved in a step-wise fashion. The Phydra library provides a set of components that can be modified by the user.
 
-Xarray-simlab currently only provides step-wise execution of model functions according to an explicit time step. Since such a solving routine is not ideal for complex systems of differential equations, we use the GEKKO Python package as a more robust back end to solving models built in Phydra. GEKKO is an open-source, object-oriented library of model construction, analysis and optimisation tools built on a core algebraic modelling language \citep{Beal2018GEKKOSuite}. Models can be constructed based on a common syntax and are compiled to efficient FORTRAN code before solving. The syntax allows the intuitive formulation of ordinary differential equations of state variables.
+% SOLVER
+XSO currently provides three solving algorithms: Odeint, GEKKO and a simple stepwise solver. GEKKO is an open-source, object-oriented library of model construction, analysis and optimisation tools built on a core algebraic modelling language \citep{Beal2018GEKKOSuite}.
 
-When assembling a model in Phydra, there are certain basic processes that allow the GEKKO solver to assemble the full model. These are necessary so that each building block can communicate with the solver, which automatically stores all defined model components in the GEKKO model instance. The current version of Phydra does not use the explicit time step of Xarray-simlab and instead uses the simulation stages with a single explicit time-step. This allows initializing state variables and fluxes, assembling model equations, solving the model and finally deleting temporary files in four distinct stages ("initialize", "run step", "finalize step" and "finalize"). Model solve time is supplied from a model process, instead of through the clocks interface of Xarray-simlab. The framework as of yet does not support custom simulation stages, but in the future this could improve and simplify the functionality of Phydra.
+% XSO backend
+- explain XSO Backend, Time, Solver, ...
 
-Python as a programming language would not be well suited to execute large scale numerical simulations.
-Utilizing GEKKO as a backend solver within the xarray-simlab framework, we can combine the usability of a high-level language like Python with the efficient computation of lower-level languages. Additionally GEKKO provides a powerful interface to perform model optimisation, usage of which will be included with Phydra in future version. 
 
 Both of Xarray-simlab and GEKKO are relatively young  Python packages and actively under development, which provides some challenges, but also allows for constant improvements to the functionality that Phydra provides.
-
-
-- solving backend
-
-- provides specific functions to handle, state vars, forcing and store intermediate fluxes in the form of mathematical ordinary differential equations. SV.dt() == equation
 
 
 \subsection{Component building-blocks} \label{Section:ComponentBuildingBlocks}
@@ -428,7 +435,9 @@ Flux & Defines part of mathematical function acting on state variables & Functio
 \end{table*}
 %
 
-- state variables
+\begin{enumerate}
+    \item state variables
+
 required inputs, required \& optional arguments (e.g. dims, flux), usage
 
 An ecosystem model tracks chemical compounds as well as organisms via state variables. These state variables can define completely different components of a model, or represent a functional group. Components within Phydra are defined at this higher level and can contain a single state variable or an array of state variables that share common fluxes with differing parameterisation. Each state variable is added to the model with a specific label that is used to reference this component in all processes affecting or dependent on it. 
@@ -441,7 +450,7 @@ The first release of Phydra supports only scalar and one-dimensional array imple
 !or!
 Dimensionality in state variables can be used to model functional groups or classes, as well as systems of higher dimensionality. At its current version Phydra provides only zero-dimensional models, but models of higher-dimension would be a clear next step in further development.
 
-- forcings
+\item forcings
 
 Forcings are defined as providing an external constant or time-varying parameter to the model. These parameters can be used in fluxes that reference the forcing type,
 
@@ -453,9 +462,9 @@ handle initializing Params, time-varying or constant, based on external data or 
 - if the forcing is based on data and not a mathematical function or constant value, it is necessary to perform some type of interpolation, if used with adaptive step-size solvers (like odeint)! choice of interpolation algorithm is up to user (we use \texttt{scipy.interpolate.splrep}, an algorithm to calculate the B-spline representation of a 1-D curve, in particular because it allows for periodic interpolation that is useful for yearly climatological forcing!
 
 
-- parameters
+\item parameters
 
-- fluxes
+\item fluxes
 
 The previous building blocks for state variables and forcings create the structure of the model, but when solved at this stage there would be no meaningful simulation. In order to define exchanges of matter between components flux processes are added to our model instance, defining the affected components via labels at model setup.
 There are multiple types of fluxes provided in the library. 
@@ -468,6 +477,7 @@ For now, dimensions have to be fixed and named at process creation (ACTUALLY THE
 % TODO: check if I can make all components of flexible dimensionality so that they work in all models!
 
 Single fluxes provide loss or gain processes to a single variable, such as sinking or influx from outside the ecosystem. In order to simplify creating common forcing fluxes, a single flux process can take list of affected components as input at model setup. An example for more complex flux type are exchange fluxes, where a flux affects one component as a source and another as a sink. These can be set up with flexible dimensionality of components. Grazing fluxes are a slightly more complicated subclass of a grid-wise flux, as ingestion is usually normalized by total prey availability, so all forcing interactions need to be calculated in a dynamically generated matrix of all prey items consumed by a component.
+\end{enumerate}
 
 
 The open-source code allows users to easy develop or modify processes to describe a specific ecosystem.
@@ -489,26 +499,26 @@ The first version of the library will contain all processes needed to create the
 \label{Figure:phydraschematics}
 \end{figure*}
 
-Phydra is a tool-box for marine ecosystem modeling, that is freely extensible by a user to be applied to many different use cases. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on creating the most appropriate model structure and parameterisation for the specific scientific hypothesis that is being investigated. 
+Phydra/XSO is a tool-box for marine ecosystem modeling, that is freely extensible by a user to be applied to many different use cases. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on creating the most appropriate model structure and parameterisation for the specific scientific hypothesis that is being investigated. 
 
 Constructing marine ecosystem models in Phydra is by design a flexible process, but the user can follow a general workflow of assembling models from the library of processes. This workflow is visualized in Figure \ref{Figure:phydraschematics} and will be further explained below.
 
 
 \subsubsection{Model creation}
 
-To create a Phydra model object, the desired processes defining state variables, forcings and fluxes have to be provided with their corresponding label to the \texttt{phydra.Model()} function.
+To create a XSO model object, the desired processes defining state variables, forcings and fluxes have to be provided with their corresponding label to the \texttt{xso.Model()} function.
 The model can be assembled from the Phydra library, modifications of provided base classes or custom written processes. Multiple instances of fluxes or components can easily be added to the model, as long as the provided label differentiates them.
 These labels will be the specific name of the process in this model instance. At model setup, the labels are used to reference a process and provide the appropriate parameters.
 
-When creating a model, the xarray-simlab framework automatically checks that all references between processes are fulfilled, orders the processes in their logical order of execution and returns a Phydra model object. This model object contains all processes in the model and allows the user to view all parameters required as input at model setup. The Phydra library provides several basic model objects, that can be modified by a user through a simple interface that allows removing, modifying or adding new processes.
+When creating a model, the XSO framework automatically checks that all references between processes are fulfilled, orders the processes in their logical order of execution and returns an XSO model object. This model object contains all processes in the model and allows the user to interactively view all parameters required as input at model setup, when printing the object in the console. The Phydra library provides several basic model objects, that can be modified by a user through a simple interface that allows removing, modifying or adding new processes.
 
 \subsubsection{Model setup} \label{Section:Workflow:ModelSetup}
 
-A Phydra model object is itself only a collection of abstract processes. In order to fully initialize a model that can be solved, the model object needs to be supplied with a complete set of parameters.
+A XSO model object is itself only a collection of abstract processes. In order to fully initialize a model that can be solved, the model object needs to be supplied with a complete set of parameters.
 
-This is done using the \texttt{phydra.create\_setup()} function. The necessary arguments to this function are the model object to be setup, all required input parameters, the time range to solve the model and the specific model output to save during runtime. The Phydra setup function is a thin wrapper around the Xarray-simlab model setup function that automatically includes the solver backend and clocks setup for the chosen solving method.
+This is done using the \texttt{xso.create\_setup()} function. The necessary arguments to this function are the model object to be setup, all required input parameters, the time range to solve the model and the specific model output to save during runtime. The XSO setup function is a thin wrapper around the Xarray-simlab model setup function that automatically includes the solver backend and clocks setup for the chosen solving method.
 
-Phydra provides several options to store model output, as well as storing the value of fluxes and forcings. This allows users to specify the model output that suits the complexity of the model construct. There are processes supplied that can aggregate all state variables, Forcings or Fluxes values for output storage to simplify the process of defining output. For complex functional group models the output of each component can be stored along an individually labelled dimension, while a simple NPZD model can store the output of components along a shared dimension.
+XSO provides several options to store model output, as well as storing the value of fluxes and forcings. This allows users to specify the model output that suits the complexity of the model construct. There are processes supplied that can aggregate all state variables, Forcings or Fluxes values for output storage to simplify the process of defining output. For complex functional group models the output of each component can be stored along an individually labelled dimension, while a simple NPZD model can store the output of components along a shared dimension.
 
 The function call returns an Xarray dataset object that contains all provided parameters as well as the initialized labelled model dimensions. This dataset can be passed with the appropriate model object to be solved in the next step, but also provides an interface to exchange parameters to easily modify an already instantiated model setup.
 
@@ -517,13 +527,8 @@ At model setup, the xarray-simlab framework supports batch dimensions of single 
 \subsubsection{Runtime}
 % -> model_instance.xsimlab.run()
 % relatively straightforward, this will first initialize the model data variables according to the added processes and parameters supplied, and then start model evaluation
-The model setup created in the previous step already contains the necessary parameters and labelled dataset for model runtime. All that is required of the user is to call the \texttt{xsimlab.run()} attribute and provide a model object that corresponds to the model setup. This does not have to be the same model instance used to create the setup, as long as specified parameters and output are compatible.
+The model setup created in the previous step already contains the necessary parameters and labelled dataset for model runtime. All that is required of the user is to call the \texttt{xsimlab.run()} method and provide a model object that corresponds to the model setup. This does not have to be the same model instance used to create the setup, as long as specified parameters and output are compatible.
 
-\textit{NOTE: Currently there is only one way to solve models in Phydra: using the GEKKO dynamic sequential solver (IMODE 7).. but there are a few options to relatively easily provide an interface for other types of solvers for future versions. Not sure if I should mention the following:}
-
--GEKKO provides a simple interface for steady state-simulations, and model optimisation. The models constructed with Phydra are completely compatible, simply the solver process needs to be exchanged (and for model optimisation an objective function needs to be defined additionally)
-
-- GEKKO does as of yet not provide an adaptive step size solver like odeint, but I have created a feature request and talked to the developers. This will very likely be included in future versions.
 
 \subsubsection{Model diagnostics and additional functionality}
 
@@ -531,7 +536,7 @@ The model setup created in the previous step already contains the necessary para
 
 - Xarray-simlab provides visualisation functions, that can be used to get a structured overview over all processes in a model instance. These are not optimized for the current structure though, as most dependencies between subprocesses are handled in the solver backend, not via explicit xarray-simlab process dependencies.
 
-- Gekko stores model equations including the names of parameters and it would be possible to add some functions that print the mathematical equations.. which would be quite helpful to build and debug a model. (possible feature)
+- XSO stores model equations including the names of parameters and it would be possible to add some functions that print the mathematical equations.. which would be quite helpful to build and debug a model. (possible feature)
 
 - Model optimisation (i.e. parameter fitting) is well supported by the GEKKO backend. I will run some tests, and if it works very well, it might make sense to include it in this publication, since it is a major strong point for using Phydra.
 
@@ -856,7 +861,7 @@ The rates of change of the state variables are described by the following set of
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_schematics/code_schematics/EMPOWER.pdf}
-\caption{Schematic of use case 2 model as implemented in the XSO framework and included in the Phydra library. To simplify visualisation, only the XSO components with their labels and linkage are shown. Each component consist of a number of variables, forcings or parameters. Thick arrows indicate the flow of a flux between state variables. Dashed lines connecting processes indicate linkages between variables and forcings, as well as groups.}
+\caption{Schematic of use case 2 model as implemented in the XSO framework and included in the Phydra library. To simplify visualisation, only the XSO components with their labels and linkage are shown. Each component consist of a number of variables, forcings or parameters. Solid arrows indicate the flow of a flux between state variables. Dashed arrows visualise flux values passed along as group variables. Dashed lines connecting processes indicate variables and forcings passed along via their label.}
 \label{Figure:CodeSchematics_2}
 \end{figure*}
 
@@ -1081,7 +1086,7 @@ The rates of change of the state variables are described by the following set of
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_schematics/code_schematics/ASTroCAT.pdf}
-\caption{Schematic of use case 3 model as implemented in the XSO framework and included in the Phydra library. To simplify visualisation, only the XSO components with their labels and linkage are shown. Each component consist of a number of variables, forcings or parameters. Thick arrows indicate the flow of a flux to state variables. Dashed lines connecting processes indicate linkages between variables and forcings, as well as group}
+\caption{Schematic of use case 3 model as implemented in the XSO framework and included in the Phydra library. To simplify visualisation, only the XSO components with their labels and linkage are shown. Each component consist of a number of variables, forcings or parameters. Solid arrows indicate the flow of a flux between state variables. Dashed arrows visualise flux values passed along as group variables. Dashed lines connecting processes indicate variables and forcings passed along via their label. Arrows with multiple lines indicate values with dimensions that are passed along.}
 \label{Figure:CodeSchematics_3}
 \end{figure*}
 
