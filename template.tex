@@ -597,7 +597,7 @@ The model equations are as follows:
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_schematics/code_schematics/Chemostat.pdf}
-\caption{Schematic of use case 1 model as implemented in the XSO framework and included in the Phydra library. Structures in solid black are written into the components. Labels of the different components are supplied at model creation, while gray structures and the resulting linkages between components (shown in thick colored arrows) are defined at model setup, via the supplied labels and parameters. The asterisk in the flux function input arguments references the variables, forcings and parameters defined within the same component, these local variables can be used in all functions (e.g. fluxes or forcing setup functions) within that same component.}
+\caption{Schematic of use case 1 model as implemented in the XSO framework and included in the Phydra library. (a) shows model setup under constant forcing, (b) shows the forcing component supplying sinusoidal forcing. Structures in solid black are hard-coded into components. Labels of the different components are supplied at model creation, while gray boxes and the resulting linkages between components (shown in thick colored arrows and dashed lines) are defined at model setup, via the supplied labels and parameters. The asterisk in the flux function input arguments references the variables, forcings and parameters defined within the same component, these local variables can be used in all functions (e.g. fluxes or forcing setup functions) within that same component.}
 \label{Figure:CodeSchematics_1}
 \end{figure*}
 
@@ -880,18 +880,18 @@ The model processes and their respective components are listed below, with a sho
     
     \item Slab-ocean forcings:
     \begin{itemize}
-        \item \texttt{MLDForcing} $$
-        \item \texttt{N0Forcing}
-        \item \texttt{PARForcing}
-        \item \texttt{SSTForcing} $$
+        \item \texttt{MLDForcing}: The mixed layer depth forcing is read from a file, interpolated and supplied via the label \texttt{"MLD"} to the framework. 
+        \item \texttt{N0Forcing}: The forcing for nutrient below the mixed layer is read from a file, interpolated and supplied via the label \texttt{"N0"} to the framework. 
+        \item \texttt{PARForcing}: This component contains the light submodel, calculating irradiance climatology for the station locations.
+        \item \texttt{SSTForcing}: The forcing for temperature within the mixed layer is read from a file, interpolated and supplied via the label \texttt{"SST"} to the framework.
     \end{itemize}
     
     \item Slab-ocean physics:
     \begin{itemize}
-        \item \texttt{MLDForcing}: The calculation of mixing in this slab model takes the value of $H$ from the \texttt{MLDForcing} component, where the forcing is read from a file, interpolated and supplied via the label \texttt{"MLD"} to the framework. 
-        \item \texttt{MLDForcing}: This forcing is supplied to the \texttt{Mixing\_K} component, where the mixing coefficient $K$ is calculated once and supplied to \texttt{SlabUpwelling} and \texttt{SlabMixing} via a group variable. This allows calculating $K$ only once per time-step for more efficient computation. 
+        \item \texttt{Mixing\_K}: From the forcing supplied via \texttt{MLDForcing} the mixing coefficient $K$ is calculated once and supplied to \texttt{SlabUpwelling} and \texttt{SlabMixing} via a group variable. $K$ is thus calculated only once per time-step for more efficient computation.
         \item \texttt{SlabUpwelling} calculates nutrient upwelling via the value of $K$ and the difference between the $N_0$ forcing and $N$. 
-        \item \texttt{SlabMixing} employs the list-input functionality described in the first use case, and calculates the effect of mixing on $P$, $Z$ and $D$. Finally, \texttt{SlabMixing} also receives the MLD forcing ($H$) from \texttt{MLDForcing} and calculates the sinking flux acting on $D$.
+        \item \texttt{SlabMixing} employs the list-input functionality described in the first use case, and calculates the effect of mixing on $P$, $Z$ and $D$. Finally, 
+        \item \texttt{SlabMixing} also receives the MLD forcing ($H$) from \texttt{MLDForcing} and calculates the sinking flux acting on $D$.
     \end{itemize}
     
     \item Phytoplankton growth: Temperature-dependent, light- and nutrient-limited growth of phytoplankton is another model process that was implemented with multiple linked components, to allow for greater flexibility.
