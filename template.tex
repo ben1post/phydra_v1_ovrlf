@@ -281,6 +281,11 @@ Phydra is a library for those starting out with marine ecosystem modeling and st
 
 Phydra for now only includes code that uses xarray-simlab-ode framework, but this does not have to be fixed and could very well be extended to include other implementations of models.
 
+- The Phydra package is built on the wealth of functionality created by the open-source scientific Python community. The package xarray-simlab forms the technical foundation of XSO, which also relies on exisiting ODE solver packages such as SciPy's odeint and APM GEKKO. XSO provides the flexible model framework and odeint an efficient solver of large models. 
+- Below we describe how Phydra leverages these open-source projects to provide a tool-set to construct, modify, solve, analyse and share marine ecosystem models. 
+
+- Phydra/XSO is a tool-box for marine ecosystem modeling, that is freely extensible by a user to be applied to many different use cases. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on creating the most appropriate model structure and parameterisation for the specific scientific hypothesis that is being investigated. 
+
 % AIM for XSO
 In order to provide phydra with a functional backend, we ended up developing our own framework: XSO
 Goals:
@@ -327,16 +332,16 @@ Andrew's comments: (THIS IS METHODS)
 % Background, theoretical framework. Specifics here!
 Phydra is an open-source Python library, that contains marine ecosystem models built in a modular fashion using the XSO framework. XSO (short for Xarray-simlab-ODE) provides both a lightweight framework for building or customizing models based on differential equations from flexible components and an extension of Xarray (a popular Python package for multi-dimensional arrays with metadata, based on the netCDF data model) to easily setup and run simulations. The model examples are implemented in Jupyter notebooks, that allow mixing source code and documentation in a browser-based interactive environment. 
 
-The XSO framework was developed in conjunction with Phydra, but is domain-agnostic and can be used to build any type of model based on differential equations. The Phydra package provides a specific library for marine ecosystem modeling applications that establishes conventions and common usage. The goal is to provide a unified framework for marine ecosystem modeling in Python that fosters creative experimentation and open exchange between scientists. 
+The XSO framework was developed in conjunction with Phydra, but is domain-agnostic and can be used to build any type of model based on differential equations. The Phydra package provides a specific library for marine ecosystem modeling applications that establishes conventions and common usage. The goal is to provide a unified framework for marine ecosystem modeling in Python that fosters creative experimentation and open exchange between scientists.
 
 The structure of Phydra and XSO, as well as a simplified model development workflow are presented in figure \ref{Figure:PhydraXSOPackageSchematics} and explained in detail below.
 
-\subsection{The Phydra library}
+\subsection{The Phydra library} \label{Section:PhydraLibrary}
 The marine ecosystem models included in the Phydra package are available to the user at multiple hierarchical levels: As a library of pre-built XSO model \textit{"components"}, as pre-assembled XSO \textit{"model objects"}, as well as exemplary model simulations in interactive Jupyter notebooks. These levels are described below:
 \begin{enumerate}
-    \item \textit{\textbf{Components}}: The XSO framework provides a collection of variable types that can be flexibly combined into a single \textit{component}. A \textit{component} is the functional building block of a model, and can contain any number of state variables, parameters, forcings or mathematical functions linking these into a system of differential equations (hereafter referred to as \textit{fluxes}), as well as references to each of these in another \textit{component}. To allow users to easily assemble their own marine ecosystem models, Phydra contains a fully documented library of commonly used \textit{components}.
+    \item \textbf{\textit{Component} library}: The XSO framework provides a collection of variable types that can be flexibly combined into a single \textit{component}. A \textit{component} is the functional building block of a model, and can contain any number of state variables, parameters, forcings or mathematical functions linking these into a system of differential equations (hereafter referred to as \textit{fluxes}), as well as references to each of these in another \textit{component}. To allow users to easily assemble their own marine ecosystem models, Phydra contains a fully documented library of commonly used \textit{components}.
     
-    \item \textit{\textbf{Model objects}}: A fully-functional model can be assembled from one or more \textit{components} into a XSO \textit{model object}. It defines the specific components used within the model can be imported from the library and setup, modified and run by a user. The first release of phydra contains the \textit{models} presented as use cases in section \ref{Section:UseCases}.
+    \item \textbf{\textit{Model object} library}: A fully-functional model can be assembled from one or more \textit{components} into a XSO \textit{model object}. It defines the specific components used within the model can be imported from the library and setup, modified and run by a user. The first release of phydra contains the \textit{model objects} presented as use cases in section \ref{Section:UseCases}.
     
     \item \textbf{Example notebooks}: \textit{Model objects} only define the collection of \textit{components} for a specific model implementation. Phydra comes with at least one fully documented model application per \textit{model object} in the library, that is presented in an interactive Jupyter notebook. These notebooks show all steps from model setup to analyzing model output and provide a template for further exploration and experimentation with the provided marine ecosystem models.
 \end{enumerate}
@@ -353,167 +358,178 @@ The first version of the library will contain all processes needed to create the
 - provides a robust, documented peer-reviewed code basis for more complex mathematical formulations
 
 
-\subsection{The XSO framework}
-- Introductory sentence
+\subsection{The XSO framework} \label{Section:XSOFramework}
+\begin{comment}
+- Introductory sentence, what is XSO? 
+- Extends the Xarray-simlab framework to inherent ODE functionality
+- Xarray extension, what can it do?
 - 
+\end{comment}
 
-Xarray-simlab-ode (XSO) is a generic framework for building computational models based on ordinary differential equations (ODEs) and a Xarray extension for running simulations. 
+XSO (short for Xarray-simlab-ODE) is a Python package that provides a framework for building and running computational models based on ordinary differential equations (ODEs).
+
+- ODE model extension of Xarray-simlab \citep{Bovy2018Xarray-simlab:Interactively}. Xarray-simlab provides a generic framework for building computational models in a modular fashion and an extension for storing model parameters, running simulations and storing output using the xarray.Dataset structure. XSO inherits most functionality from that package but extends it with a xarray-simlab process construcor (creates \textit{components}), new variable types and a model and solver backend. Interface is only wrapped not hidden, so allows many custom extensions for specific applications.
+
+- XSO components built from XSO variable types, explained in detail below
 
 
-Xarray-simlab provides a generic framework for building computational models in a modular fashion and an extension for storing model parameters, running simulations and storing output using the xarray.Dataset structure. 
-
-
-The library of modular processes and the user interface are based on the Xarray-simlab Python package \citep{Bovy2018Xarray-simlab:Interactively}.
-
+-The model construction process is self-documenting, as parameters and model output, as well as user-supplied metadata is stored in a single Xarray dataset.
 Xarray provides an efficient and labelled multi-dimensional storage format, that is integrated with functionality for easy plotting, post-processing and storing of model output. Xarray.Datasets are easily converted to Netcdf files, a commonly used file format for biogeochemical data and large model output. 
 
-- An XSO model instance includes processes handling the solver and model assembly, as well as processes defining state variables, forcings, parameters and their interactions (i.e. fluxes). State variables can be defined as unique instances, but also as functional groups (essentially an array of state variables), and Phydra provides functions capable of flexibly handling multi-dimensional interactions between model components. 
-
-
-In addition to being an extension to xarray as a native storage solution, XSO provides the object-oriented framework for model building blocks, as well as the model setup and runtime user interface in Phydra. The building-blocks of the model are stored in decorated python classes, hereafter referred to as components. Within these components, all functions related to model formulation are stored. The component contaions XSO variables that define dependencies or values, on which specific simulation functions act during model runtime. At model initialisation the XSO framework automatically orders the processes according to their dependencies, and allows a model instance to be initialized with parameters and solved in a step-wise fashion. The Phydra library provides a set of components that can be modified by the user.
-
-
-- XSO stores model equations including the names of parameters and it would be possible to add some functions that print the mathematical equations.. which would be quite helpful to build and debug a model. (possible feature)
+The basic objects:
+\begin{enumerate}
+    \item \textbf{\textit{Variable types}}: 
+    - Custom attributes that can construct a \textit{component}: \textit{variable}, \textit{forcing}, \textit{parameter}, \textit{flux} or \textit{group}. Variable types are explained in greater detail in section \ref{Section:CreatingXSOComponent}.
+    
+    \item \textbf{\textit{Component}}: 
+    - decorated Python class, that converts defined variable types into a fully functional model component
+    - Decorator: \texttt{xso.component}
+    
+    \item \textbf{\textit{Model object}}: 
+    - created with function \texttt{xso.model()}, supplying dictionary of model components with their labels
+    
+    An XSO model object includes backend processes handling the solver and model assembly, as well as processes defining state variables, forcings, parameters and their interactions (i.e. fluxes).  
+    
+    - Provide specific string labels for each component, allows re-use of components with specific labels.
+    These labels will be the specific name of the process in this model instance. At model setup, the labels are used to reference a process and provide the appropriate parameters.
+    
+    - When creating a model, the XSO framework automatically checks that all references between processes are fulfilled, orders the processes in their logical order of execution and returns an XSO model object. This model object contains all processes in the model and allows the user to interactively view all parameters required as input at model setup, when printing the object in the console.
+    
+    \item \textbf{\textit{Model setup}}: 
+    - Xarray.dataset
+    - created with function \texttt{xso.setup()}, supplying solver, model object, input parameters and time steps that model output is returned in (for adaptive step-size solvers, e.g. odeint) or actual solver time steps (for step-wise solvers, e.g. GEKKO and stepwise)
+    
+    At model setup, the xarray-simlab framework supports batch dimensions of single or multiple parameters along which the model is solved for each set of parameters supplied. This provides an intuitive interface to explore the parameter space of models.
+    
+    The function call returns an Xarray dataset object that contains all provided parameters as well as the initialized labelled model dimensions. This dataset can be passed with the appropriate model object to be solved in the next step, but also provides methods to exchange parameters to easily modify an already instantiated model setup.
+    
+    \item \textbf{\textit{Model output}}: 
+    - Xarray.dataset
+    - returned when calling \texttt{model.xsimlab.run()} method on \textit{model setup} object.
+    
+    - The model setup data structure is used as the blueprint for storing model output. Upon calling the runtime function with the specific model instance and setup, a "filled-out" dataset is returned containing model setup parameters and model output in labelled dimensions. 
+    
+    
+\end{enumerate}
 
 % SOLVER
-XSO currently provides three solving algorithms: Odeint, GEKKO and a simple stepwise solver. GEKKO is an open-source, object-oriented library of model construction, analysis and optimisation tools built on a core algebraic modelling language \citep{Beal2018GEKKOSuite}.
+XSO currently provides three solving algorithms: Odeint, GEKKO and a simple stepwise solver. GEKKO is an open-source, object-oriented library of model construction, analysis and optimisation tools built on a core algebraic modelling language \citep{Beal2018GEKKOSuite}. For up to date information consult the online documentation (see code availability section).
+
+XSO provides an interface for iterative modification, both to more complex and simpler model constructs and allows running parameter ranges as batch dimensions. The specific steps of model development are presented in further detail in the section \ref{Section:ModelDevelopmentWorkflow}.
 
 
-\subsubsection{Workflow of developing a model from pre-existing components}
+\subsubsection{Workflow of developing a model from pre-existing components} \label{Section:ModelDevelopmentWorkflow}
 %%% TWO-COLUMN FIGURES
 %
 %%f
 \begin{figure*}[t]
 \includegraphics[width=12cm]{Figures/firstdraft_schematics/00_schematics_Package.pdf}
-\caption{Schematic of package structure. Xarray-simlab-ode, an extension of Xarray-Simlab, provides the framework. Phydra is a library of functional components, that can be used, extended and modified. A typical workflow would consist of (1) Choosing a pre-existing model, modifying a model or creating a new model from components. (2) This model has to be setup with the correct labels and parameters, and a solver is chosen. (3) The model can be run efficiently, all input and output data is contained in Xarray datasets (4)  that can be conveniently stored or shared. (5) Model output can be conveniently analysed and visualized in the pre-existing scientific python ecosystem.}
+\caption{Schematic of package structure. Xarray-simlab-ode, an extension of Xarray-Simlab, provides the framework. Phydra is a library of functional components, that can be used, extended and modified. A typical workflow would consist of (1) Choosing a pre-existing model, modifying a model or creating a new model from components. (2) This model has to be setup with the correct labels and parameters, and a solver is chosen. (3) The model can be run efficiently, all input and output data is contained in Xarray datasets (4)  that can be conveniently stored or shared. (5) Model output can be conveniently analysed and visualized in the scientific Python ecosystem.}
 \label{Figure:PhydraXSOPackageSchematics}
 \end{figure*}
 
-
-A typical model development workflow using Phydra would assemble a model instance from the basic building-blocks: XSO components defining state variables, forcings and fluxes. 
-
-- At model initialisation, the framework checks dependencies between processes and stores the model instance as an Model object. Following, at model setup the user provides all necessary parameters and desired model output, from which the framework creates a labelled dataset object. This step-wise process allows running the model instance with a specific setup, or a range of different setups at model runtime. 
-
-- The model setup data structure is used as the blueprint for storing model output. Upon calling the runtime function with the specific model instance and setup, a "filled-out" dataset is returned containing model setup parameters and model output in labelled dimensions. 
-
-- The resulting dataset is compatible with packages for data analysis and visualisation from the Python scientific ecosystem. Storage of labelled multi-dimensional model output to the NetCDF file format is natively supported through the Xarray extension.
-The model construction process is self-documenting, as parameters and model output, as well as user-supplied metadata is stored in a single Xarray construct.
-- If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes. The magnitude of the fluxes can then easily be plotted... much improved workflow over having to allocate all values to variables or large arrays to use later, makes checking model dynamics much easier
-
-- XSO provides an interface for iterative modification, both to more complex and simpler model constructs and allows running parameter ranges as batches in parallel [NOTE: experimental feature, not yet tested!]. The specific steps of model development are presented in further detail in the section presenting the XSO framework.
-
-The Phydra package is built on the wealth of functionality created by the open-source scientific Python community. The package xarray-simlab forms the technical foundation of XSO, which also relies on exisiting ODE solver packages such as SciPy's odeint and APM GEKKO. XSO provides the flexible model framework and odeint an efficient solver of large models. 
-
-
-Below we describe how Phydra leverages these open-source projects to provide a tool-set to construct, modify, solve, analyse and share marine ecosystem models. 
-
-Phydra/XSO is a tool-box for marine ecosystem modeling, that is freely extensible by a user to be applied to many different use cases. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on creating the most appropriate model structure and parameterisation for the specific scientific hypothesis that is being investigated. 
-
 Constructing marine ecosystem models in Phydra is by design a flexible process, but the user can follow a general workflow of assembling models from the library of processes. This workflow is visualized in Figure \ref{Figure:phydraschematics} and will be further explained below.
 
+\begin{enumerate}
+    \item \textbf{Creating a \textit{model object}}: 
+    A typical model development workflow using Phydra would assemble a model instance from the basic building-blocks: XSO \textit{components} defining state variables, forcings and fluxes. 
+    - To create a XSO model object, the desired processes defining state variables, forcings and fluxes have to be provided with their corresponding label to the \texttt{xso.Model()} function.
+    The model can be assembled from the Phydra library, modifications of provided base classes or custom written processes. 
 
-To create a XSO model object, the desired processes defining state variables, forcings and fluxes have to be provided with their corresponding label to the \texttt{xso.Model()} function.
-The model can be assembled from the Phydra library, modifications of provided base classes or custom written processes. Multiple instances of fluxes or components can easily be added to the model, as long as the provided label differentiates them.
-These labels will be the specific name of the process in this model instance. At model setup, the labels are used to reference a process and provide the appropriate parameters.
+    
+    \item \textbf{Setting up the model}: 
+    A XSO model object is itself only a collection of abstract \textit{components}. In order to fully initialize a model that can be solved, the model object needs to be supplied with a complete set of parameters, as well as a choice of parameters and the solving algorithm to use.
+    This is done using the \texttt{xso.setup()} function. The necessary arguments to this function are the model object to be setup, all required input parameters, the time range to solve the model and the specific model output to save during runtime.
+    
+    
+    \item \textbf{Running model simulations}:
+    - The model setup created in the previous step already contains the necessary parameters and labelled dataset for model runtime. All that is required of the user is to call the \texttt{xsimlab.run()} method and provide a model object that corresponds to the model setup.
+    
+    \item \textbf{Storing model output}: 
+    XSO provides several options to store model output, as well as storing the value of fluxes and forcings. This allows users to specify the model output that suits the complexity of the model construct. There are processes supplied that can aggregate all state variables, Forcings or Fluxes values for output storage to simplify the process of defining output. For complex functional group models the output of each component can be stored along an individually labelled dimension, while a simple NPZD model can store the output of components along a shared dimension.
+    - The resulting dataset is compatible with packages for data analysis and visualisation from the Python scientific ecosystem. Storage of labelled multi-dimensional model output to the NetCDF file format is natively supported through the Xarray extension. 
+    - If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes. The magnitude of the fluxes can then easily be plotted... much improved workflow over having to allocate all values to variables or large arrays to use later, makes checking model dynamics much easier
+    - easy to store, and easy to share
+    - contains all metadata (e.g. data source or units) supplied by user at setup
+    
+    \item \textbf{Analyzing & visualizing model output}:
+    - Model output is Xarray.dataset, fully compatible with Python scientific ecosystem.
+    - Xarray provides built-in functions for data analysis and visualization, easy to convert to Pandas and Numpy
+    - rich interface and full compatibility with advanced data analysis packages
+    - Natively supports matplotlib and more advanced data-visualisation tools like hvplot
+    - model output data can be extracted by labels 
+    
+    
+\end{enumerate}
 
-When creating a model, the XSO framework automatically checks that all references between processes are fulfilled, orders the processes in their logical order of execution and returns an XSO model object. This model object contains all processes in the model and allows the user to interactively view all parameters required as input at model setup, when printing the object in the console. The Phydra library provides several basic model objects, that can be modified by a user through a simple interface that allows removing, modifying or adding new processes.
-
-%\subsubsection{Model setup} \label{Section:Workflow:ModelSetup}
-
-A XSO model object is itself only a collection of abstract processes. In order to fully initialize a model that can be solved, the model object needs to be supplied with a complete set of parameters.
-
-This is done using the \texttt{xso.create\_setup()} function. The necessary arguments to this function are the model object to be setup, all required input parameters, the time range to solve the model and the specific model output to save during runtime. The XSO setup function is a thin wrapper around the Xarray-simlab model setup function that automatically includes the solver backend and clocks setup for the chosen solving method.
-
-XSO provides several options to store model output, as well as storing the value of fluxes and forcings. This allows users to specify the model output that suits the complexity of the model construct. There are processes supplied that can aggregate all state variables, Forcings or Fluxes values for output storage to simplify the process of defining output. For complex functional group models the output of each component can be stored along an individually labelled dimension, while a simple NPZD model can store the output of components along a shared dimension.
-
-The function call returns an Xarray dataset object that contains all provided parameters as well as the initialized labelled model dimensions. This dataset can be passed with the appropriate model object to be solved in the next step, but also provides an interface to exchange parameters to easily modify an already instantiated model setup.
-
-At model setup, the xarray-simlab framework supports batch dimensions of single or multiple parameters along which the model can be solved in parallel at runtime. This provides an efficient and intuitive interface to explore the parameter space of models.
-
-%\subsubsection{Runtime}
-% -> model_instance.xsimlab.run()
-% relatively straightforward, this will first initialize the model data variables according to the added processes and parameters supplied, and then start model evaluation
-The model setup created in the previous step already contains the necessary parameters and labelled dataset for model runtime. All that is required of the user is to call the \texttt{xsimlab.run()} method and provide a model object that corresponds to the model setup. This does not have to be the same model instance used to create the setup, as long as specified parameters and output are compatible.
+- This model development workflow is shown in full for the presented use cases in Jupyter notebooks in the model examples folder of Phydra.
 
 
 
-\subsubsection{Creating new components}  \label{Section:ComponentBuildingBlocks}
-
-- short description of the variable types, and how that can be used to create custom components
+\subsubsection{Creating new components}  \label{Section:CreatingXSOComponent}
 
 - \textit{Components} are compact python classes inspired by data-classes
 - specific variable types are used to initialize attributes and methods in python class, framework takes care of boilerplate code, creates fully functional model building blocks in the backend.
 
 - \textit{Components} can be easily modified to have a different function, as long as the interaction between state variables matches with the dimensions and overall structure of the other components involved in the model. 
 
+- short description of the variable types, and how that can be used to create custom components:
+\begin{itemize}
+    \item \textbf{\textit{variable}}: Class attribute
+    Defines time-dependent variable in model that is affected by fluxes
+    
+    required inputs, required \& optional arguments (e.g. dims, flux), usage
 
-%%% TWO-COLUMN TABLE
-%
-%t
-\begin{table*}[t]
-\caption{Types of variables that can be used in xarray-simlab-ode}
-\begin{tabular}{l c r}
-\tophline
-Variable type &  Function & Usage \\
-%
-\middlehline
-State variable & Defines time-dependent variable in model that is affected by fluxes & Class attribute \\
-Forcing & Defines external time-dependent variable in model & Class attribute, requires setup function \\
-Parameter & Model parameter to be used in fluxes and setup functions & Class attribute \\
-Flux & Defines part of mathematical function acting on state variables & Function decorator \\
-%
-\bottomhline
-\end{tabular}
-\belowtable{} % Table Footnotes
-\end{table*}
-%
+    An ecosystem model tracks chemical compounds as well as organisms via state variables. These state variables can define completely different components of a model, or represent a functional group. Components within Phydra are defined at this higher level and can contain a single state variable or an array of state variables that share common fluxes with differing parameterisation. Each state variable is added to the model with a specific label that is used to reference this component in all processes affecting or dependent on it. 
 
-\begin{enumerate}
-    \item state variables
+    The actual dimensions of a functional group are initialized after passing a parameter at model setup. This has been designed for easily testing different levels of ecosystem complexity.
 
-required inputs, required \& optional arguments (e.g. dims, flux), usage
+    In addition to size, the component could be modified to include information on units or other specific parameters relevant to the model. The added flexible dimensionality of components was designed with the current issues in marine ecosystem model in mind. The effects of different levels of complexity, in the number and definition of phytoplankton functional types (PFT) for example, is not routinely tested in marine ecosystem models. Phydra provides a framework that allows for easy testing through flexible modification of such model complexity at model setup.
 
-An ecosystem model tracks chemical compounds as well as organisms via state variables. These state variables can define completely different components of a model, or represent a functional group. Components within Phydra are defined at this higher level and can contain a single state variable or an array of state variables that share common fluxes with differing parameterisation. Each state variable is added to the model with a specific label that is used to reference this component in all processes affecting or dependent on it. 
+    The first release of Phydra supports only scalar and one-dimensional array implementations of state variables, but extending this to 2- and 3-dimensional flexibility is a high development priority. 
+    !or!
+    Dimensionality in state variables can be used to model functional groups or classes, as well as systems of higher dimensionality. At its current version Phydra provides only zero-dimensional models, but models of higher-dimension would be a clear next step in further development.
+    
+    State variables can be defined as unique instances, but also as functional groups (essentially an array of state variables), and Phydra provides functions capable of flexibly handling multi-dimensional interactions between model components.
+    
+    \item \textbf{\textit{forcing}}: Class attribute, requires setup function
+    Defines external time-dependent variable in model
+    
+    orcings are defined as providing an external constant or time-varying parameter to the model. These parameters can be used in fluxes that reference the forcing type,
 
-The actual dimensions of a functional group are initialized after passing a parameter at model setup. This has been designed for easily testing different levels of ecosystem complexity.
+    handle initializing Params, time-varying or constant, based on external data or mathematical functions, that can be referenced and used in other processes, store labelled values of their values
 
-In addition to size, the component could be modified to include information on units or other specific parameters relevant to the model. The added flexible dimensionality of components was designed with the current issues in marine ecosystem model in mind. The effects of different levels of complexity, in the number and definition of phytoplankton functional types (PFT) for example, is not routinely tested in marine ecosystem models. Phydra provides a framework that allows for easy testing through flexible modification of such model complexity at model setup.
+    - forcing functions needs to take time as input, and return forcing value for that time
+    - mention vectorization? this is important for it to work, but technical detail..
+    - parameters defined within component can be used in both the setup function and the forcing function
+    - if the forcing is based on data and not a mathematical function or constant value, it is necessary to perform some type of interpolation, if used with adaptive step-size solvers (like odeint)! choice of interpolation algorithm is up to user (we use \texttt{scipy.interpolate.splrep}, an algorithm to calculate the B-spline representation of a 1-D curve, in particular because it allows for periodic interpolation that is useful for yearly climatological forcing!
+    
+    \item \textbf{\textit{parameter}}: Class attribute
+    Model parameter to be used in fluxes and setup functions
+    
+    \item \textbf{\textit{flux}}: Function decorator
+    Defines part of mathematical function acting on state variables
+    
+    The previous building blocks for state variables and forcings create the structure of the model, but when solved at this stage there would be no meaningful simulation. In order to define exchanges of matter between components flux processes are added to our model instance, defining the affected components via labels at model setup.
+    There are multiple types of fluxes provided in the library. 
 
-The first release of Phydra supports only scalar and one-dimensional array implementations of state variables, but extending this to 2- and 3-dimensional flexibility is a high development priority. 
-!or!
-Dimensionality in state variables can be used to model functional groups or classes, as well as systems of higher dimensionality. At its current version Phydra provides only zero-dimensional models, but models of higher-dimension would be a clear next step in further development.
+    take labels at model setup, that reference state variables or forcing, and use them to define fluxes based on mathematical functions in python syntax, store labelled values of their intermediate values
 
-\item forcings
+    Dimensions can be of any number, however the solvers might run into trouble at very complex models. 
 
-Forcings are defined as providing an external constant or time-varying parameter to the model. These parameters can be used in fluxes that reference the forcing type,
+    For now, dimensions have to be fixed and named at process creation (ACTUALLY THEY DON'T, can provide list of dims!)
+    % TODO: check if I can make all components of flexible dimensionality so that they work in all models!
 
-handle initializing Params, time-varying or constant, based on external data or mathematical functions, that can be referenced and used in other processes, store labelled values of their values
+    Single fluxes provide loss or gain processes to a single variable, such as sinking or influx from outside the ecosystem. In order to simplify creating common forcing fluxes, a single flux process can take list of affected components as input at model setup. An example for more complex flux type are exchange fluxes, where a flux affects one component as a source and another as a sink. These can be set up with flexible dimensionality of components. Grazing fluxes are a slightly more complicated subclass of a grid-wise flux, as ingestion is usually normalized by total prey availability, so all forcing interactions need to be calculated in a dynamically generated matrix of all prey items consumed by a component.
+    
+    \item \textbf{\textit{group}}: Class attribute
+    Collects the value of variables defined in other \textit{components} with the matching group label. Currently this functionality only allows collecting the value of fluxes.
+    
+\end{itemize}
 
-- forcing functions needs to take time as input, and return forcing value for that time
-- mention vectorization? this is important for it to work, but technical detail..
-- parameters defined within component can be used in both the setup function and the forcing function
-- if the forcing is based on data and not a mathematical function or constant value, it is necessary to perform some type of interpolation, if used with adaptive step-size solvers (like odeint)! choice of interpolation algorithm is up to user (we use \texttt{scipy.interpolate.splrep}, an algorithm to calculate the B-spline representation of a 1-D curve, in particular because it allows for periodic interpolation that is useful for yearly climatological forcing!
+- To construct a component, the \textit{variable types} can be defined as attributes.
 
-
-\item parameters
-
-\item fluxes
-
-The previous building blocks for state variables and forcings create the structure of the model, but when solved at this stage there would be no meaningful simulation. In order to define exchanges of matter between components flux processes are added to our model instance, defining the affected components via labels at model setup.
-There are multiple types of fluxes provided in the library. 
-
-take labels at model setup, that reference state variables or forcing, and use them to define fluxes based on mathematical functions in python syntax, store labelled values of their intermediate values
-
-Dimensions can be of any number, however the solvers might run into trouble at very complex models. 
-
-For now, dimensions have to be fixed and named at process creation (ACTUALLY THEY DON'T, can provide list of dims!)
-% TODO: check if I can make all components of flexible dimensionality so that they work in all models!
-
-Single fluxes provide loss or gain processes to a single variable, such as sinking or influx from outside the ecosystem. In order to simplify creating common forcing fluxes, a single flux process can take list of affected components as input at model setup. An example for more complex flux type are exchange fluxes, where a flux affects one component as a source and another as a sink. These can be set up with flexible dimensionality of components. Grazing fluxes are a slightly more complicated subclass of a grid-wise flux, as ingestion is usually normalized by total prey availability, so all forcing interactions need to be calculated in a dynamically generated matrix of all prey items consumed by a component.
-\end{enumerate}
-
-
-
+- 
 
 
 
@@ -1174,11 +1190,20 @@ $size_{opt}^j$ &  & $0.65 \left( \frac{size_{P}^i}{1\mu m} \right)^{0.56}$ & \ \
 - Situated in complexity between GUI tools that allow drag and drop, and custom model scripts. The combination of phydra as a library and XSO as a framework aims to reduce the boilerplate code necessary to write computational models in Python.
 
 \subsection{Current limitations of Phydra and XSO}
-
+- only ODE models
+- presented use cases limited to zero dimensional physical settings
+- limited set of solvers
+- so far not optimized for very large models, reaching computational limits of implemented solvers
+- less optimized than custom script (as would be expected from framework)
+- no advanced features like parameter optimization yet, although technically possible
+- 
 
 \subsection{Current usage and future developments}
 - The Phydra package is available via the Python pip package manager, but we encourage using Conda as a package manager that is provided with the scientific Anaconda Python distribution.
 Please follow the up-to-date instructions on the Github repository for installation of Phydra and its dependencies.
+
+% future feature development
+- XSO stores model equations including the names of parameters and it would be possible to add some functions that print the mathematical equations.. which would be quite helpful to build and debug a model. (possible feature)
 
 % CONDA NAME DROP
 Since Python and the dependencies of Phydra are constantly developed further, we will provide instructions to install a fully compatible virtual environment with the Conda package manager separate from a users standard Python installation. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter environment that is available via Conda. For more complex and larger model runs on servers Python scripts are preferable.
