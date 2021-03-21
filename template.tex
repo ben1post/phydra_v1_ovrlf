@@ -359,64 +359,35 @@ The first version of the library will contain all processes needed to create the
 
 
 \subsection{The XSO framework} \label{Section:XSOFramework}
-\begin{comment}
-- Introductory sentence, what is XSO? 
-- Extends the Xarray-simlab framework to inherent ODE functionality
-- Xarray extension, what can it do?
-- 
-\end{comment}
 
-XSO (short for Xarray-simlab-ODE) is a Python package that provides a framework for building and running computational models based on ordinary differential equations (ODEs).
+XSO (short for Xarray-simlab-ODE) is a Python package that extends the functionality of the modeling framework Xarray-simlab \citet{Bovy2018Xarray-simlab:Interactively}. Xarray-simlab is a highly flexible framework but only provides a step-wise solver at model runtime. XSO provides custom setup functions, variable types, class and function decorators, as well as a model and solver backend to facilitate building and running computational models based on differential equations. 
 
-- ODE model extension of Xarray-simlab \citep{Bovy2018Xarray-simlab:Interactively}. Xarray-simlab provides a generic framework for building computational models in a modular fashion and an extension for storing model parameters, running simulations and storing output using the xarray.Dataset structure. XSO inherits most functionality from that package but extends it with a xarray-simlab process construcor (creates \textit{components}), new variable types and a model and solver backend. Interface is only wrapped not hidden, so allows many custom extensions for specific applications.
+XSO inherits full Xarray compatibility from Xarray-simlab. Xarray is based on the netCDF data model that is commonly used in the biogeochemical sciences and inherently supports multi-dimensional data including labelled dimensions and metadata. The Xarray extension allows storing model parameters and output, as well as running simulations with a fully documented data structure that can be easily stored, shared and used for further analysis.
 
-- XSO components built from XSO variable types, explained in detail below
-
-
--The model construction process is self-documenting, as parameters and model output, as well as user-supplied metadata is stored in a single Xarray dataset.
-Xarray provides an efficient and labelled multi-dimensional storage format, that is integrated with functionality for easy plotting, post-processing and storing of model output. Xarray.Datasets are easily converted to Netcdf files, a commonly used file format for biogeochemical data and large model output. 
-
-The basic objects:
-\begin{enumerate}
+XSO provides a set of functional objects, which are briefly presented below:
+\begin{itemize}
     \item \textbf{\textit{Variable types}}: 
-    - Custom attributes that can construct a \textit{component}: \textit{variable}, \textit{forcing}, \textit{parameter}, \textit{flux} or \textit{group}. Variable types are explained in greater detail in section \ref{Section:CreatingXSOComponent}.
+    Different types of model variables can be defined using custom attributes, which are referred to as \textit{variable types}. The class decorator \texttt{xso.component} converts these attributes to functional model variables. XSO currently provides the following attributes: \textit{variable}, \textit{forcing}, \textit{parameter}, \textit{flux} or \textit{group}. These variable types are explained in greater detail in section \ref{Section:CreatingXSOComponent}.
     
     \item \textbf{\textit{Component}}: 
-    - decorated Python class, that converts defined variable types into a fully functional model component
-    - Decorator: \texttt{xso.component}
+    A \textit{component} refers to a Python class decorated with the \texttt{xso.component} function. \textit{Components} can contain any number of variable types and functions and are the basic building-block of models within the XSO framework.
     
     \item \textbf{\textit{Model object}}: 
-    - created with function \texttt{xso.model()}, supplying dictionary of model components with their labels
+    A model is created with a call to the function \texttt{xso.model()} by supplying a dictionary of model \textit{components} with their respective labels. The supplied labels identify the \textit{components} for all future steps and allow reusing \textit{components} with unique labels. An XSO \textit{model object} automatically includes backend processes handling model assembly and the solver backend. When creating a model, the XSO framework automatically orders the processes in their logical order of execution and returns the \textit{model object}. The user can interactively view all parameters required as input at model setup, when printing the object in the console.
     
-    An XSO model object includes backend processes handling the solver and model assembly, as well as processes defining state variables, forcings, parameters and their interactions (i.e. fluxes).  
-    
-    - Provide specific string labels for each component, allows re-use of components with specific labels.
-    These labels will be the specific name of the process in this model instance. At model setup, the labels are used to reference a process and provide the appropriate parameters.
-    
-    - When creating a model, the XSO framework automatically checks that all references between processes are fulfilled, orders the processes in their logical order of execution and returns an XSO model object. This model object contains all processes in the model and allows the user to interactively view all parameters required as input at model setup, when printing the object in the console.
-    
-    \item \textbf{\textit{Model setup}}: 
-    - Xarray.dataset
-    - created with function \texttt{xso.setup()}, supplying solver, model object, input parameters and time steps that model output is returned in (for adaptive step-size solvers, e.g. odeint) or actual solver time steps (for step-wise solvers, e.g. GEKKO and stepwise)
-    
-    At model setup, the xarray-simlab framework supports batch dimensions of single or multiple parameters along which the model is solved for each set of parameters supplied. This provides an intuitive interface to explore the parameter space of models.
-    
-    The function call returns an Xarray dataset object that contains all provided parameters as well as the initialized labelled model dimensions. This dataset can be passed with the appropriate model object to be solved in the next step, but also provides methods to exchange parameters to easily modify an already instantiated model setup.
+    \item \textbf{\textit{Model setup}}:
+    The \textit{model setup} object is a Xarray dataset, that includes all relevant information needed at runtime. It is created with a call to \texttt{xso.setup()} by supplying the \textit{model object}, a dictionary of input parameters, the desired time steps and solver as arguments. The function call returns an Xarray dataset object that contains all provided parameters as well as the initialized labelled model dimensions. The \textit{model setup} object provides the \texttt{xsimlab.run()} method that executes the model with the chosen solver and returns model output when called. Additionally there are methods available for updating arguments, such as the solver or specific parameters. 
     
     \item \textbf{\textit{Model output}}: 
-    - Xarray.dataset
-    - returned when calling \texttt{model.xsimlab.run()} method on \textit{model setup} object.
-    
-    - The model setup data structure is used as the blueprint for storing model output. Upon calling the runtime function with the specific model instance and setup, a "filled-out" dataset is returned containing model setup parameters and model output in labelled dimensions. 
-    
-    
-\end{enumerate}
+    When executing the model by calling the \texttt{xsimlab.run()} method of the \textit{model setup}, a "filled-out" dataset is returned containing model setup parameters and model output in labelled dimensions. The model output is again a Xarray dataset, fully compatible with all methods and extensions for storing, analyzing or visualizing the data provided by Xarray.
+\end{itemize}
 
 % SOLVER
-XSO currently provides three solving algorithms: Odeint, GEKKO and a simple stepwise solver. GEKKO is an open-source, object-oriented library of model construction, analysis and optimisation tools built on a core algebraic modelling language \citep{Beal2018GEKKOSuite}. For up to date information consult the online documentation (see code availability section).
+XSO currently provides three solving algorithms: An adaptive step size solver from the SciPy package (odeint), a fixed step-size solver based on a core algebraic modeling language (GEKKO) and a simple stepwise solver that is built into the backend Xarray-simlab framework. For up to date information consult the online documentation (see code availability section).
 
-XSO provides an interface for iterative modification, both to more complex and simpler model constructs and allows running parameter ranges as batch dimensions. The specific steps of model development are presented in further detail in the section \ref{Section:ModelDevelopmentWorkflow}.
+XSO is a lightweight framework that adds some computational time needed for linking model processes and setting up storage at runtime. Model runtime is otherwise dependent on the chosen solver algorithm. We make no definite claims as to computational efficiency here, as the solver backend is implemented flexibly and can be adapted to specific use cases. With the implemented odeint solver, XSO makes full use of Numpy vectorization. Simple models, such as use case 1 solve in the millisecond range. More complex models like use case 3 still solve in less than a minute even for large number of state variables (>80) and run times of 10 years on a normal laptop. An up-to-date and more detailed presentation can be found in the online documentation (see code availability section).
 
+XSO provides an interface for iterative modification, both to more complex and simpler model constructs and allows running parameter ranges as batch dimensions. The specific steps of model development are presented in further detail in section \ref{Section:ModelDevelopmentWorkflow}.
 
 \subsubsection{Workflow of developing a model from pre-existing components} \label{Section:ModelDevelopmentWorkflow}
 %%% TWO-COLUMN FIGURES
@@ -424,7 +395,7 @@ XSO provides an interface for iterative modification, both to more complex and s
 %%f
 \begin{figure*}[t]
 \includegraphics[width=12cm]{Figures/firstdraft_schematics/00_schematics_Package.pdf}
-\caption{Schematic of package structure. Xarray-simlab-ode, an extension of Xarray-Simlab, provides the framework. Phydra is a library of functional components, that can be used, extended and modified. A typical workflow would consist of (1) Choosing a pre-existing model, modifying a model or creating a new model from components. (2) This model has to be setup with the correct labels and parameters, and a solver is chosen. (3) The model can be run efficiently, all input and output data is contained in Xarray datasets (4)  that can be conveniently stored or shared. (5) Model output can be conveniently analysed and visualized in the scientific Python ecosystem.}
+\caption{Schematic of package structure. XSO provides the framework. Phydra is a library of functional \textit{components} and pre-built \textit{model objects}, that can be used, extended and modified. A typical workflow would consist of (1) Choosing a pre-existing model, modifying a model or creating a new model from components. (2) This model has to be setup with the correct labels and parameters, and a solver is chosen. (3) The model can be run efficiently, all input and output data is contained in Xarray datasets (4)  that can be conveniently stored or shared. (5) Model output is returned as a "filled-out" Xarray dataset that is fully compatible to be analysed and visualized with the wealth of tools provided by the Python scientific ecosystem.}
 \label{Figure:PhydraXSOPackageSchematics}
 \end{figure*}
 
@@ -458,12 +429,10 @@ Constructing marine ecosystem models in Phydra is by design a flexible process, 
     - rich interface and full compatibility with advanced data analysis packages
     - Natively supports matplotlib and more advanced data-visualisation tools like hvplot
     - model output data can be extracted by labels 
-    
-    
+
 \end{enumerate}
 
 - This model development workflow is shown in full for the presented use cases in Jupyter notebooks in the model examples folder of Phydra.
-
 
 
 \subsubsection{Creating new components}  \label{Section:CreatingXSOComponent}
@@ -474,6 +443,7 @@ Constructing marine ecosystem models in Phydra is by design a flexible process, 
 - \textit{Components} can be easily modified to have a different function, as long as the interaction between state variables matches with the dimensions and overall structure of the other components involved in the model. 
 
 - short description of the variable types, and how that can be used to create custom components:
+
 \begin{itemize}
     \item \textbf{\textit{variable}}: Class attribute
     Defines time-dependent variable in model that is affected by fluxes
@@ -495,7 +465,7 @@ Constructing marine ecosystem models in Phydra is by design a flexible process, 
     \item \textbf{\textit{forcing}}: Class attribute, requires setup function
     Defines external time-dependent variable in model
     
-    orcings are defined as providing an external constant or time-varying parameter to the model. These parameters can be used in fluxes that reference the forcing type,
+    Forcings are defined as providing an external constant or time-varying parameter to the model. These parameters can be used in fluxes that reference the forcing type,
 
     handle initializing Params, time-varying or constant, based on external data or mathematical functions, that can be referenced and used in other processes, store labelled values of their values
 
@@ -505,7 +475,7 @@ Constructing marine ecosystem models in Phydra is by design a flexible process, 
     - if the forcing is based on data and not a mathematical function or constant value, it is necessary to perform some type of interpolation, if used with adaptive step-size solvers (like odeint)! choice of interpolation algorithm is up to user (we use \texttt{scipy.interpolate.splrep}, an algorithm to calculate the B-spline representation of a 1-D curve, in particular because it allows for periodic interpolation that is useful for yearly climatological forcing!
     
     \item \textbf{\textit{parameter}}: Class attribute
-    Model parameter to be used in fluxes and setup functions
+    Model parameter to be used in flux and setup functions
     
     \item \textbf{\textit{flux}}: Function decorator
     Defines part of mathematical function acting on state variables
@@ -974,9 +944,9 @@ $\theta_{chl}$& constant mixing parameter & 75 & 75 & 75 & 75 & \unit{g \ g^{−
 \end{table*}
 %
 
-The batch dimension feature of the XSO model setup function presented in section \ref{Section:Workflow:ModelSetup} was utilized here. It allows defining a new dimension at model setup and supplying a list of values for a specific parameter. In our case this additional dimension defines the four stations via the specific forcing and the parameters $V_P^{max}$, $\alpha$, $\mu_Z$ and $m_Z$ that \citet{Anderson2015c} varied between the locations. At runtime the model is solved individually for each set of parameters in the supplied lists and output is returned in a single Xarray dataset. The model output for each station can then be easily retrieved via the dimension label. In our presentation we limited ourselves to recreating the model runs shown in the original publication, but this feature also lends itself well for parameter scans and further testing of the model.
+The batch dimension feature of the XSO model setup function presented in section \ref{Section:Workflow:ModelSetup} was utilized here. It allows defining a new dimension at model setup and supplying a list of values for a specific parameter. In our case this additional dimension defines the four stations via the specific forcing and the parameters $V_P^{max}$, $\alpha$, $\mu_Z$ and $m_Z$ that \citet{Anderson2015c} varied between the locations. At runtime the model is solved individually for each set of parameters in the supplied lists and output is returned in a single Xarray dataset. The model output for each station can then be easily retrieved via the supplied batch dimension label (in this case \texttt{"station"}). In our presentation we limited ourselves to recreating the model runs shown in the original publication, but this feature also lends itself well for parameter scans and further testing of the model.
 
-\citet{Anderson2015c} included a detailed discussion of the treatment of light in a slab model. From the formulations presented in the original paper we adapted two implementations of the analytic depth integral of light. These are a simple Beer's law, which parameterizes light attenuation with a single attenuation coefficient for the entire mixed layer, as well as the more complex piecewise description originally presented in \citet{Anderson1993APhotosynthesis}, which evaluates light attenuation for three discrete depth intervals within the mixed layer as a function of chlorophyll concentration with specific polynomial coefficients for each interval. Model results for both approaches are shown and compared below.
+\citet{Anderson2015c} included a detailed discussion of the treatment of light in a slab model. From the formulations presented in the original paper we adapted two implementations of the analytic depth integral of light. These are a simple Beer's law, which parameterizes light attenuation with a single attenuation coefficient for the entire mixed layer, as well as the more complex piecewise description originally presented in \citet{Anderson1993APhotosynthesis}, which evaluates light attenuation for three discrete depth intervals within the mixed layer as a function of chlorophyll concentration with specific polynomial coefficients for each interval. Model results for both formulations are shown and compared below.
 
 \subsubsection{Results}
 %%f
@@ -1043,7 +1013,7 @@ Where $\Delta size_{P}$ is the prey size tolerance parameter, with units of \uni
 
 Zooplankton growth is a product of total biomass grazed ($G_P$) and the net production efficiency parameter $\epsilon$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton  \citep{Straile1997GrossGroup}. Excretion of grazed biomass to $N$ is parameterized by $f_{eg}$ and another egested fraction that would feed into a detrital pool is lost from the system. Following \citet{Banas2011b} the grazing fractions are split equally ($\epsilon = f_{eg} = 1/3$).
 
-Zooplankton experiences quadratic mortality according to the parameter $m_{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system \citep{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
+Zooplankton experiences quadratic mortality according to the parameter $m_{Z2}$, describing higher-order mortality and predation of zooplankton that is removed from the system following \citet{Edwards2000TheModels}. This closure term is quadratic, calculated with the implicit assumption that mortality of $Z_j$ is proportional to total zooplankton biomass $\sum_{j} Z_j$.
 
 %\subsubsection{Model equations}
 The rates of change of the state variables are described by the following set of equations. See \citet{Banas2011b} for a more detailed discussion of model structure and formulation.
@@ -1081,7 +1051,7 @@ The rates of change of the state variables are described by the following set of
 The ASTroCAT model was implemented using the XSO framework. In order to find a useful structuring of model components, we can separate the model into state variables, forcings and fluxes. For state variables we have the nutrient ($N$), multiple size-classes of phytoplankton ($P_i$) and zooplankton ($Z_j$). The only forcing is the nutrient concentration of the external medium ($N_0$). At least 5 fluxes can be separately defined: The inflow of the external medium, $P_i$ growing on $N$, $Z_j$ grazing on $P_i$ and mortality terms for both $P_i$ and $Z_j$.
 The model was implemented using 10 XSO components as visualized in Figure \ref{Figure:CodeSchematics_3}. We chose to simplify the schematic by only showing the components with their respective labels. A detailed description of each component can be found in the Phydra repository on Github.
 
-The original ASTroCAT model was implemented with an interactive graphical user interface showing beautiful animation of model output that was written in Processing 2 and kindly supplied by the author upon request. Our implementation in the XSO framework is technically quite similar to the original model code, with the major differences being the modular component structure and the use of vectorization instead of for-loops to define functions acting on the size-classes.
+The original ASTroCAT model was implemented with an interactive graphical user interface showing beautiful animation of model output that was written in Processing 2 and kindly supplied by the author upon request. Our implementation in the XSO framework is technically quite similar to the original model code, with the major differences being the modular component structure and the use of vectorization instead of for-loops to define functions computing the \textit{fluxes} acting on arrays of size-classes.
 
 The model processes and their respective components are listed below, with a short description of their function and application in the model:
 
@@ -1115,14 +1085,10 @@ The model processes and their respective components are listed below, with a sho
         \item \texttt{QuadDecayDim}: Similarly quadratic mortality of zooplankton is defined with a dimension label. The vectorization functionality allows defining the quadratic term as the sum of all zooplankton biomass, while still calculating over all zooplankton size classes.
     \end{itemize}
 \end{enumerate}
-- Parameters were entirely adapted from \citet{Banas2011b}, see table \ref{Table:usecase3parameters} for all used parameter values.
 
-- Phytoplankton and zooplankton sizes are log-spaced.
+The distribution of phytoplankton and zooplankton sizes are log-spaced. The \texttt{SVArraySize} \textit{component} registering the phytoplankton and zooplankton state variables takes the size range as parameter input, however this is only for documentation purposes. The allometric parameters are calculated via helper functions outside of model \textit{components} to allow maximum flexibility and reduce complexity of the specific model implementation.
 
-- Allometries are not built into model, to reduce complexity and increase flexibility.. instead they are provided as helper functions with Phydra -> can be used for any project! What is input variable in model is not size but the actual parameter. Model however does store the size variable, as this is required input for the Size-based SV component (additional param). This way users can store any necessary information with model data..
-
-- "Note that exponent relating relating optimum prey size to predator body size is far from 1, which is implicit assumption of models that use a constant predator-prey size ratio: most small grazers eat phytoplankton to their own size than large grazers do" [need to fix this in model code, currently relationship is 1 to 1]
-
+Parameters were adapted from \citet{Banas2011b}, see table \ref{Table:usecase3parameters} for all used parameter values and allometric relationships.
 \begin{table*}[t]
 \caption{Parameters and allometric functions used in use case 3.}
 \begin{tabular}{l c c r}
@@ -1151,33 +1117,26 @@ $size_{opt}^j$ &  & $0.65 \left( \frac{size_{P}^i}{1\mu m} \right)^{0.56}$ & \ \
 \end{table*}
 %
 
-- modification: very simple! use SV-Array component, and provide variable number of initial values in list, model automatically scales all other functions etc.
+\citet{Banas2011b} present a detailed analysis of model output for variable metrics of ecosystem complexity. We recreate a part of the analysis with a simple comparison of model dynamics for a variable number of phytoplankton and zooplankton size classes. The number of state variables can be varied at model setup by supplying a list of initial values with the desired dimensions. We run the model for the range of 2 to 50 size classes.
 
 \subsubsection{Results}
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_plots/03_ASTroCAT_N50P50Z.pdf}
-\caption{Nutrient concentration and biomass under steady nutrient forcing in model run resolving 50 size classes. Size classes are log-spaced in a range of 1 to 20 and 2.16 to 420. (a) Nutrient concentration over time. (b) Phytoplankton biomass by size class over 10 years of model time evolution. (c) Zooplankton time evolution over the same period.}
+\caption{Nutrient concentration and biomass under steady nutrient forcing in model run resolving 50 size classes. Size classes are log-spaced in a range of 1 to 20 \unit{µ m} for phytoplankton and 2.16 to 420 \unit{µ m} for zooplankton. (a) Nutrient concentration over time. (b) Phytoplankton biomass by size class over 10 years of model time evolution. (c) Zooplankton biomass over the same period.}
 \label{Figure:ResultsASTroCAT_1}
 \end{figure}
 
-- recreate dynamics observed using the same model by \citet{Banas2011b}.
-- showing oscillatory behaviour, emergent properties of complex food web (one level of trophic interaction)
+Running the model with 40 size classes of phytoplankton and zooplankton recreates the dynamics presented by \citet{Banas2011b}. See figure \ref{Figure:ResultsASTroCAT_1} for the time evolution of $N$, $P_i$ and $Z_j$ over a ten year run. The complex food web shows oscillatory changes in biomass between the state variables with periods from days to years, that reach a stable distribution after 5-6 years of run time. Despite the feedback loops built into the food web, the model reaches a stable steady-state in longer runs (not shown here) and does not show chaotic behaviour.
 
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_plots/03_ASTroCAT_sizeclassrange.pdf}
-\caption{Comparative runs of varying number of size-classes. (a) Mean biomass of phytoplankton over the last year of a ten year run over a range of 2 to 50 size-classes of Phytoplankton and Zooplankton. Standard deviation is plotted in red. Grey crosses mark runs not otherwise shown, colored dots correspond to exemplary runs. (b) Exemplary model runs. Sum of phytoplankton biomass is shown over a ten year run.}
+\caption{Comparative runs of varying number of size-classes. (a) Mean biomass of phytoplankton over the last year of a ten year run over a range of 2 to 50 size-classes of phytoplankton and zooplankton. Standard deviation is plotted in red. Grey crosses mark runs not otherwise shown, colored dots correspond to exemplary runs. (b) Exemplary model runs. Sum of phytoplankton biomass is shown over a ten year run.}
 \label{Figure:ResultsASTroCAT_2}
 \end{figure}
 
-- modification: interesting effect of the number of size classes on model output and model stability.. seems to stabilize (but still vary) after 10-20 clones -> important fact for functional group type models! dynamics are an artifact of low resolution, not functional diversity. With increased resolution, more "predictable" dynamics. This effect was already noted by \citet{Baird2007b}.
-
-- We have shown: Phydra/XSO can be used for complex ecosystem formulations and advanced size-based and functional group type models
-
-
-
-
+In figure \ref{Figure:ResultsASTroCAT_2} we show the effect on bulk phytoplankton biomass when running the model with a variable number of size classes. Lower number of size classes (2-10) show highly variable output during and for the final year of a ten year run. Bulk dynamics seems to stabilize for numbers of size classes above 10, however there is still deviation between runs in average phytoplankton biomass for the last year of model runs for more than 10 size classes. The increased resolution seems to reduce the perturbations carried on from initial model conditions, confirming the patterns observed by \citet{Baird2010IncreasingErrors}.
 
 
 \section{Discussion}
