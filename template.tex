@@ -360,14 +360,14 @@ The first version of the library will contain all processes needed to create the
 
 \subsection{The XSO framework} \label{Section:XSOFramework}
 
-XSO (short for Xarray-simlab-ODE) is a Python package that extends the functionality of the modeling framework Xarray-simlab \citet{Bovy2018Xarray-simlab:Interactively}. Xarray-simlab is a highly flexible framework but only provides a step-wise solver at model runtime. XSO provides custom setup functions, variable types, class and function decorators, as well as a model and solver backend to facilitate building and running computational models based on differential equations. 
+XSO (short for Xarray-simlab-ODE) is a Python package that extends the functionality of the modeling framework Xarray-simlab \citep{Bovy2018Xarray-simlab:Interactively}. Xarray-simlab is a highly flexible framework but only provides a step-wise solver at model runtime. XSO provides custom setup functions, variable types, class and function decorators, as well as a model and solver backend to facilitate building and running computational models based on differential equations. 
 
 XSO inherits full Xarray compatibility from Xarray-simlab. Xarray is based on the netCDF data model that is commonly used in the biogeochemical sciences and inherently supports multi-dimensional data including labelled dimensions and metadata. The Xarray extension allows storing model parameters and output, as well as running simulations with a fully documented data structure that can be easily stored, shared and used for further analysis.
 
 XSO provides a set of functional objects, which are briefly presented below:
 \begin{itemize}
     \item \textbf{\textit{Variable types}}: 
-    Different types of model variables can be defined using custom attributes, which are referred to as \textit{variable types}. The class decorator \texttt{xso.component} converts these attributes to functional model variables. XSO currently provides the following attributes: \textit{variable}, \textit{forcing}, \textit{parameter}, \textit{flux} or \textit{group}. These variable types are explained in greater detail in section \ref{Section:CreatingXSOComponent}.
+    Different types of model variables can be defined using custom attributes, which are referred to as \textit{variable types}. The class decorator \texttt{@xso.component} converts these attributes to functional model variables. XSO currently provides the following attributes: \textit{variable}, \textit{forcing}, \textit{parameter}, \textit{flux} or \textit{group}. These variable types are explained in greater detail in section \ref{Section:CreatingXSOComponent}.
     
     \item \textbf{\textit{Component}}: 
     A \textit{component} refers to a Python class decorated with the \texttt{xso.component} function. \textit{Components} can contain any number of variable types and functions and are the basic building-block of models within the XSO framework.
@@ -376,7 +376,7 @@ XSO provides a set of functional objects, which are briefly presented below:
     A model is created with a call to the function \texttt{xso.model()} by supplying a dictionary of model \textit{components} with their respective labels. The supplied labels identify the \textit{components} for all future steps and allow reusing \textit{components} with unique labels. An XSO \textit{model object} automatically includes backend processes handling model assembly and the solver backend. When creating a model, the XSO framework automatically orders the processes in their logical order of execution and returns the \textit{model object}. The user can interactively view all parameters required as input at model setup, when printing the object in the console.
     
     \item \textbf{\textit{Model setup}}:
-    The \textit{model setup} object is a Xarray dataset, that includes all relevant information needed at runtime. It is created with a call to \texttt{xso.setup()} by supplying the \textit{model object}, a dictionary of input parameters, the desired time steps and solver as arguments. The function call returns an Xarray dataset object that contains all provided parameters as well as the initialized labelled model dimensions. The \textit{model setup} object provides the \texttt{xsimlab.run()} method that executes the model with the chosen solver and returns model output when called. Additionally there are methods available for updating arguments, such as the solver or specific parameters. 
+    The \textit{model setup} object is a Xarray dataset, that includes all relevant information needed at runtime. It is created with a call to \texttt{xso.setup()} by supplying the \textit{model object}, a dictionary of input parameters, the desired time steps and solver as arguments. Multiple values for a specific parameter can be passed with an additional batch dimension. At model runtime the model can be solved for each set of parameters within the batch dimension. The function call to \texttt{xso.setup()} returns a \textit{model setup} object, that is a Xarray dataset containing all provided parameters as well as the initialized labelled model dimensions and supplied metadata. The \textit{model setup} object provides the \texttt{xsimlab.run()} method that executes the model with the chosen solver and returns model output when called. Additionally there are methods available for updating arguments, such as the solver or specific parameters, that return a new \textit{model setup}.
     
     \item \textbf{\textit{Model output}}: 
     When executing the model by calling the \texttt{xsimlab.run()} method of the \textit{model setup}, a "filled-out" dataset is returned containing model setup parameters and model output in labelled dimensions. The model output is again a Xarray dataset, fully compatible with all methods and extensions for storing, analyzing or visualizing the data provided by Xarray.
@@ -385,9 +385,9 @@ XSO provides a set of functional objects, which are briefly presented below:
 % SOLVER
 XSO currently provides three solving algorithms: An adaptive step size solver from the SciPy package (odeint), a fixed step-size solver based on a core algebraic modeling language (GEKKO) and a simple stepwise solver that is built into the backend Xarray-simlab framework. For up to date information consult the online documentation (see code availability section).
 
-XSO is a lightweight framework that adds some computational time needed for linking model processes and setting up storage at runtime. Model runtime is otherwise dependent on the chosen solver algorithm. We make no definite claims as to computational efficiency here, as the solver backend is implemented flexibly and can be adapted to specific use cases. With the implemented odeint solver, XSO makes full use of Numpy vectorization. Simple models, such as use case 1 solve in the millisecond range. More complex models like use case 3 still solve in less than a minute even for large number of state variables (>80) and run times of 10 years on a normal laptop. An up-to-date and more detailed presentation can be found in the online documentation (see code availability section).
+XSO is a lightweight framework that adds some computational time needed for linking model processes and setting up storage at runtime. Model runtime is otherwise dependent on the chosen solver algorithm. We make no definite claims as to computational efficiency here, as the solver backend is implemented flexibly and can be adapted to specific use cases. With the implemented odeint solver, XSO makes full use of Numpy vectorization. Simple models, such as use case 1 solve in the millisecond range. More complex models like use case 3 still solve in less than a minute even for large number of state variables (>80) and run times of 10 years on a normal laptop.
 
-XSO provides an interface for iterative modification, both to more complex and simpler model constructs and allows running parameter ranges as batch dimensions. The specific steps of model development are presented in further detail in section \ref{Section:ModelDevelopmentWorkflow}.
+XSO provides an interface for iterative modification, both to more complex and simpler model constructs. The specific steps of model development are presented in further detail in section \ref{Section:ModelDevelopmentWorkflow}.
 
 \subsubsection{Workflow of developing a model from pre-existing components} \label{Section:ModelDevelopmentWorkflow}
 %%% TWO-COLUMN FIGURES
@@ -408,7 +408,7 @@ Constructing marine ecosystem models in Phydra is by design a flexible process, 
     The model can be assembled from the Phydra library, modifications of provided base classes or custom written processes. 
 
     
-    \item \textbf{Setting up the model}: 
+    \item \textbf{Creating a \textit{model setup}}: 
     A XSO model object is itself only a collection of abstract \textit{components}. In order to fully initialize a model that can be solved, the model object needs to be supplied with a complete set of parameters, as well as a choice of parameters and the solving algorithm to use.
     This is done using the \texttt{xso.setup()} function. The necessary arguments to this function are the model object to be setup, all required input parameters, the time range to solve the model and the specific model output to save during runtime.
     
