@@ -336,7 +336,9 @@ The Xarray-simlab modeling framework follows a modular object-oriented design th
     Variables are the most basic element of a model. XSO provides a set of \textit{variable types} that can be used as attributes or function decorators when constructing \textit{components}. The class decorator \texttt{@xso.component} converts the \textit{variable types} to functional Xarray-simlab variables and registers them within the model backend. XSO currently provides the following attributes: \textit{variable}, \textit{forcing}, \textit{parameter}, \textit{flux} or \textit{group}. These variable types are explained in greater detail in section \ref{Section:CreatingXSOComponent}.
     
     \item \textbf{\textit{Component}}: 
-    \textit{Components} are the logical building-blocks of a computational model that declare a subset of variables used in the model and defines a specific set of mathematical functions computed for these variables during model runtime. More specifically, a \textit{component} refers to a Python class decorated with the \texttt{xso.component} function that wraps the Xarray-simlab \textit{process} constructor. The XSO framework provides a collection of custom attributes (i.e. \textit{variable types}) that can be flexibly combined into a single \textit{component}. \textit{Components} can contain any number of variable types and functions. Linking variables between \textit{components} occurs at model setup via the supplied labels.
+    \textit{Components} are the logical building-blocks of a computational model that declare a subset of variables used in the model and defines a specific set of mathematical functions computed for these variables during model runtime. More specifically, a \textit{component} refers to a Python class decorated with the \texttt{xso.component} function that wraps the Xarray-simlab \textit{process} constructor. 
+    The decorating function registers the \textit{variable types} within the framework, greatly reducing unnecessary boilerplate code and creates fully functional model building blocks (i.e. Xarray-simlab \textit{processes}).
+    The XSO framework provides a collection of custom attributes (i.e. \textit{variable types}) that can be flexibly combined into a single \textit{component}. \textit{Components} can contain any number of variable types and functions. Linking variables between \textit{components} occurs at model setup via the supplied labels.
     
     \item \textbf{\textit{Model object}}: 
     \textit{Model objects} are instances of the Model class provided by Xarray-simlab. They consist of an ordered, immutable collections of \textit{components}. A XSO \textit{model object} is created with a call to the function \texttt{xso.model()} by supplying a dictionary of model \textit{components} with their respective labels. XSO provides an interface for running pre-built \textit{model objects} that contain all \textit{components} relevant to the model. These can be easily stored and shared to users not proficient in model construction that are interested in using a specific model with custom parameterisation.
@@ -378,7 +380,7 @@ The open-source code allows users to easy develop or modify processes to describ
 %%f
 \begin{figure*}[t]
 \includegraphics[width=12cm]{Figures/firstdraft_schematics/00_schematics_Package.pdf}
-\caption{Schematic of package structure. XSO provides the framework. Phydra is a library of functional \textit{components} and pre-built \textit{model objects}, that can be used, extended and modified. A typical workflow would consist of (1) Choosing a pre-existing model, modifying a model or creating a new model from components. (2) This model has to be setup with the correct labels and parameters, and a solver is chosen. (3) The model can be run efficiently, all input and output data is contained in Xarray datasets (4)  that can be conveniently stored or shared. (5) Model output is returned as a "filled-out" Xarray dataset that is fully compatible to be analysed and visualized with the wealth of tools provided by the Python scientific ecosystem.}
+\caption{Schematic of package structure. XSO provides the framework. Phydra is a library of functional \textit{components} and pre-built \textit{model objects}, that can be used, extended and modified. A typical workflow would consist of (1) Choosing a pre-existing model, modifying a model or creating a new model from components. (2) This model has to be setup with the correct labels and parameters, and a solver is chosen. (3) The model can be run efficiently, all input and output data is contained in Xarray datasets (4) that can be conveniently stored or shared. (5) Model output is returned as a "filled-out" Xarray dataset that is fully compatible to be analysed and visualized with the wealth of tools provided by the Python scientific ecosystem. The workflow is presented in further detail in section \ref{Section:ModelDevelopmentWorkflow}.}
 \label{Figure:PhydraXSOPackageSchematics}
 \end{figure*}
 
@@ -388,111 +390,96 @@ This section illustrates the key steps of configuring and running an ecosystem m
 % this needs to be more user workflow, less backend explanation (leave that to previous framework explanation), instead focus on the actual functions and arguments, step by step
     \item \textbf{Creating a \textit{model object}}: 
     A typical modeling workflow would begin with a \textit{model object}. The \textit{model object} can be imported from the Phydra library or assembled from the provided \textit{components}. Creating custom \textit{components} is explained in section \ref{Section:CreatingXSOComponent}.
-    To create a custom model, the function \texttt{xso.model()} is called with a single argument:
+    To create a \textit{model object}, the function \texttt{xso.model()} is called with a single argument:
     \begin{itemize}
-        \item \texttt{model_dict}: A dictionary of model \textit{components} with their respective labels. The supplied labels identify the \textit{components} for all future steps and allow reusing \textit{components} with unique labels.
+        \item \texttt{model\_dict}: A dictionary of model \textit{components} with their respective labels. The supplied labels identify the \textit{components} for all future steps and allow reusing \textit{components} with unique labels.
     \end{itemize}
     The function call automatically includes processes handling model assembly and the solver backend. When creating a model, the XSO framework automatically orders the processes in their logical order of execution and returns the \textit{model object}. The user can interactively view all parameters required as input at model setup, when printing the object in the console.
 
     \item \textbf{Creating a \textit{model setup}}: 
-    - The next step is to create a \textit{model setup} corresponding to the \textit{model object}.
-    - In order to fully initialize a model that can be solved, the model object needs to be supplied with a complete set of parameters, labels linking forcings and variables between \textit{components}, as well as the time steps and solving algorithm to use.
+    The next step is to create a \textit{model setup} corresponding to the \textit{model object}.
     The \textit{model setup} object is a Xarray dataset that contains all provided parameters as well as the initialized labelled model dimensions and supplied metadata. It is created with a call to \texttt{xso.setup()} by supplying the following arguments:
     \begin{itemize}
-        \item \texttt{model}: \textit{model object}
-        \item \texttt{solver}: label of built in solver or class of custom solver
-        \item \texttt{input_vars}: a dictionary of input parameters
-        Multiple values for a specific parameter can be passed with an additional batch dimension. At model runtime the model can be solved for each set of parameters within the batch dimension.
-        
-        \item \texttt{output_vars}: The user can specify output variables, by default (if no input is provided) all values of variables, forcings and fluxes are stored after model runtime.
-        
+        \item \texttt{model}: This argument takes the \textit{model object} created in the previous step. It provides the blueprint for the \textit{model setup} and the backend checks \textit{components} and variabel labels against the provided \textit{model object}.
+        \item \texttt{solver}: The solver can be chosen from those implemented in the XSO backend via the appropriate string label. Additionally the user can supply a custom solver implementation based on the abstract solver base class available within the XSO framework.
+        \item \texttt{input\_vars}:
+        In order to fully initialize a model that can be solved, a user needs to be supply a complete set of parameters and labels linking forcings and variables between \textit{components} to the \texttt{input\_vars} argument. The argument takes a dictionary where each component is referenced via the label supplied when the \textit{model object} was created. The parameters and variables are referenced via the attribute names defined when creating the \textit{component}. Multiple values for a specific parameter can be passed with an additional batch dimension. At model runtime the model can be solved for each set of parameters within the batch dimension.
+        \item \texttt{output\_vars}: The user can specify output variables, by default (if no input is provided) all values of variables, forcings and fluxes are stored after model runtime.
         \item \texttt{time}: To specify the time-steps used for model execution, the user has to supply an array of time-steps. This can be easily done using Numpy functions such as \texttt{np.linspace} by providing the desired range and time-steps and passing the resulting array to the \texttt{time} argument.
     \end{itemize}
     At this stage the user can store the fully initialized \textit{model setup} to reuse or modify later, or to share with other users.
     
     \item \textbf{Running model simulations}:
-    - The model setup created in the previous step already contains the necessary parameters and labelled dataset for model runtime. All that is required of the user is to call the \texttt{xsimlab.run()} method and provide a model object that corresponds to the model setup.
-    The runtime method is provided by the underlying Xarray-simlab framework, of which the following arguments are currently supported by XSO:
+    The \textit{model setup} created in the previous step contains all necessary information needed at model runtime. All that is required of the user is to call the \texttt{xsimlab.run()} method and provide a model object that corresponds to the model setup. The runtime method is provided by the underlying Xarray-simlab framework, of which the following arguments are currently required by XSO:
     \begin{itemize}
-        \item \texttt{model}: \textit{model object}
+        \item \texttt{model}: This argument takes the \textit{model object} created in the first step.
         \item \texttt{batch\_dim}: If defined at model setup, the label of the batch dimension has to be supplied to the \texttt{batch\_dim} argument.
-        \item \texttt{store}: This optional argument allows specifying a string path where simulation input and output data is stored. If the argument is not specified, all data will be saved in memory.
     \end{itemize}
-    A "filled-out" dataset is returned containing model setup parameters and model output in labelled dimensions. The model output is again a Xarray dataset, fully compatible with all methods and extensions for storing, analyzing or visualizing the data provided by Xarray.
+    The method returns model output as a new Xarray dataset, which can be used in the following steps.
     
     \item \textbf{Storing model output}: 
-    - Typically a user would assign the model output to a new variable in Python.
-    - The model output is a Xarray dataset, that provides a wealth of functionality for storing the specific dataset. We want to highlight the \texttt{to_netcdf()} method that stores the full model output including metadata and labeled dimensions to an NetCDF file at the user-specified location.
-    
-    XSO provides several options to store model output, as well as storing the value of fluxes and forcings. This allows users to specify the model output that suits the complexity of the model construct.
-    - The resulting dataset is compatible with packages for data analysis and visualisation from the Python scientific ecosystem. Storage of labelled multi-dimensional model output to the NetCDF file format is natively supported through the Xarray extension. 
-    - If the option is specified at setup, the model output will include not just the state variables, but the values of all fluxes. The magnitude of the fluxes can then easily be plotted... much improved workflow over having to allocate all values to variables or large arrays to use later, makes checking model dynamics much easier
-    - easy to store, and easy to share
-    - contains all metadata (e.g. data source or units) supplied by user at setup
+    Simulation inputs and outputs can be kept in memory or saved on disk. Storage of labelled multi-dimensional model output to the NetCDF file format is natively supported by Xarray. The provided \texttt{to\_netcdf()} method stores the full model output including metadata and labeled dimensions to a NetCDF file at the user-specified location. The resulting file contains all metadata (e.g. data source or units) supplied by the user at previous steps and can be easily shared or used for further analysis. 
     
     \item \textbf{Analyzing & visualizing model output}:
-    - Model output is Xarray.dataset, fully compatible with Python scientific ecosystem.
-    - model output data can be extracted by labels (how?)
-    - Xarray provides built-in functions for data analysis and visualization, easy to extract data to Pandas dataframes or Numpy arrays. These provide a rich interface and full compatibility with advanced data analysis tools.
-    - Natively supports matplotlib and more advanced data-visualisation tools like hvplot
+    The Xarray dataset created at model runtime is natively compatible with a wealth of packages for data analysis and visualisation from the Python scientific ecosystem. Xarray provides built-in compatibility with the standard plotting library Matplotlib and more advanced data-visualisation tools like Hvplot that make full use of the labelled dimensions for plotting multi-dimensional data. The data for a specific dimension can be extracted to Pandas dataframes (a popular package for data analysis) via the \texttt{to\_dataframes()} method. Specific variables can be indexed and extracted as Numpy arrays via their \textit{component} and variable labels. These methods provide a rich interface and full compatibility with advanced data analysis tools created by the open-source Python community.
 
 \end{enumerate}
 
-For documented and practical implementations of this model development workflow see the Jupyter notebooks in the model examples folder of the Phydra library.
+- This is exemplary model development workflow, provides multiple steps at which exchange can happen. 
+- Currently not all functionality of Xarray-simlab is compatible with XSO backend, but as the project is further developed we are looking to extend functionality.
+For documented and practical implementations of this model development workflow see the Jupyter notebooks in the model examples folder of the Phydra library (see code availability section).
 
 \subsection{Creating new components}  \label{Section:CreatingXSOComponent}
 
-Phydra comes with a library of \textit{components} that were created using the XSO framework. To implement models beyond those included in the Phydra library, users can build custom \textit{components} from a set \textit{variable types} provided by the XSO framework. \textit{Components} are simply Python classes with the \textit{variable types} as attributes and methods that are decorated with \texttt{@xso.component}. The decorating function registers the \textit{variable types} within the framework, greatly reducing unnecessary boilerplate code and creates fully functional model building blocks (i.e. Xarray-simlab \textit{processes}). Existing \textit{components} can be easily modified to have a different functionality, as long as the dimensions of the included state variables and fluxes match those of the interacting components in the model. 
-- A binary choice exists between defining the specific \textit{variable type} at model setup locally within the \textit{component}, or retrieving its value defined in another \textit{component}. This choices is given by the \texttt{foreign} argument available for \textit{variables} and \textit{forcings}. The benefit to defining \texttt{foreign=True} is that a specific variable can be defined in a single component and reused throughout the model. Additionally the variable can be flexibly modified by exchanging the \textit{component} that defines the referenced \textit{variable type} in the model. When a forcing or state variable defined as \texttt{foreign=False} (the default option) the user needs to supply a string label at model setup that uniquely identifies the variable within the model.
+To implement ecosystem models beyond those included in the Phydra library, users can build custom \textit{components} from a set of \textit{variable types} provided by the XSO framework. Constructing a \textit{component} is as simple as writing a Python class, except that the framework greatly reduces the necessary boilerplate code (e.g. there is need to define dunder methods such as \texttt{\_\_init\_\_}). The \textit{variable types} can be flexibly combined as attributes and function decorators within a class that is decorated with \texttt{@xso.component}. The decorator converts the class to a functional Xarray-simlab \textit{process} and registers the \textit{variable types} in the XSO backend.
 
-The currently available \textit{variable types} in the XSO framework are explained below:
-\begin{itemize}
-    \item \textbf{\textit{variable}}: Class attribute
-    Defines time-dependent variable in model that is affected by fluxes
+The currently implemented \textit{variable types} in the XSO framework are presented below:
+\begin{enumerate}
+    \item \textbf{\textit{state variable}}: The class attribute \texttt{xso.variable} registers a time-dependent state variable. The following arguments are available:
+    \begin{itemize}
+        \item \texttt{foreign}: A binary choice exists between defining the \textit{state variable} at model setup locally within the \textit{component}, or retrieving its value defined in another \textit{component}. This choices is given by the \texttt{foreign} argument available for \textit{state variables} and \textit{forcings}. The benefit to defining \texttt{foreign=True} is that a specific variable can be defined in a single component and referenced throughout the model. Additionally the variable can be flexibly modified by exchanging the \textit{component} that defines the referenced \textit{variable type} in the model. When a forcing or state variable defined as \texttt{foreign=False} (the default option) the user needs to supply a string label at model setup that uniquely identifies the variable within the model.
+        
+        \item \texttt{dims}: A \textit{state variable} can be implemented as a scalar (the default option) or as an array by supplying a string label for the \texttt{dim} argument. The label defines the variable dimension across the model at model setup and runtime.
+        
+        \item \texttt{list\_input}: XSO implements this feature to allow greater flexibility in setting up components that act on multiple variables in a similar manner. The list input feature can be activated via \texttt{list\_input = True} if the \textit{state variable} is defined as \texttt{foreign = True}. At model setup the user can supply a list of labels that are iterated over, calculating the specific flux acting on each supplied \textit{state variable}.
+        
+        \item \texttt{flux}: To define a specific mathematical function acting on the \textit{state variable}, a \textit{flux} function needs to be defined within the \textit{component}. Additionally, to create an implicit link between the defined \textit{state variable} and the \textit{flux}, the name of the \textit{flux} function is supplied to the \texttt{flux} argument.
+        
+        \item \texttt{negative}: If an argument was made to \texttt{flux}, the \texttt{negative} argument allows changing the mathematical sign of how the \textit{flux} affects the \textit{state variable}. The default is that the result of the \textit{flux} is added to the \textit{state variable}. If \texttt{negative=True}, the \textit{flux} will be subtracted.
+        
+        \item \texttt{groups}: The \texttt{groups} argument takes a string label that can be referenced in a \textit{group} variable in another \textit{component}. The \textit{group} variable assembles all \textit{state variables} (or \textit{forcings} and \textit{fluxes}) that share the same label across the model and can be used as an array of these values. This allows great flexibility in linking variables between \textit{components} to extend or refactor model processes.
+        
+        \item \texttt{description}: The argument allows passing a short string descriptor of the implemented variable that is included in the \textit{model object}, e.g. to clarifiy the purpose of the variable to a user. The description is available at all steps of the modeling workflow.
+        
+        \item \texttt{attrs}: The argument allows including more detailed metadata (e.g. units or citation) that will be included with the \textit{model setup} and model output Xarray datasets.
+    \end{itemize}
     
-    - required inputs, required \& optional arguments (e.g. dims, flux), usage
-
-    - State variables can be defined as unique instances, but also as functional groups (essentially an array of state variables). Dimensions need to be defined via custom string labels supplied to the \texttt{dims} argument.
+    A \textit{component} can contain any number of \textit{state variables}. In the Phydra library we followed the design pattern that \textit{state variables} are defined within a simple \textit{component} that is reused with unique labels for each required variable. All other \textit{components} reference these \textit{state variables} via the \texttt{foreign=True} functionality.
     
-    \item \textbf{\textit{forcing}}: Class attribute, requires setup function
-    Defines external time-dependent variable in model
     
-    Forcings are defined as providing an external constant or time-varying parameter to the model. These parameters can be used in fluxes that reference the forcing type,
+    \item \textbf{\textit{forcing}}: The class attribute \texttt{xso.forcing} registers an external time-varying parameter. It shares the \texttt{foreign}, \texttt{dims}, \texttt{groups}, \texttt{description} and \texttt{attrs} arguments with the \textit{state variable} attribute. Additionally a forcing needs to be supplied with the following argument:
+    \begin{itemize}
+        \item \texttt{setup\_func}: The argument has to be supplied with the name of a locally defined forcing setup function. This is a Python function defined within the \textit{component} that contains any necessary logic or computation for supplying the time-dependent forcing to the XSO backend. The setup function constructs and returns the actual forcing function, that takes model time as input and returns the value of the forcing during model runtime.
+    \end{itemize}
     
-    - Constant forcings could be supplied via a simple parameter to a flux, but in the Phydra library constant forcings are implemented as forcings, to allow easy exchange to variable forcings without having to modify other \textit{components} in model 
+    Constant forcings could be supplied via a single parameter to a \textit{flux}, but in the Phydra library constant forcings are generally implemented as \textit{forcing} variables, to allow easy exchange to variable forcings without having to modify other \textit{components} in model. 
 
-    handle initializing Params, time-varying or constant, based on external data or mathematical functions, that can be referenced and used in other processes, store labelled values of their values
-
-    - forcing functions needs to take time as input, and return forcing value for that time
-    - mention vectorization? this is important for it to work, but technical detail..
-    - parameters defined within component can be used in both the setup function and the forcing function
-    - if the forcing is based on data and not a mathematical function or constant value, it is necessary to perform some type of interpolation, if used with adaptive step-size solvers (like odeint)! choice of interpolation algorithm is up to user (we use \texttt{scipy.interpolate.splrep}, an algorithm to calculate the B-spline representation of a 1-D curve, in particular because it allows for periodic interpolation that is useful for yearly climatological forcing!
+    All variables and parameters defined within component can be used as arguments in both the setup function and the forcing function, e.g. to calculate station-specific forcing from a more general \textit{component}.
     
-    \item \textbf{\textit{parameter}}: Class attribute
-    Model parameter to be used in flux and setup functions
+    If the forcing is based on data and not a mathematical function or constant value, it is necessary to perform some type of interpolation to supply the forcing to the model at flexible time steps. The interpolation would naturally happen within the setup function, where the choice of interpolation algorithm is up to the user. In Phydra we use \texttt{scipy.interpolate.splrep}, an algorithm to calculate the B-spline representation of a 1-D curve, in particular because it allows for periodic interpolation that is useful for yearly climatological forcing.
     
-    \item \textbf{\textit{flux}}: Function decorator
-    Defines part of mathematical function acting on state variables
-    
-    The previous building blocks for state variables and forcings create the structure of the model, but when solved at this stage there would be no meaningful simulation. In order to define exchanges of matter between components flux processes are added to our model instance, defining the affected components via labels at model setup.
-    There are multiple types of fluxes provided in the library. 
-
-    take labels at model setup, that reference state variables or forcing, and use them to define fluxes based on mathematical functions in python syntax, store labelled values of their intermediate values
-
-    Dimensions can be of any number, however the solvers might run into trouble at very complex models. 
-
-    For now, dimensions have to be fixed and named at process creation (ACTUALLY THEY DON'T, can provide list of dims!)
-    % TODO: check if I can make all components of flexible dimensionality so that they work in all models!
-
-    Single fluxes provide loss or gain processes to a single variable, such as sinking or influx from outside the ecosystem. In order to simplify creating common forcing fluxes, a single flux process can take list of affected components as input at model setup (with \texttt{list\_input = True} argument). An example for more complex flux type are exchange fluxes, where a flux affects one component as a source and another as a sink. These can be set up with flexible dimensionality of components. Grazing fluxes are a slightly more complicated subclass of a grid-wise flux, as ingestion is usually normalized by total prey availability, so all forcing interactions need to be calculated in a dynamically generated matrix of all prey items consumed by a component.
+    \item \textbf{\textit{parameter}}: 
+    Model parameters can be added to a \textit{component} via the \texttt{xso.parameter} class attribute. It shares the \texttt{dims}, \texttt{description} and \texttt{attrs} arguments with the \textit{state variable} attribute. Any parameter defined as an attribute is available as an argument to the \textit{flux} and forcing setup functions within a \textit{component}. The specific value of the \textit{parameter} is supplied at model setup.
     
     \item \textbf{\textit{group}}: Class attribute
-    Each previous variable type includes a \texttt{groups} argument, that requires supplying a unique string label. 
-    - This string label is also supplied to Name argument of the \textit{group} variable, and all variable defined in other components that match the label are collected as a list. 
-    - Collects the value of variables defined in other \textit{components} with the matching group label. This group variable can be used in the calculation of fluxes similar to any other locally defined \textit{variable type} within the same \textit{component}.
-    - This allows for flexibility in model setup and provides extensible of models, e.g. growth-limiting terms can be aggregated to a final component that calculates total flux and limting terms can removed or added flexibly.
+    The \texttt{xso.group} class attribute allows creating a \textit{group variable} that aggregates multiple variables defined in other components. \textit{State variables}, \textit{forcings} and \textit{fluxes} provide a \texttt{groups} argument that can be supplied with a string label. By supplying the same string label to the \texttt{name} argument of the \textit{group} variable, all variables defined in other components that match the label are collected as a list. 
+    This group variable can be used in the calculation of fluxes similar to any other locally defined \textit{variable type} within the same \textit{component}. This allows for flexibility in model setup and provides extensible of models, e.g. growth-limiting terms can be aggregated to a final component that calculates total flux and limiting terms can removed or added flexibly.
     
-\end{itemize}
+    \item \textbf{\textit{flux}}: 
+    The previous building blocks for state variables, forcings and parameters create the structure of the model, but when solved at this stage there would be no meaningful simulation. The basic building block of the system of differential equations that underpin an XSO model are \textit{fluxes}. A \textit{flux} is a Python function within a \textit{component} that takes the locally defined \textit{state variables}, \textit{forcings} and \textit{parameters} as input arguments and is decorated with \texttt{@xso.flux}. The decorator can be used as is or supplied with specific values for the \texttt{dims}, \texttt{groups}, \texttt{description} and \texttt{attrs} arguments. The \textit{flux} defines a mathematical function acting on state variables that can be directly linked to a \textit{state variable} via their \texttt{flux} argument or can be passed along to a \textit{group} variable and assigned to a \textit{state variable} in another \textit{component}.
+
+    
+\end{enumerate}
 
 A \textit{component} can contain any number of \textit{variable types} as attributes, as well as helper functions or other custom attributes and methods. A complex flux can be broken down into multiple functions contained in the same decorated Python class.
 
