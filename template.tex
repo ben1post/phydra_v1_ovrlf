@@ -644,7 +644,8 @@ The published model code was written as an R script, with some modifications all
 Many NPZD-type models have been published over the years with a plethora of different formulations for the functional responses of the ecosystem components. The EMPOWER model was presented with various formulations for the treatment of light, and we followed this path by showing two different light-attenuation algorithms that can be easily exchanged in the modular framework. 
 
 \subsubsection{Description}
-% really present a concise and to the point model description here, as would be in any other model publication.
+% for EMPOWER move all description to supplementary, no need to explain everything again
+% use simple plain english paragraph describing model
 The model uses nitrogen as its currency (quantities are measured in units of $\mu mol$ N $m^{-3}$, or $\mu M$), with state variables for dissolved nutrients ($N$), phytoplankton ($P$), zooplankton ($Z$) and detritus ($D$). The model employs slab physics as presented in \citet{Evans1985ACycles}. The model ocean is built up of two layers. A biologically inert deep ocean is situated below a well mixed upper layer of variable depth that contains the ecosystem. The model structure, locations and parameters are adapted from the EMPOWER model presented by \citet{Anderson2015c}.
 
 The model is driven by empirical forcing describing the depth of the mixed layer ($H$), average temperature of the mixed layer ($T$), photosynthetically active radiation at the surface ($I$) and nutrient concentration in the deep layer ($N_0$) 
@@ -1113,90 +1114,71 @@ In figure \ref{Figure:ResultsASTroCAT_2} we show the effect on bulk phytoplankto
 \section{Discussion}
 % keep discussion simple! just mention a few important points!
 % what is absolutely necessary?
+\begin{comment}
+Note: The discussion section features some presentation of issues specific to the current Phydra implementation. I still have to split the current Phydra code into the XSO package and go through the implemented code (i.e. tidy it up) and document the functions. It might be that some of these issues will be resolved (or modified) after I have finished setting up the final XSO package... that is why the discussion section is a bit colloquial or rough in places. I will go through it again once the final packages are ready and done and make sure to clean up the loose ends!
+
+also, I might leave out the GEKKO solver backend explanation (and perhaps leave that implementation out of the first release of Phydra), since it doesn't really provide any useful functionality currently. It has a lot of potential though..
+\end{comment}
+
 \subsection{Structuring complex marine ecosystem models in a flexible framework}
 
 % framework flexibility trade-off (design choices)
-- Achieving flexibility of modeling frameworks in a practical software implementation is challenging.
-- Frameworks generally require a level of abstraction.
-- Trade-off between frameworks with high level of generality and abstraction that are easier to use but limited in application and frameworks that operate at very low level and require high effort to learn and use. A framework that over-restricts the user interface may be easy to manage, but reduces possible applications. 
-
-- Situated in complexity between GUI tools that allow drag and drop, and custom model scripts. 
-- XSO as a framework aims to reduce the boilerplate code necessary to write computational models in Python. Phydra as a library provides a reviewed code base that users can start from.
+In creating a modeling framework the design choices have a profound effect on both the flexibility and usability, with an inherent trade-off between these two aspects. In developing the Phydra package, we went through multiple iterations of a self-contained framework that provides the user with a few options to customize pre-built models, but this setup did not fulfil our goal of fully flexible model development and ultimately restricted the range of applications. Achieving true flexibility in a practical software implementation of a modeling framework is challenging, but our approach was finally inspired by the Xarray-simlab framework and the corresponding Fastscape model library created by Benoît Bovy. There, a generalistic low-level modeling framework (Xarray-simlab) provides the foundation for a library of advanced landscape evolution models (in Fastscape), that remain accessible and modifiable through the underlying open-source framework. We followed this design pattern by developing a flexible framework for constructing models based on differential equations (XSO) that is applied in the Phydra library. The Phydra library provides users with fully functional models that can be setup and run via a simple user interface. These models remain fully accessible and modifiable through the underlying XSO framework.
 
 % framework with Python backend and Python frontend
-- Frameworks can be implemented using a custom scripting language or provide pre-built model objects that can be extended through inheritance.
-- The XSO framework aims to strike a balance between these two levels. Python is very popular and widely used by scientists. Basic syntax of XSO should be easily accessible by users proficient in Python. Instead of requiring a custom scripting language (e.g. YAML), the provided \textit{variable types} and \textit{component} decorators supply a simplified user interface that is rooted in basic Python functionality. 
-- level of abstraction between \textit{variable types} and \textit{components}, backend technical implementation can be updated and improved without breaking functionality of existing model \textit{components} and models.
-
-- This design however reduces accessibility to scientist not proficient in Python, might require a steeper learning curve.
-- another benefit: XSO framework does generally not restrict packages, syntax or math used in defined functions. The underlying Xarray-simlab goes beyond that in flexibility, so that we had to define our own custom extension to simplify setting up ODE-based models.
-- Since XSO mostly wraps Xarray-simlab, this framework is available to users for further extension and custom functionality
-- allows user to use their own packages or functionality within the Python syntax
+In contrast to available tools that allow building differential equation based models from a set of customizable building blocks in a graphical interface and other modeling frameworks that utilize a custom scripting language (e.g. via YAML files), the Phydra and XSO frontend and backend are fully implemented in a single programming language: Python. This might require a higher initial effort for users foreign to Python, but we argue that the effort is well worth the wealth of functionality provided by the Python scientific ecosystem. The XSO model development workflow is similar to writing standard Python code, with the added benefit of a set of modular Python objects and attributes that automatically handle model input, output, computationally constructing and solving the model. Functional model \textit{components} do not have to inherit from specific base classes, as in common in other object-oriented modeling frameworks. The functions defining \textit{forcings} and \textit{fluxes} within \textit{components} in XSO are not restrictive in their Python syntax and can make use of external Python packages, as long as the value that is finally supplied at model runtime is compatible with the chosen solver backend. Since XSO itself is a wrapper of Xarray-simlab without hiding the underlying functionality, this further expands the possibilities for custom applications and further development of the framework. The flexibility of the underlying framework should not dissuade users less interested in technical customization as the Phydra library provides fully functional pre-configured \textit{components} and \textit{model objects} that provide a solid foundation for marine ecosystem model development.
 
 % flexibility in model construction
-- Conceptual ecosystem models vary greatly in complexity. 
-- XSO allows the user to choose component refactoring of model components, no limit to variable types used within a component, no limit to levels of group variables linking components to define a single ecosystem process. Fluxes could be as complex or simple as the user desires.
-- \textit{Component} bundles certain functions, parameters and variables.
-- \textit{Components} can theoretically contain any number of \textit{variable types}, but this is practically limited by 
-- Every aspect of model needs to defined at the \textit{variable type} level within components, no implicit model structure otherwise.. (i.e. what i want to say: XSO has no "magic" everything needs to be clearly defined in \textit{components} of the model.) BUT components that handle complex setups can be reused and shared.
-- State variables, Forcings, etc. need to be set up in one \textit{component}, can be referenced across the model, system of ODEs is constructed via the \textit{fluxes} that are assigned to the referenced state variables.
-
-- Because of framework design: Effort required to construct models is proportional to required model complexity!
+The XSO framework is currently limited to model applications based on ordinary differential equations. With this limitation, conceptual marine ecosystem models still vary greatly in complexity. Our goal in developing the framework was to allow users to build models without restricting the level of complexity, in particular as it relates to the number of state variables and model processes. This was implemented in the framework by providing \textit{variable types} which directly correspond to the basic mathematical components of a model based on ordinary differential equations (e.g. state variables, parameters, forcings and partial equations). Every aspect of the model needs to be defined at the level of \textit{variable types}. Model \textit{components} can be flexibly constructed from the provided set of \textit{variable types} and wrap a logical component of the model as the user sees fit. There is no limit to the number of \textit{variable types} used within a component and no limit to levels of \textit{group} variables linking components to define a single ecosystem process. State variables, forcings and parameters need to be initialized in one \textit{component} and can be referenced across the model. The system of differential equations is constructed from the \textit{fluxes} contained in the model \textit{components} via the supplied labels at model setup. As a result of these design choices, the effort required to construct models is proportional to the desired model complexity and \textit{components} can easily be modified to more complex formulations while remaining interchangeable. We hope that this will encourage experimentation and inter-comparison of model performance at variable levels of complexity. 
 
 
-
-\subsection{Current limitations of Phydra and XSO}
+\subsection{Current limitations of XSO and Phydra}
 % XSO limitations
 % XSO for ODEs only (by design)
-- First version of XSO only supports building models based on ODEs.
-- The XSO framework as-of-yet does not support completely different models, such as agent based models.
-- no advanced features like parameter optimization yet, although technically possible
-- benefits from mathematical formulations that are the same for both input and output terms of a particular \textit{flux} function. No feature yet that simplifies unit conversions, etc.
+In order to finish development of a first version of the XSO framework and Phydra library, we had to make some restrictive choices in terms of functionality and applicability.
 
-% XSO solvers implemented so far, python = slow
-- limited set of solvers
-- less optimized than custom script (as would be expected from framework)
-- so far not optimized for very large models, reaching computational limits of implemented solvers
-- "problem" with high-level scripted language python: inherently slow! but many ways to circumvent
-- The solver backend can be extended to include solvers compiling model to machine code 
-- odeint makes full use of numpy vectorization, relatively fast and efficient for presented use cases
+The first restriction is that the XSO framework currently only supports mathematical models based on ordinary differential equations. There are no specific methods that help with setting up a system of partial differential equations, as would be needed for setting up a multi-dimensional model, but such functionality could be added in the future. Other modeling approaches not based on differential equations, such as agent based models, fall outside the scope of XSO. Currently there are no features implemented that go beyond the construction and solving of a model. The framework structure would technically support advanced features for model introspection (e.g. printing the system of equations in LaTeX) or parameter optimization, but these are currently at an experimental stage and will be added to the XSO framework in later stages of development.
+
+The first version of XSO implements a limited set of solver algorithms. These are a simple step-wise solver, an adaptive step-size solver optimized for solving system of ODES (Scipy's \texttt{odeint}) and a fixed step-size solver based on an algebraic modeling language (GEKKO). The simple step-wise solver is the only backend that currently supports multi model parallelism when executing multiple sets of parameters via the \textit{batch} dimensionality feature. None of the implemented solvers currently support single model parallelism and are thus not optimized for very large models (i.e. > 200 state variables).
+The implementation of the GEKKO solver backend does not yet provide access to the powerful features for model optimisation provided by GEKKO. It was included in the first release as a proof-of-concept to showcase the compatibility with advanced solver algorithms. As the XSO framework is developed we are looking to extend the framework interface to allow users to directly access the additional functionality of GEKKO.
 
 % Current design paradigm rooted in flexible labeling to link components
-- Links between model components are defined via supplied labels at model setup! This is not ideal for complex models, requiring many labels. For the presented use cases this is easily manageable. However implicit links between components is possible and should be considered for constructing models that aim at a high level of complexity, where the user does not require easy exchange of many model components.
-- Current design paradigm made for rapid prototyping and easily exchanging and reusing \textit{components}
-- built-in links between \textit{components} are particularly useful for canonical ecosystem models, where the main goal is to extend and experiment with a specific model setup.
+The high level of flexibility in the current version of XSO is rooted in the model backend that links the defined \textit{variable types} in separate \textit{components} via the supplied string labels at model setup. This design choice was made to allow easy reuse of \textit{components}, for example a \textit{component} that defines a mortality flux acting on a single state variable could be implemented multiple times in a model to act on different state variables referenced via their label at model setup. This workflow allows for rapid prototyping, so that \textit{components} can be easily modified or exchanged and the routing of \textit{fluxes} can be modified even after creating the \textit{model object}. This is manageable for the presented use cases, but not ideal for very complex models that will require many labels to be supplied at model setup. Although this functionality is not yet built into the XSO user interface, implicit links between \textit{components} are technically possible via the underlying Xarray-simlab framework. This functionality can be implemented in future versions of XSO and should be considered for constructing models that aim at a high level of complexity, where the main goal is to extend and experiment on a specific model setup.
+
+\begin{comment}
+% a comment for now, because I am not sure if this will be worked out in the first version of XSO or still an existing caveat
+A caveat to the flexibility of \textit{components} is that currently the dimensions of \textit{variable types} need to be defined within a \textit{component} via a unique string label. The XSO framework checks at model setup that the dimension labels match in actual dimensionality across the model, e.g. that the mortality flux has the matching dimensionality to the referenced phytoplankton state variable that it acts upon. In order to allow full flexibility when exchanging \textit{components}, the user should be able to supply a specific dimension label at model setup, which is currently not supported by Xarray-simlab. A work-around is that the user modifies just that specific argument in the \textit{flux} within the \textit{component}.
+\end{comment}
 
 % Phydra focus on simple physical settings for ecosystem models (no dimensionality yet!)
-- For large spatial applications not suitable, will need to include parallelisation, but this functionality is inherently supported by the underlying Xarray-simlab architecture. Solver backend will need to be optimized to support it in the future
-- presented use cases limited to zero dimensional physical settings
-- number of model dimensions need to be defined within \textit{components} and needs to match within the model
+The focus on rapid model prototyping is represented in the choice of use case models for the first version of the Phydra library. The models are all zero-dimensional and feature a relatively simple physical setting (i.e. open-ocean slab physics or a flow-through system). More advanced multi-dimensional model applications are technically possible, but currently not supported by the user interface of the XSO framework.
+
 
 
 \subsection{Current usage and future developments}
 % How to install and run Phydra?
-- The Phydra package is available via the Python pip package manager, but we encourage using Conda as a package manager that is provided with the scientific Anaconda Python distribution.
-- Conda install via \texttt{conda install conda-forge phydra}, automatically checks dependencies and installs required packages.
-Please follow the up-to-date instructions on the Github repository for installation of Phydra and its dependencies.
+The Phydra library and the XSO framework are packages written in pure Python that can be easily installed via the Conda package management system, that resolves and installs all necessary dependencies. The packages are also individually available via the package installer for Python (pip). Please follow the up-to-date instructions on the Github repository for installation of Phydra and its dependencies.
+
+Since Python and the dependencies of Phydra are constantly developed further, we will provide instructions to install a fully compatible virtual environment with the Conda package manager separate from a users standard Python installation. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter notebook environment that is available via Conda. For more complex and larger model runs on servers Python scripts are preferable.
+
+This paper showcases the first published usage of Phydra and XSO. We hope that with continued development the user base and range of application will grow. The Phydra library can provide a starting point and learning tool for scientists interested in entering the field of marine ecosystem modeling using Python.
 
 % underyling packages are constantly developed, Phydra will grow with them
-Both of Xarray-simlab and GEKKO are relatively young Python packages and actively under development, which provides some challenges, but also allows for many future improvements to the functionality of Phydra and XSO.
-- In fact, backend is not fixed, and project could expand to wrap more advanced backend code specifically suited to marine ecosystem model applications (e.g. legacy Fortran code)
-- These type of frameworks are not built for rock-solid long maintained performance, Python and the underlying packages are developing fast. But that bug is also a feature: fast development, very extensible and flexible
-- Can be circumvented with appropriate environment manager e.g. Conda (very recommended to users of Phydra), checks dependencies and versions at installation, should allow users relatively setup
-% CONDA NAME DROP
-Since Python and the dependencies of Phydra are constantly developed further, we will provide instructions to install a fully compatible virtual environment with the Conda package manager separate from a users standard Python installation. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter environment that is available via Conda. For more complex and larger model runs on servers Python scripts are preferable.
+The Xarray-simlab package that provides the basis for the XSO framework is relatively young project and actively under development, which provides some challenges, but also allows for many future improvements to the functionality of Phydra and XSO. The Phydra library does not have to be restrained to the XSO framework in future development. The Phydra library could be expanded to provide a functional Python interface to backend code specifically suited to marine ecosystem model applications (e.g. legacy Fortran code).
 
 % future feature development
-- ""The framework allows to build models very quickly and dynamically from many components by automating aspects such as workflow dependencies and model input detection. It has also potential to automate other aspects like parallel execution of model components, command-line interface and/or graphical interface.""
-- XSO stores model equations including the names of parameters and it would be possible to add some functions that print the mathematical equations.. which would be quite helpful to build and debug a model. (possible feature: further model introspection and debugging)
-- possible feature: create interface/methods for parameter optimization
-- possible feature: create custom methods to expand model dimensionality, allow straight-forward definition of boundary condition and exchange between model compartments
-% above and below could be merged into a single paragraph
-% OPEN SOURCE CONTRIBUTION 
-We hope that Phydra offers the marine ecosystem modeling community a new tool for research and practical applications. New developments are very likely to arise from such work and collaborations. 
-- In particular open collaboration can greatly expand the library of \textit{components} and \textit{model objects} beyond those presented here.
-Phydra and XSO are open-source projects. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. 
-The code is fully accessible on Github with LICENSE and distributed using the Python package installer PyPI and through a channel on the package manager Conda. A guide on how interested users can contribute to the project is provided in the online documentation.
+The XSO framework in its current version allows building models quickly and dynamically from \textit{components} and provides a user interface to setup and run a model that is stored as a fully documented Xarray dataset. The Phydra library provides a set of \textit{components}, models and example applications that showcase the usability of the framework and provide a common library for marine ecosystem modeling applications. We hope that this already offers the marine ecosystem modeling community with a useful tool for research and practical applications. 
+
+The features that are high on the development priority list are: 
+\begin{itemize}
+    \item Methods for model introspection, such as printing the system of equations and visualizing the model structure.
+    \item Providing an interface and methods for model parameter optimization.
+    \item Creating custom methods to expand model dimensionality, to allow straight-forward definition of boundary condition and exchange between model compartments.
+    \item Extending the solver backend to support larger, multi-dimensional models.
+\end{itemize}
+Further developments are very likely to arise from future research projects and collaborations. The Phydra library of \textit{components} and \textit{model objects} could be expanded beyond the use cases presented here and allow easy reproducibility of specific model applications presented in research.
+
+Phydra and XSO are open-source projects. The code is fully accessible on Github and can be freely reused and modified according to a BSD-3 license. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. More information on how interested users can contribute to the project is provided in the online documentation.
 
 
 %%% added Section label for editing purposes, later simply use \conclusions
@@ -1204,24 +1186,19 @@ The code is fully accessible on Github with LICENSE and distributed using the Py
 %\conclusions  %% \conclusions[modified heading if necessary]
 % Place this project in the wider open science ecosystem, summarize and conclude
 
-make the main points again (from intro)
-
-
 %What is Phydra? What is XSO?
 %Reiterate what we have written and the use cases shown
-- XSO is the underlying framework
-- Phydra is a library
+Phydra is a new Python library that contains fully configured marine ecosystem models and pre-built model building-blocks (i.e. \textit{components}) that can be mix-and-matched to custom model configurations. The XSO Python package supplies the modular modeling framework and provides a user interface to flexibly build computational models based on differential equations. The XSO framework allows detailed control over the state variables, parameters, forcings and mathematical functions in the model and renders each defined model \textit{component} interchangeable. 
 
-% Highlight collaborative modeling workflow
+% Highlight (collaborative) modeling workflow
 - The structure of this project was designed to inherently support collaborative model development. Scientists working with computational models do not always build the models themselves, and instead work on parameterization or simply analyze model output for specific locations. This type of usage is intentionally supported by providing the Phydra library of pre-built \textit{model objects} and \textit{components}. A user can start working with models without detailed knowledge of the underlying framework and learn the basic workflow before progressing to building custom models using the XSO framework. Additionally, more advanced user can easily share custom \textit{components} or \textit{model objects} via the built-in object structure.
-- 
 
 % Highlight flexible dimension setup, great for testing PFT-type or allometry based models
 - An ecosystem model tracks chemical compounds as well as organisms via state variables. These state variables can define completely different components of a model, or represent a functional group. \textit{Components} within Phydra are defined at this higher level and can contain a single state variable or an array of state variables that share common fluxes with differing parameterisation. 
 
 - In addition to size, the component could be modified to include information on units or other specific parameters relevant to the model. The added flexible dimensionality of components was designed with the current issues in marine ecosystem model in mind. The effects of different levels of complexity, in the number and definition of phytoplankton functional types (PFT) for example, is not routinely tested in marine ecosystem models. Phydra provides a framework that allows for easy testing through flexible modification of such model complexity at model setup.
 
-
+%make the main points again (from intro)
 old school modeling can be done better
 show that I am moving in a direction that other people are! Brian Rose climlab, etc.
 
