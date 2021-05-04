@@ -180,70 +180,74 @@ Comprehensive documentation is available online.
 % can also mention open source, but just high-level summaries, same on phydra details, no detail in intro
 % establish, why what you make is different from everything done before. why it is important! (2 sentences)
 
-%\subsection{Models of marine ecosystems}
+% Introductory paragraph, spelling out the issue, end with: therefore we present Phydra/XSO!
+Scientists have used mathematical models to advance our understanding of marine ecosystem for more than 80 years \citep{Gentleman2002a}. Model formulations are constantly evolving and the broad availability of computational resources has democratized the field and greatly expanded the scope of possibilities.
+Early models of a few ordinary differential equations have matured into detailed descriptions of the lower trophic levels in marine ecosystems that are run in complex three-dimensional global circulation models (GCMs) \citep[e.g.][]{Dutkiewicz2020DimensionsDiversity}. 
+Marine ecosystems are inherently complex, so the trajectory of model development has understandably been in that direction. In running to more complex descriptions the model formulations have been mostly adapted from earlier models, some of which have been criticised as not making physiological sense \citep{Smith2014}. Ecosystem models should not be initialized naively, but instead treated as hypotheses and multiple structures and levels of complexity should be tested against objective functions and other model structures \citep{Franks2009}. A useful metaphor in model construction is Occam's razor: the simplest solution is often the right one, at least it can be better tested and analyzed. In marine ecosystem model development this methodology is often not consistently applied \citep{Shimoda2016}.
+We argue that at least part of the problem are the disparate tools used in the academic field of marine ecosystem modeling, which show a growing gap to the software ecosystems used for data analysis. 
+The former often have a steeper learning curve, are less accessible to novice users and can result in convoluted workflows, while the latter is evolving rapidly towards more streamlined and interactive workflows. This is despite the fact that modern, interpreted programming languages commonly used for data analysis applications have evolved the capabilities to efficiently support advanced numerical computations.
+To efficiently test and answer basic questions about marine ecosystem models, the community requires modeling tools that are easy to use, open-source, allow granular control of model structure, and provide a tool-set that fosters scientific collaboration. These are the ideas that lead us to develop the XSO framework and Phydra library in the open-source programming language Python.
+
+ %\subsection{Models of marine ecosystems}
 %- Marine ecosystems are important
 %- and very complex
 Marine ecosystems play a central role in the functioning of our planet. The biomass produced indirectly feeds a considerable part of earth’s population through fisheries \citep{Stock2017} and marine primary production contributes roughly half of the oxygen in the atmosphere \citep{Field1998PrimaryComponents}. Marine plankton communities are an integral part of the global carbon cycle, through their role in sequestering carbon to the deep ocean \citep{Falkowski1998BiogeochemicalProduction}. These communities are fascinatingly complex in their ecosystem functions and biodiversity, of which up to two-thirds has yet to be described \citep{Appeltans2012TheDiversity}. This diversity is contained in a physical environment that is inherently three-dimensional \citep{Levin2017AddingConservation}, where physical and chemical properties are governed by large and small scale ocean dynamics. 
 
 %- This is why: we need modeling
-Numerical models of marine ecosystems are useful quantitative tools to untangle these complex systems. Scientists have used mathematical models to advance our understanding of marine ecosystem for more than 80 years \citep{Gentleman2002a}. Model formulations are constantly evolving and the broad availability of computational resources has democratized the field and greatly expanded the scope of possibilities.
-%- Model development timeline
-The parameterizations and formulations of today's large-scale marine biogeochemical models trace a direct lineage from the foundational studies of the field. The very early marine ecosystem models used Lotka-Volterra-type predator-prey systems of differential equations to describe highly simplified marine ecosystems \citep{Fleming1939, Riley1946FactorsBank}. Their successors were the nutrient-phytoplankton-zooplankton-detritus (NPZD) models, which succeeded in reproducing the bloom dynamics observed in the temperate ocean with zero-dimensional box model descriptions of a few trophic levels \citep{Evans1985ACycles, Fasham1990a}. A logical next step was expanding the physical dimensions up to coupling NPZD models to three-dimensional general circulation models \citep[e.g.][]{Sarmiento1993AZone}.
-The added dimensions do not necessarily have to represent physical dimensions and much work has been focused on resolving ecological and functional dimensions in marine ecosystem models \citep{Follows2011ModelingMicrobes}.
-NPZD models were expanded to plankton functional type (PFT) models, that resolved a handful of phytoplankton functional types as added state variables \citep{LeQuere2005}.
-This development received much scrutiny, positing \citet{Anderson2005} to ask if marine ecosystem modellers were "running before we can walk?". The added state variables greatly increase the model parameter space, which leads to difficulties in validating model output in light of insufficient information.
-A different approach was taken by trait-based models, that resolve an entire spectrum of one or more ecosystem component \citep{Bruggeman2007a, Merico2009, Follows2007EmergentOcean}. The difficulty of defining a complex parameter space was here simplified by constraining the spectrum to trade-offs between functional traits, e.g. between nutrient affinity and growth rate. Specific model applications usually focus on a small set of trade-offs and 
-Such models can contain hundreds of state variables for a specific ecosystem component and current computational structures support running them coupled to global three-dimensional general circulation models \citep{Dutkiewicz2020DimensionsDiversity}.
-
-Marine ecosystems are inherently complex, so the trajectory of model development has understandably been in that direction. In running to more complex descriptions the model formulations have been mostly adapted from earlier models, some of which have been criticised as not making physiological sense \citep{Smith2014}.
-Complex ecosystem models should not be initialized naively, but instead treated as hypotheses and multiple structures and levels of complexity should be tested against objective functions and other model structures \citep{Franks2009}. A useful metaphor in model construction is Occam's razor: the simplest solution is often the right one, at least it can be better tested and analyzed. In marine ecosystem model development this methodology is often not consistently applied \citep{Shimoda2016}.
-
-%- A lot of problems reside with the tools we use for modeling (old, inflexible, complicated)
-%- Data analysis, modern workflows , modeling tools can evolve in similar direction
-We argue that at least part of the problem are the tools and workflows commonly used in the academic field of marine ecosystem modeling. The tools show a growing gap to software ecosystems for data analysis. The former often have a steeper learning curve, are less accessible to novice users and can result in convoluted workflows, while the latter is evolving rapidly towards more interactive and streamlined workflows.
-Early-career researchers entering the field of marine ecosystem modeling face the daunting task of learning ecological, mathematical and technical aspects of building a model. The task of coding a functional model is complicated enough that scientists hardly have time to focus on the important aspects of model-to-model and model-to-data comparisons. This can be somewhat alleviated by working with existing model code, but often this requires scientist to work with monolithic codes and learn specialist programming languages such as FORTRAN.
-Many legacy implementations of marine ecosystem models evolve organically to higher complexities at the expense of their readability, which may compromise sustainability in the long term and raises issues of error-proneness. In particular, simplifying already complex models is not always straightforward or possible.
-This is despite the fact that models are often very similar in nature and share many technical aspects. Apart from the pure mathematical structure of a model, the implementation needs to provide other functionality such as an interface to supply parameters and handle model data input and output. 
-The commonalities of differential equation based models lend it very well to the use of modeling frameworks that provide this functionality built-in. This study presents an effort in this direction: the XSO modeling framework and the Phydra library for marine ecosystem modeling written in Python.
-
-% Why Python:
-The free and open-source programming language Python has been billed as "the next wave in earth sciences computing" \citep{Lin2012}. Python is an interpreted, object-oriented language that has gained wide popularity in all kinds of software engineering. In contrast to older programming languages such as C++ or FORTRAN, Python provides the flexibility and usability of modern high-level programming languages and is relatively easier to learn.
-The scientific Python community has developed tools that support advanced numerical modeling, multidimensional data structures and a rich ecosystem for data analysis and visualisation.
-Notably, the Pangeo project 
+Numerical models of marine ecosystems are useful quantitative tools to untangle these complex systems. The parameterizations and formulations of today's large-scale marine biogeochemical models trace a direct lineage from the foundational studies of the field. The very early marine ecosystem models used Lotka-Volterra-type predator-prey systems of ordinary differential equations to describe highly simplified marine ecosystems \citep{Fleming1939, Riley1946FactorsBank}. Their successors were the nutrient-phytoplankton-zooplankton-detritus (NPZD) models, which succeeded in reproducing the bloom dynamics observed in the temperate ocean with zero-dimensional box model descriptions of a few trophic levels \citep{Evans1985ACycles, Fasham1990a}. A logical next step was expanding the physical dimensions up to coupling NPZD models to three-dimensional general circulation models (GCMs) \citep[e.g.][]{Sarmiento1993AZone}. The added dimensions do not necessarily have to represent physical dimensions and much work has been focused on resolving ecological and functional dimensions in marine ecosystem models \citep{Follows2011ModelingMicrobes}. NPZD models were expanded to plankton functional type (PFT) models, that resolved a handful of phytoplankton functional types as added state variables \citep{LeQuere2005}. This development of adding complexity ad-hoc received much scrutiny, positing \citet{Anderson2005} to ask if marine ecosystem modellers were "running before we can walk?". The added state variables greatly increase the model parameter space, which leads to difficulties in validating model output in light of insufficient information. A different approach was taken by trait-based models, that resolve an entire spectrum of one or more ecosystem component \citep{Bruggeman2007a, Merico2009, Follows2007EmergentOcean}. The difficulty of defining the complex parameter space was here simplified by constraining the spectrum to trade-offs between functional traits, e.g. between nutrient affinity and growth rate.
+Such models can contain hundreds of state variables for a specific ecosystem component and current computational structures support running them coupled to global three-dimensional GCMs \citep{Dutkiewicz2020DimensionsDiversity}. Such studies highlight the strong effect that the choices in dimensionality and trade-offs have on model output and similar to PFT models these choices need to be made carefully.
+These models trace back to the early models in many aspects, in particular that they are all based on differential equations. There are many different exciting approaches, such as such as agent-based modeling \citep{Hellweger2016AdvancingModelling} or Bayesian hierarchical modeling \citep{Coll2019PredictingApproaches}, but these go beyond the scope of this study and the presented modeling tools.
+Differential-equation based marine ecosystem models span a diverse range of model structures and parameterisations and develop in a direction to capture the diverse marine ecosystems structures and functions. We must make best use of this diversity and work together to achieve greater inter-comparability and openness in our modeling approaches \citep{Heymans2020TheChallenge}.
 
 
-% what other modeling frameworks are out there IN PYTHON!
-There are already some great modeling frameworks aimed to address the two issues above in the Python Scientific ecosystem (e.g., Climlab, CliMT/Simpl, Landlab).
+We argue that a current road block to comparability and openness are the tools commonly used in marine ecosystem modeling, that can often be outdated, inflexible and complicated.
+Early-career researchers entering the field of marine ecosystem modeling face the daunting task of learning the ecological, mathematical and technical aspects of building a model. Coding a functional model is complicated enough that scientists hardly have time to focus on the important aspects of model-to-model and model-to-data comparisons. 
+Many implementations of marine ecosystem models have incrementally increased in complexity at the expense of their readability and flexibility, which may compromise sustainability in the long term and raises issues of error-proneness. Working with existing model code often requires scientists to work with monolithic codes and convoluted workflows. More than being a nuisance, this undermines the reproducibility of modeling studies.
 
-Some projects developed provide frameworks for large biogeochemical models:
-- Veros BGCM
-- downside of interpreted language is speed, but example of Veros BGCM shows that Python has evolved the capabilities of handling very complex calculations, without loosing usability benefits.
+% OPEN SOURCE
+The foundation of good science should be transparency and for a marine ecosystem modeling study the model code is a central part of the scientific process that ideally should be published to an open-source repository. This allows for reproducibility and can provide the basis for fruitful research collaborations. Most data analysis software is firmly rooted in the open-source principle and is collectively developed, but for marine ecosystem modeling this approach not been widely adopted yet.
+Some notable projects aiming in this direction are the European Regional Seas Ecosystem Model (ERSEM, \citet{Butenschon2016}) that provides a generic ecosystem model, and the Framework for Aquatic Biogeochemical Models (FABM, \citet{Bruggeman2014a}) which provides a framework for coupling biogeochemical models such as ERSEM to hydrodynamic models. 
+From a coastal ecosystem model for the North Sea, ERSEM has evolved to a generic tool for ecosystem modeling that provides a complex model setup including pelagic, benthic and microbial components written in FORTRAN. Code is available upon registration and the general implementation is developed centrally by the Plymouth Marine Laboratory. FABM is also written in FORTRAN, but available completely open-source via Github and provides an object-oriented interface to couple custom biogeochemical models. 
+
+Complex ocean models are typically coded in low-level programming languages such as C or FORTRAN. These relatively old programming languages are well suited to complicated numerical operations and very efficient, but provide a daunting challenge to non-specialist scientists. Their core design and lack of abstraction can result in inflexible and complex code implementations.
+Modern high-level programming languages like Python or Julia are designed to improve code readability and usability. They still require a substantial effort to learn and use correctly, but make the resulting code easier to read and modify. Python specifically has gained wide popularity in both software engineering and the scientific community, so far as being billed as "the next wave in earth sciences computing" \citep{Lin2012}. The powerful standard library and flexible object-oriented syntax have allowed the scientific Python community to collectively develop tools that support advanced numerical modeling, handling multidimensional data structures and a rich ecosystem for data analysis and visualisation.
+
+- downside of interpreted language is speed,
 - Python is rapidly developing and leveraging other lower level language for speed. Also has growing functionality for parallelisation of code execution which is very relevant to large multi-dimensional marine ecosystem model use cases. 
 
+example of Veros BGCM \citep{Hafner2018VerosPython} shows that Python has evolved the capabilities of handling very complex calculations, without loosing usability benefits.
+Important aspect of marine ecosystem modeling: GENERAL CIRCULATION MODELS
+
+
+
+
+
+% make transition to talking about frameworks, and why that is useful.
+The most widely used modeling approach employs systems of differential equations and this commonality would allow using modeling frameworks that provide much of the boilerplate technical functionality, such as data input/output and solving algorithms. 
+A framework here signifies the abstract definition of a software framework, where building blocks of model terms, solvers and other generic functionality is supplied to be modified by a user. This can be in the form of software with a graphical user interface (GUI), a custom scripting language or object-oriented code.
+
+There have been many projects aimed at increasing usability and simplifying model construction. Some projects are aimed at users without knowledge of programming languages that allow building models in a graphical user interface, but currently available tools are either closed-source and developed for-profit (e.g. the proprietary STELLA modeling software) or provide little flexibility for modern modeling applications outside their specific domain (e.g. Ecopath/Ecosim).
+
+
+- There are these Python modeling frameworks already!
+- Python is powerful langauge for frameworks! (see VEROS gcm)
+There are already some great modeling frameworks aimed to address the two issues above in the Python Scientific ecosystem (e.g., Climlab, CliMT/Simpl, Landlab).
+
+
+- Notably, the Pangeo project provides a community driven ecosystem for open-source big-data earth system sciences in Python \citep{Eynard-Bontemps2019TheCNES}. It makes use of 
+
+Pure Python modeling framework:
 - mention Fastscape/Xarray-simlab setup, how that inspires the current project
 - finish off with mentioning the requirements for a modeling framework that can solve the problems spelled out above! (Xarray-simlab is a powerful step in that direction, can provide unified interface and data structure for many applications)
 
 
-% what other modeling frameworks are out there
-Modeling frameworks should ideally be easy to use, open-source, easy to modify, and provide a tool-set that fosters scientific collaboration. The foundation of good science should be transparency and for a marine ecosystem modeling study the model code is a central part of the scientific process that ideally should be published to an open-source repository. 
-- This doesn't only engender greater transparency, but provides a basis for other researchers.
 
-The philosophy of open-source software has been fruitfully applied in the field as can be seen by efforts such as FABM or ERSEM.
-Notable projects aiming in this direction are the FABM and ERSEM models provided completely open-source on Github.
-- FABM (Fortran code, ecosystem model part not very flexible, but perhaps this can be developed in future)
-- ERSEM (Fortran code, Model framework for specific marine ecosystem model implementation)
-both have been developed to provide Python interface, allow some access to backend Fotran code, but since code base is external this restricts customizability, a framework fully implemented in Python does not restrict development or interoperability.
-
-- These are highly complex models, not modeling tools per se
-- i.e. they don't provide a basic framework of building-blocks to build custom models (granularity of control)
-
-There have been many projects aimed at increasing usability and simplifying model construction. Some projects are aimed at users without knowledge of programming languages that allow building models in a graphical user interface, but currently available tools are either closed-source and developed for-profit (e.g. the proprietary STELLA modeling software) or are built on an outdated technical basis and provide little flexibility for modern modeling applications outside their specific domain (e.g. Ecopath/Ecosim).
 
 
 
 %- This is why, we developed Phydra / XSO
 % why is Phydra/XSO different from previous efforts?
-This study reports on the development of a new modeling framework that is offered as an open source implementation for use be the marine ecosystem modeling community.
+This study reports on the development of a new modeling framework that is offered as an open source implementation for use by the marine ecosystem modeling community.
 
 To our knowledge no such framework developed that allows building marine ecosystem models from modular components in a flexible manner in Python!
 
