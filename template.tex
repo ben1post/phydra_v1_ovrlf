@@ -212,60 +212,28 @@ From a coastal ecosystem model for the North Sea, ERSEM has evolved to a generic
 Complex ocean models are typically coded in low-level programming languages such as C or FORTRAN. These relatively old programming languages are well suited to complicated numerical operations and very efficient, but provide a daunting challenge to non-specialist scientists. Their core design and lack of abstraction can result in inflexible and complex code implementations.
 Modern high-level programming languages like Python or Julia are designed to improve code readability and usability. They still require a substantial effort to learn and use correctly, but make the resulting code easier to read and modify. Python specifically has gained wide popularity in both software engineering and the scientific community, so far as being billed as "the next wave in earth sciences computing" \citep{Lin2012}. The powerful standard library and flexible object-oriented syntax have allowed the scientific Python community to collectively develop tools that support advanced numerical modeling, handling multidimensional data structures and a rich ecosystem for data analysis and visualisation.
 
-- downside of interpreted language is speed,
-- Python is rapidly developing and leveraging other lower level language for speed. Also has growing functionality for parallelisation of code execution which is very relevant to large multi-dimensional marine ecosystem model use cases. 
-
-example of Veros BGCM \citep{Hafner2018VerosPython} shows that Python has evolved the capabilities of handling very complex calculations, without loosing usability benefits.
-Important aspect of marine ecosystem modeling: GENERAL CIRCULATION MODELS
-
-
-
+-
+The downside to the interpreted nature of Python is that it often results in slower integration speeds. This is counteracted by the language being rapidly developed, leveraging other lower-level languages for speed and growing in functionality for parallel code execution.
+\citet{Hafner2018VerosPython} have implemented a global-scale ocean GCM in pure Python, that shows comparable performance to existing GCM implementations. This shows that Python has evolved the capabilities of handling very complex calculations as is common in marine ecosystem models without loosing the usability benefits.
 
 
 % make transition to talking about frameworks, and why that is useful.
-The most widely used modeling approach employs systems of differential equations and this commonality would allow using modeling frameworks that provide much of the boilerplate technical functionality, such as data input/output and solving algorithms. 
-A framework here signifies the abstract definition of a software framework, where building blocks of model terms, solvers and other generic functionality is supplied to be modified by a user. This can be in the form of software with a graphical user interface (GUI), a custom scripting language or object-oriented code.
+In recent years there has been a number of modeling frameworks developed in Python, mostly for domain-specific applications. A framework here signifies the abstract definition of a software framework, where building blocks of model components, solvers and other generic functionality is supplied to be modified by a user. Some of these implement a Python front-end that provides a user interface for a FORTRAN back-end (e.g. CliMT, \citet{Monteiro2016TheToolkit}; PyOM, \citet{Eden2016ClosingModel}, which generally restricts flexibility and requires user to interact with FORTRAN back-end code for model customization. Others are fully implemented in Python (e.g. Landlab, \citet{Hobley2017CreativeDynamics}), which allows users to more readily modify model processes. Such a modeling framework has to our knowledge to date not been developed for marine ecosystem modeling.
 
-There have been many projects aimed at increasing usability and simplifying model construction. Some projects are aimed at users without knowledge of programming languages that allow building models in a graphical user interface, but currently available tools are either closed-source and developed for-profit (e.g. the proprietary STELLA modeling software) or provide little flexibility for modern modeling applications outside their specific domain (e.g. Ecopath/Ecosim).
-
-
-- There are these Python modeling frameworks already!
-- Python is powerful langauge for frameworks! (see VEROS gcm)
-There are already some great modeling frameworks aimed to address the two issues above in the Python Scientific ecosystem (e.g., Climlab, CliMT/Simpl, Landlab).
-
-
-- Notably, the Pangeo project provides a community driven ecosystem for open-source big-data earth system sciences in Python \citep{Eynard-Bontemps2019TheCNES}. It makes use of 
-
-Pure Python modeling framework:
-- mention Fastscape/Xarray-simlab setup, how that inspires the current project
-- finish off with mentioning the requirements for a modeling framework that can solve the problems spelled out above! (Xarray-simlab is a powerful step in that direction, can provide unified interface and data structure for many applications)
-
-
-
-
+The most widely used modeling approach in marine ecosystem modeling employs systems of differential equations. This commonality would allow using modeling frameworks that provide much of the boilerplate technical functionality, such as data input/output and solving algorithms. Python provides many tools that simplify handling systems of differential equations, but applications in ecosystem modeling will require robust data-management and a user interface for running simulations. The beauty of open-source software development is that we can build on previous efforts in the Python community.
+The Pangeo project is a community driven ecosystem for open-source big-data earth system sciences in Python \citep{Eynard-Bontemps2019TheCNES}. The \textit{Pangeo stack} includes a suite of independent open-source efforts, such as the Xarray package \citep{Hoyer2017Xarray:Python} for handling multi-dimensional data based on the NetCDF standard, and the browser-based interactive coding environment of Jupyter notebooks \citep{Kluyver2016JupyterWorkflows},
+A Pangeo-affiliated project is the Xarray-simlab package developed by Beno\^{\i}t Bovy \citep{Bovy2018Xarray-simlab:Interactively}, which provides a light-weight modeling framework as an extension of Xarray. Xarray-simlab is domain-agnostic and provides simple base classes to build models without any implemented model structure or solver, but provides a user interface for model construction, setup and runtime.
+A showcase of Xarray-simlab's capabilities is the Fastscape framework for landscape evolution modeling \citep{benoit_bovy_2020_3840917}, that allows building models from scratch using modular components in an optimized and interactive Python environment. Xarray-simlab would be very well suited for marine ecosystem modeling implementations, but contains no functionality for building and solving models of differential equations. In order to support this functionality, we developed an extension to Xarray-simlab that is specifically suited to build such models: the Xarray-simlab-ODE (XSO) modeling framework. We applied this framework in the Phydra library for marine ecosystem modeling. 
 
 
 %- This is why, we developed Phydra / XSO
 % why is Phydra/XSO different from previous efforts?
-This study reports on the development of a new modeling framework that is offered as an open source implementation for use by the marine ecosystem modeling community.
+This study reports on the development of a new modeling framework and model library that is offered as an open-source implementation for contribution and use by the marine ecosystem modeling community. This is (to our knowledge) the first framework that allows building marine ecosystem models from modular components in a flexible manner in pure Python. The implementation of models in the XSO framework allows for granular control of model structure, reusing and routing flexibly between modular components, a flexible implementation of the solver back-end and a modeling workflow that is easily documented at each step.
+By building on the burgeoning Pangeo ecosystem, the framework uses established data formats and supports a range of interactive ...tools to . The object-oriented Python structure allows for collaboration 
 
-To our knowledge no such framework developed that allows building marine ecosystem models from modular components in a flexible manner in Python!
+The Phydra library applies this framework to build marine ecosystem models and provides pre-built components, models and exemplary workflows. The first release includes the full set of components, models and workflows to generate the results presented in the study. In this early stage of development the Phydra library focuses on model applications in zero-dimensional physical settings. 
+The library is open to contribution from the community and we hope that it will provide a transparent reference and collaborative environment. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on scientific questions and creating the most appropriate model structure and parameterisation.
 
-In order to provide phydra with a functional backend, we ended up developing our own framework: XSO
-Goals:
-- granular control of model structure
-- modular \& flexible model structure (allows reuse of components, flexible routing between processes)
-- model implementation not dependent on specific solver (flexible solver backend)
-- 2 levels of complexity -> model assembly and component construction
-found Xarray-simlab as basis, provides many benefits, but not optimized for models based on differential equations -> based on step-wise calculations
--> Benjamin Post developed Xarrray-simlab-ODE (XSO) 
-
-Object oriented structure still highly simplifies collaboration with non-modelers or people not versed in higher-level python. Higher transparency and collaboration between modelers as well, since same code base and similar 
-
-- Phydra/XSO is a tool-box for marine ecosystem modeling, that is freely extensible by a user to be applied to many different use cases. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on creating the most appropriate model structure and parameterisation for the specific scientific hypothesis that is being investigated. 
-
-- With the developed modeling framework we anticipate that students can translate their ecological insight into numerical experiments much faster, not loosing motivation.
-- Additionally experienced researchers can quickly set up hypothetical models, or modify existing models, without having to radically alter their code.
 
 
 %- Aims & structure
@@ -289,6 +257,28 @@ Phydra/XSO aims at empowering scientists to do better research in less time, col
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Object oriented structure still highly simplifies collaboration with non-modelers or people not versed in higher-level python. Higher transparency and collaboration between modelers as well, since same code base and similar 
+
+
+- With the developed modeling framework we anticipate that students can translate their ecological insight into numerical experiments much faster, not loosing motivation.
+- Additionally experienced researchers can quickly set up hypothetical models, or modify existing models, without having to radically alter their code.
+
+In developing the XSO modeling framework and Phydra libary, we set the following objectives:
+\begin{itemize}
+    \item Granular control of model structure down to variables and functions.
+    \item A modular framework that allows for reuse of and flexible routing between components.
+    \item The model implementation should not be tied to a specific solving algorithm, but instead provide a flexible solver back-end.
+    \item Model construction follows an intuitive workflow that is easily documented or stored at each step.
+\end{itemize}
+
+
+ This can be in the form of software with a graphical user interface (GUI), a custom scripting language or object-oriented code.
+
+There have been many projects aimed at increasing usability and simplifying model construction. Some projects are aimed at users without knowledge of programming languages that allow building models in a graphical user interface, but currently available tools are either closed-source and developed for-profit (e.g. the STELLA modeling software, \citep{Costanza2001ModelingIII}) or provide little flexibility for modern modeling applications outside their specific domain (e.g. Ecopath/Ecosim, \citep{Coll2009EcosystemApproach}).
+An example for a modeling framework utilizing a custom scripting language is the MicroBenthos framework written in Python that constructs a model from user-supplied YAML text files \citep{Chennu2018MicroBenthos:Ecology}. 
+
+
 % 1st paragraph: Importance of marine ecosystems and phytoplankton to global biogeochemical cycles + diversity of organisms and species
 
 %  \subsection{Phytoplankton modeling: From NPZD to DARWIN}
