@@ -225,29 +225,16 @@ The Pangeo project is a community driven ecosystem for open-source big-data eart
 A Pangeo-affiliated project is the Xarray-simlab package developed by Beno\^{\i}t Bovy \citep{Bovy2018Xarray-simlab:Interactively}, which provides a light-weight modeling framework as an extension of Xarray. Xarray-simlab is domain-agnostic and provides simple base classes to build models without any implemented model structure or solver, but provides a user interface for model construction, setup and runtime.
 A showcase of Xarray-simlab's capabilities is the Fastscape framework for landscape evolution modeling \citep{benoit_bovy_2020_3840917}, that allows building models from scratch using modular components in an optimized and interactive Python environment. Xarray-simlab would be very well suited for marine ecosystem modeling implementations, but contains no functionality for building and solving models of differential equations. In order to support this functionality, we developed an extension to Xarray-simlab that is specifically suited to build such models: the Xarray-simlab-ODE (XSO) modeling framework. We applied this framework in the Phydra library for marine ecosystem modeling. 
 
-
-%- This is why, we developed Phydra / XSO
-% why is Phydra/XSO different from previous efforts?
-This study reports on the development of a new modeling framework and model library that is offered as an open-source implementation for contribution and use by the marine ecosystem modeling community. This is (to our knowledge) the first framework that allows building marine ecosystem models from modular components in a flexible manner in pure Python. The implementation of models in the XSO framework allows for granular control of model structure, reusing and routing flexibly between modular components, a flexible implementation of the solver back-end and a modeling workflow that is easily documented at each step.
-By building on the burgeoning Pangeo ecosystem, the framework uses established data formats and supports a range of interactive ...tools to . The object-oriented Python structure allows for collaboration 
-
-The Phydra library applies this framework to build marine ecosystem models and provides pre-built components, models and exemplary workflows. The first release includes the full set of components, models and workflows to generate the results presented in the study. In this early stage of development the Phydra library focuses on model applications in zero-dimensional physical settings. 
-The library is open to contribution from the community and we hope that it will provide a transparent reference and collaborative environment. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on scientific questions and creating the most appropriate model structure and parameterisation.
-
+The implementation of models in the XSO framework allows for granular control of model structure, reusing and routing flexibly between modular components, a flexible implementation of the solver back-end and a modeling workflow that is easily documented at each step. 
+By being built on Xarray-simlab the framework is natively integrated with the tools provided by the Pangeo ecosystem for handling large data structures in interactive Jupyter notebooks. The framework supports a highly collaborative model development workflow, as model parameterisations and output are Xarray datasets that can be readily stored as NetCDF files and the object-oriented code structure allows easy exchange of models and their components.
+The Phydra library applies this framework to build marine ecosystem models and provides pre-built components, models and exemplary workflows. The first release includes the full set of components, models and workflows to generate the results presented in the study. In this early stage of development the Phydra library focuses on model applications in zero-dimensional physical settings. The library is open to contribution from the community and we hope that it will provide a transparent reference and collaborative environment. 
 
 
 %- Aims & structure
-"In this paper, we (a) describe modeling approach, (b) apply modeling approach in 3 examples"
+This study reports on the development of a new modeling framework and model library that is offered as an open-source implementation for contribution and use by the marine ecosystem modeling community. This is (to our knowledge) the first framework that allows building marine ecosystem models from modular components in a flexible manner in pure Python. 
+The XSO framework and Phydra library aim at empowering scientists to do better research in less time, collaborate efficiently and make new discoveries. Our goal is to make the technical implementation of writing functions and setting up a model more accessible, so that the focus can be on scientific questions and creating the most appropriate model structure and parameterisation.
 
-The utility of the phydra package is here shown via three model implementations. Two models from literature are recreated.
-
-The package can be used for any model setting, so far only slab physics and a chemostat setting are hard-coded in package.
-
-Finally, the relevance of this work and potential next steps are discussed.
-
-Phydra/XSO aims at empowering scientists to do better research in less time, collaborate efficiently and make new discoveries
-
-
+In the next section, we present the usage of the XSO framework and structure of the Phydra library, including the steps of an exemplary model development workflow. In the following model use case seciton, we show the utility of the tool-set in three exemplary model applications: A basic NP chemostat model, an NPZD model in a slab physical setting adapted from \citet{Anderson2015c} and a complex size-structured model in a simple box setting adapted from \citet{Banas2011b}. We then discuss the framework architecture, current limitations and possible future developments of XSO and Phydra.
 
 
 
