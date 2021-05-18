@@ -81,12 +81,12 @@
 
 \begin{document}
 
-\title{The Phydra (v0.1) library and XSO (v0.1) framework for flexible, modular and reproducible marine ecosystem modeling based on differential equations in Python} 
+\title{The Phydra (v0.1) library and XSO (v0.1) framework for flexible, modular and reproducible marine ecosystem modeling} 
 
 
 % \Author[affil]{given_name}{surname}
 \Author[1]{Benjamin}{Post}
-\Author[1]{Esteban}{Acevedo-Trejos}
+\Author[3]{Esteban}{Acevedo-Trejos}
 \Author[2]{Andrew }{Barton}
 \Author[3]{Benoît}{Bovy}
 \Author[1]{Agostino}{Merico}
@@ -128,30 +128,20 @@
 
 \maketitle
 
-\begin{abstract} [Just collecting ideas:] 
+\begin{abstract}
 
-Marine ecosystem modeling is central to understanding the biogeochemical cycles driving the earth system. 
-
-These models can have highly variable complexity, both in terms of mechanistic and spatial resolution. 
-No consensus in terms of adequate model complexity and formulation has been reached, although there are many canonical model structures used and modified.
-
-This paper introduces Phydra, an open-source library for marine ecosystem modeling built with the object-oriented modeling framework Xarray-simlab-ODE (XSO), with the goal to support efficient, flexible and easily reproducible development of models based on ordinary differential equations. 
-
-Phydra provides pre-built models and model components that can be modified and assembled to complex ecosystem models. 
-
-All basic processes can be adapted and modified in simple Python to describe different and more complex ecosystems. The first release focuses on zero-dimensional phytoplankton models, but models of higher dimensionality are also possible.
-
-Xarray data-structure, self-documenting workflow, ease of sharing models, as well as input and output.
+Marine ecosystem modeling is central to understanding the biogeochemical cycles driving the earth system. These models can have highly variable complexity, both in terms of mechanistic and spatial resolution. No consensus in terms of adequate model complexity and formulation has been reached, although there are many canonical model structures used and modified. This paper introduces Phydra, an open-source library for marine ecosystem modeling built with the object-oriented modeling framework Xarray-simlab-ODE (XSO), with the goal to support efficient, flexible and easily reproducible development of models based on ordinary differential equations. Phydra provides pre-built models and model components that can be modified and assembled to develop ecosystem models of various levels of complexity. All basic processes can be adapted and modified in Python to describe relevant ecosystems processes.
 
 Phydra is embedded in the Python scientific ecosystem and is natively compatible with many tools for prototyping, analysis \& visualisation of models.
 
-This paper presents the general structure of Phydra, the usage of xarray-simlab-ode and the workflow of developing model applications of varying complexity.
-
-Phydra, as well as all models and other work presented here is available open-source and can be used by the scientific community to build, modify, run and test ODE-based models. The Phydra standard library aspect, can collaborate share model functions mechanisms, really focus on science instead of fixing bugs.. 
-
-Comprehensive documentation is available online.
 
 
+- We present three model use cases, from a highly simplified laboratory setting to a canonical ecosystem model in an open-ocean physical setting, and finally a complex size-structured ecosystem model.
+
+- We show the utility and usability, as well ease of modifying models and parameters as well as handling model output.
+
+Phydra, as well as all models and other work presented here is available open-source and can be used by the scientific community to build, modify, run and test ecosystem models based on differential equations.
+- We hope that Phydra and XSO will provide useful tools for the marine ecosystem modeling community
 
 
 
@@ -683,7 +673,7 @@ Despite the different technical implementation and solving algorithms employed h
 
 From a model describing an oceanic physical setting with a relatively simple ecosystem, we move to a model with a simplified physical setting with a complex description of a size-structured ecosystem. The model structure for the second use case was adapted from the ATroCAT model \citep{Banas2011b}. The original publication features extended investigation of model dynamics, for example under variable forcing or with stochastic grazing parameters. We focus on the basic setup under constant forcing. It is a simple box model that features an allometric description of multiple size-classes of both phytoplankton growing on a single nutrient, as well as an equal amount of size-classes of zooplankton grazing on phytoplankton. This level of trophic interaction is highly resolved, but many other ecological processes are neglected, e.g. there is no detrital or regeneration pathway. Even in this simple box-model setting, the complex food web yields an emergent pattern of phytoplankton size diversity. Size is used in this type of models as a "master-trait", which allows to link eco-physiological properties of various organisms with key ecological functions \citep{Litchman2008}. 
 
-Combining the dimension functionality of the XSO framework with the built-in vectorization of model equations lends itself very well to implement such a model. Instead of defining state variable without dimensionality, as was done in the previous two use cases, we simply add a dimension label to the \texttt{xso.variable} attribute. This allows the user to initialize and use the variable instead as an array of size-classes, e.g. via \texttt{dims=(phyto)} supplied to . The number of size-classes is inherently variable and can be set at model setup. We showcase this feature by running the model with 2 to 50 size classes and comparing bulk phytoplankton biomass between runs.
+Combining the dimension functionality of the XSO framework with the built-in vectorization of model equations lends itself very well to implement such a model. Instead of defining state variable without dimensionality, as was done in the previous two use cases, we simply add a dimension label to the \texttt{xso.variable} attribute within the component. This allows the user to initialize and use the variable instead as an array of size-classes, e.g. via \texttt{xso.variable(dims=("phyto"), ...)}. The number of size-classes is inherently variable and can be set at model setup. We showcase this feature by running the model with 2 to 50 size classes and comparing bulk phytoplankton biomass between runs.
 
 \subsubsection{Description}
 %%f
