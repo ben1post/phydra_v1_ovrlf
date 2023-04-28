@@ -333,7 +333,7 @@ We illustrate here the key steps of configuring and running an ecosystem model u
 
 To showcase the utility of the XSO framework and Phydra library, we present three marine ecosystem model applications of varying complexity. For each application we present the mathematical model, the implementation within the XSO framework and some model results. To highlight the modular nature of the framework, we also show how one aspect of each model is modified.
 
-For the first model application, we considered a highly simplified model, whose implementation using the XSO framework is presented in full detail. To simplify the presentation of the more complex models in use cases 2 and 3, we show only the \textit{component} structure and highlight additional technical aspects of the implementation. For all use cases the complete code, following the full development workflow from model creation to output visualization, is available publicly as interactive Jupyter notebooks in the Phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}).
+For the first model application, we considered a simple model, whose implementation using the XSO framework is presented in full detail. For the presentation of the more complex models in use cases 2 and 3, we show only the \textit{component} structure and highlight additional technical aspects of the implementation. For all use cases the complete code, following the full development workflow from model creation to output visualization, is available publicly as interactive Jupyter notebooks in the Phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}).
 
 \subsection{Model application 1: phytoplankton growth in a chemostat}
 %%f
@@ -354,7 +354,7 @@ Phytoplankton growth ($\mu$) is described by Monod kinetics \citep{Monod1942Rech
 \begin{equation}
     \mu = \mu_{max} \frac{N}{k + N} 
 \end{equation}
-where $k$ is the half-saturation nutrient concentration, defined as X, $N$ is the ambient nutrient concentration, and $\mu_{max}$ is the maximum growth rate achievable under perfect growth conditions.
+where $k$ is the half-saturation nutrient concentration, defined as the concentration at which half the maximum growth rate is achieved, $N$ is the ambient nutrient concentration, and $\mu_{max}$ is the maximum growth rate achievable under perfect growth conditions.
 
 The model equations are:
 
@@ -382,10 +382,7 @@ The model equations are:
 \label{Figure:CodeSchematics_1}
 \end{figure*}
 
-In order to find a useful structuring of model components, we can separate the model into state variables, forcing, and fluxes. For state variables, we have nutrient ($N$) and phytoplankton ($P$). The only forcing is the nutrient concentration of the external medium ($N_0$), whether it is constant or variable. Three fluxes can be separately defined: (1) the inflow of the external medium, (2) $P$ growing on $N$, and (3) the outflow of both $N$ and $P$.
-The model was implemented using these 6 separate model components, as visualized in Figure \ref{Figure:CodeSchematics_1}.
-
-The model implementation and structure built from Phydra components is presented in detail in appendix \ref{Appendix:Implementation1}.
+In order to find a useful structuring of model components, we can separate the model into state variables, forcing, and fluxes. For state variables, we have nutrient ($N$) and phytoplankton ($P$). The only forcing is the nutrient concentration of the external medium ($N_0$), whether it is constant or variable. Three fluxes can be separately defined: (1) the inflow of the external medium, (2) $P$ growing on $N$, and (3) the outflow of both $N$ and $P$. The model was implemented using these 6 separate model components, as visualized in Figure \ref{Figure:CodeSchematics_1}.
 
 
 %%% TWO-COLUMN TABLE
@@ -393,15 +390,17 @@ The model implementation and structure built from Phydra components is presented
 %t
 \begin{table*}[t]
 \caption{Model parameters used in application 1.}
-\begin{tabular}{l c c r}
+\begin{tabular}{l c c c r}
 \tophline
-Parameter & Description & Value & Units \\
+Parameter & Code variable & Description & Value & Units \\
 \middlehline
 
-$N_0$ & nutrient concentration of external medium & 0.1 & \unit{µM \ N} \\
-$\mu_{max}$ & maximum growth rate & 1 & \unit{d^{-1}} \\
-$d$ & dilution rate & 0.1 & \unit{d^{-1}}\\
-$k_N$ & half-saturation nutrient concentration & 0.7 & \unit{µM \ N}\\
+$N$ & \texttt{N} & concentration of nitrogen in medium & t(0) = 1 & \unit{µM \ N} \\
+$P$ & \texttt{P} & concentration of phytoplankton in medium & t(0) = 0.1 & \unit{µM \ N} \\
+$N_0$ & \texttt{N0} & nutrient concentration of external medium & 0.1 & \unit{µM \ N} \\
+$\mu_{max}$ & \texttt{mu} & maximum growth rate & 1 & \unit{d^{-1}} \\
+$d$ & \texttt{rate} & dilution rate & 0.1 & \unit{d^{-1}}\\
+$k_N$ & \texttt{halfsat} & half-saturation nutrient concentration & 0.7 & \unit{µM \ N}\\
 
 \bottomhline
 \end{tabular}
@@ -409,20 +408,20 @@ $k_N$ & half-saturation nutrient concentration & 0.7 & \unit{µM \ N}\\
 \end{table*}
 %
 
-To explore the basic dynamics, we chose standard parameters values (Table \ref{Table:UseCase1Parameters}). Initial values for $N$ and $P$ were set at 1 (units) and 0.1 (units), respectively. The model was run for X days with a time step of Z.
+To explore the basic dynamics, we chose standard parameters values (Table \ref{Table:UseCase1Parameters}). Initial values for $N$ and $P$ were set at 1 \unit{µM \ N} and 0.1 \unit{µM \ N}, respectively. The model was run for 100 days with a time step of 0.1 days.
 
-In order to run the model with periodic forcing, we can simply exchange the forcing component from \texttt{ConstantForcing} to \texttt{SinusoidalForcing}. This specific component requires more input parameters, but otherwise the model creation and setup remain the same. There is also the option to update the pre-existing model object and model setup object by simply supplying the \texttt{SinusoidalForcing} component for the \texttt{"N\_inflow"} component via the \texttt{model.update\_processes()} method and updating the corresponding parameters via \texttt{model\_setup.update\_vars()} functions supplied by the Xarray-Simlab framework that XSO extends. Such functionality allows straightforward modification and testing of models.
+In order to run the model with periodic forcing, we can simply exchange the forcing component from \texttt{ConstantForcing} to \texttt{SinusoidalForcing}. This specific component requires two more input parameters, but otherwise the model creation and setup remain the same. There is also the option to update the pre-existing model object and model setup object by simply supplying the \texttt{SinusoidalForcing} component for the \texttt{"N\_inflow"} component via the \texttt{model.update\_processes()} method and updating the corresponding parameters via \texttt{model\_setup.update\_vars()} functions supplied by the Xarray-Simlab framework that XSO extends. Such functionality allows straightforward modification and testing of models.
 
 \subsubsection{Results}
 
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_plots/01_chemostat_output.pdf}
-\caption{Model output for the two chemostat model scenarios: (a) Constant forcing and (b) Sinusoidal forcing. In each case, the concentration of nutrient (N; color) and phytoplankton (P; color) are shown through time.}
+\caption{Model output for the two chemostat model scenarios: (a) Constant forcing and (b) Sinusoidal forcing. In each case, the concentration of nutrient ($N$, purple) and phytoplankton ($P$, green) are shown through time.}
 \label{Figure:ResultsChemostat}
 \end{figure}
 
-Figure \ref{Figure:ResultsChemostat} shows the results of the two model runs, with constant nutrient concentration and with periodically variable external nutrient concentration. With the constant forcing, the model quickly reaches a steady state, as nutrient supply and the resulting phytoplankton growth balances with the loss of nutrient and phytoplankton due to the constant outflux of medium. The periodically variable nutrient concentration creates oscillations in $P$ centred around 0.9 \unit{µM \ N}).
+Figure \ref{Figure:ResultsChemostat} shows the two model runs performed, comparing constant nutrient concentration and periodically variable external nutrient concentration. Under constant forcing, the model quickly reaches a steady state, as nutrient supply and the resulting phytoplankton growth balances with the loss of nutrient and phytoplankton due to the constant outflux of medium. The periodically variable nutrient concentration creates oscillations in $P$ centred around 0.9 \unit{µM \ N}).
 
 This first model application represents a basic proof-of-concept that our presented library and framework can create expected results within a very simple model setup.
 
@@ -430,16 +429,17 @@ This first model application represents a basic proof-of-concept that our presen
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_schematics/02_schematics_EMPOWER.pdf}
-\caption{Model schematic of the Nutrient-Phytoplankton-Zooplankton-Detritus (NPZD) slab model presented as a second application. The model structure is adapted
-from \citet{Anderson2015c}. Boxes with black and white fonts represent state variables and external forcing, respectively. Arrows indicate fluxes between state variables. The upper layer box contains the ecosystem model. The curvy blue line represents the variable mixed layer depth that defines the boundary between the upper layer and the inert deep ocean. Briefly state what you mean by "slab"}
+\caption{Model schematic of the NPZD slab model presented as a second application. The model structure is adapted
+from \citet{Anderson2015c}. Boxes with black and white fonts represent state variables and external forcing, respectively. Arrows indicate fluxes between state variables. The upper layer box contains the ecosystem model. The curvy blue line represents the variable mixed layer depth that defines the boundary between the upper layer and the inert deep ocean. }
 \label{Figure:ModelSchematics_2}
 \end{figure}
 
-The second application describe a classic Nutrient-Phytoplankton-Zooplankton-Detritus, or NPZD, model embedded in a slab-ocean physical setting \citep[e.g.,][]{Evans1985ACycles, Fasham1990a}. The simplified two-layer structure provides a simple zero-dimensional description of physical processes affecting plankton ecosystems in the open ocean. This classic model structure constitutes an efficient physical setting for more complicated ecosystem descriptions and is often used for teaching marine ecosystem modelling \citep{Anderson2015c}. The presented application is an implementation of the EMPOWER model, as presented by \citet{Anderson2015c}. See Figure \ref{Figure:ModelSchematics_2} for a schematic of the model structure. <Briefly describe the ecosystem, ie "Model phytoplankton growth is tied to temperature, light, and nutrients, phytoplankton are consumed by zooplankton predaors, etc">
+The second application describe a classic Nutrient-Phytoplankton-Zooplankton-Detritus (NPZD) ecosystem model embedded in a slab-ocean physical setting \citep[e.g.,][]{Evans1985ACycles, Fasham1990a}. "Slab" refers to a simplified two-layer structure that provides a zero-dimensional description of physical processes affecting plankton ecosystems in the open ocean. This classic model structure provides an efficient physical setting for more complicated ecosystem descriptions and is often used for teaching marine ecosystem modelling \citep{Anderson2015c}. The presented application is an implementation of the EMPOWER model, as presented by \citet{Anderson2015c}. See Figure \ref{Figure:ModelSchematics_2} for a schematic of the model structure.
 
-The published model code was written as an R script, with some modifications allowed via user supplied flags. We updated the model code to the modular and flexible XSO framework, allowing for greater adaptability and experimentation on this classic structure.
 
-Many NPZD-type models have been published over the years, with many different formulations for the functional responses of the ecosystem components. The EMPOWER model was presented with various formulations for the treatment of light. We followed the same approach by considering two different light-attenuation algorithms that can be easily exchanged in the modular framework.
+The NPZD slab model lends itself well to investigate the bulk nutrient dynamics in the upper ocean layer, as well as the export of biomass production. Model phytoplankton growth is tied to temperature, light and nutrients. Phytoplankton are consumed by zooplankton predators, which are in turn subject to a higher order mortality (constituting grazing by higher trophic levels). Phytoplankton and zooplankton mortality, as well as grazing byproducts feed into a detritus pool, which in turn is partially remineralised in the upper ocean. The movement and depth of the mixed layer has effects on all components. Nutrients are exchanged between the deep ocean and upper ocean across the mixed layer. Phytoplankton and zooplankton experience mixing loss, which Detritus does as well, in addition to a general sinking term.
+
+Many NPZD-type models have been published over the years, with a plethora of formulations for the functional responses of the ecosystem components. The EMPOWER model was presented with various formulations for the treatment of light. We followed the same approach by considering two different light-attenuation algorithms that can be easily exchanged in the modular framework. The published model code was written as an R script, with some modifications allowed via user supplied flags. We updated the model code to the modular and flexible XSO framework, allowing for greater adaptability and experimentation on this classic structure.
 
 \subsubsection{Description}
 % for EMPOWER move all description to supplementary, no need to explain everything again
@@ -481,7 +481,7 @@ Nutrient limitation of phytoplankton growth $\gamma^N$ is described by the Micha
 
 where $k_N$ is the half-saturation nutrient concentration. $N$ is the ambient nutrient concentration.
 
-The term $\gamma_{I}$ represents growth-dependence on total light ($I$) available to phytoplankton through the whole upper mixed layer. We use the formulation of Smith (add citation) to calculate the photosynthetic rate:
+The term $\gamma_{I}$ represents growth-dependence on total light ($I$) available to phytoplankton through the whole upper mixed layer. We use the formulation of Smith (add citation) to calculate the photosynthetic rate \citep{smit}:
 
 \begin{equation}
     V_P = \frac{\alpha ~ I ~ V_P^{max}}{\sqrt{(V_P^{max})^2 + \alpha^2 I^2}}
