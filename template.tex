@@ -81,7 +81,7 @@
 
 \begin{document}
 
-\title{The XSO framework (v0.1) and Phydra library (v0.1) for an integrated plankton ecosystem modeling environment in Python} 
+\title{The XSO framework (v0.1) and Phydra library (v0.1) for a flexible, reproducible and integrated plankton ecosystem modeling environment in Python} 
 
 
 % \Author[affil]{given_name}{surname}
@@ -156,6 +156,12 @@ To date most global circulation models and large marine ecosystem models are wri
 For example, the ERSEM marine ecosystem model implementation provides some flexibility to modify and experiment with model structures via markup language files or Python interfaces, but the general formulations are hard-coded in Fortran scripts \citep{Butenschon2016}. The limnological FABM-PCLake model was rewritten to allow for a more modular structure \citep[][]{Schnedler-Meyer2022WaterModel}. 
 
 Modern, interpreted programming languages commonly used for data analysis applications (e.g. Python) have evolved the capabilities to efficiently support advanced numerical computations \citep{Lin2012}. This is showcased by Veros, a global circulation model (GCM) written in Python \citep{Hafner2018VerosPython}. The Python ecosystem and Jupyter Notebooks in particular \citep{Kluyver2016JupyterWorkflows}, have shown to be a useful tool for collaborative modeling workflows \citep[e.g. eWaterCycle platform,][]{Hut2022TheCollaboration}. 
+
+There is a diversity of approaches to aquatic ecosystem models, and frameworks used
+\citep{Janssen2015ExploringPerspective} <- actually provides systematic list of frameworks used (!)
+
+- make model formulation more accessible for non-specialists! XSO/Phydra no replacement, but an added tool simplifying model construction
+
 
 
 
@@ -289,49 +295,15 @@ The marine ecosystem models included in the Phydra package are available to the 
 The open-source and extensible nature of Phydra and XSO enables users to customize and develop processes that accurately describe a particular ecosystem. In a collaborative effort to promote efficient, transparent, and reproducible marine ecosystem modeling, Phydra encourages users to contribute their own \textit{components} and \textit{models} to the core library. The Phydra library could potentially offer a comprehensive, well-documented, and peer-reviewed codebase for the scientific exploration of marine ecosystem models.
 
 
-\begin{comment}
-    
-\subsection{Workflow for developing a model from pre-built components} \label{Section:ModelDevelopmentWorkflow}
 
-% Highlight (collaborative) modelling workflow
-The software presented here was designed to support collaborative model development. Scientists working with computational models do not always build the models themselves. Often, scientists use existing models and focus the work on parameterisation and analysis of results obtained with model applications to specific locations. This type of use is specifically supported in our software because we equipped the Phydra library with pre-built \textit{model objects} and \textit{components}. A user can start working with models without detailed knowledge of the underlying framework and learn the basic workflow before progressing to building custom models using the XSO framework. Additionally, more advanced users can easily share custom \textit{components} or \textit{model objects} via the respective Python objects. This particular design makes our software suitable for teaching. 
 
-We illustrate here the key steps of configuring and running an ecosystem model using the XSO framework. The workflow is presented in Figure \ref{Figure:PhydraXSOPackageSchematics}.
 
-\begin{enumerate}
-% this needs to be more user workflow, less backend explanation (leave that to previous framework explanation), instead focus on the actual functions and arguments, step by step
-    \item  \textbf{Creating a \textit{model object}:} 
-    A typical modelling workflow would begin with a \textit{model object}. The \textit{model object} can be imported from the Phydra library or assembled from the provided \textit{components}. The procedure for creating custom \textit{components} is explained in section \ref{Section:CreatingXSOComponent}. A \textit{model object} is created by calling the function \texttt{xso.model()} with a single argument: \texttt{model\_dict}. This argument is a dictionary of model \textit{components} with their respective labels. The supplied labels identify the \textit{components} for all future steps. The function call automatically includes processes handling model assembly and the solver backend. When creating a model, the XSO framework automatically orders the processes in their logical order of execution and returns the \textit{model object}. The user can interactively view all parameters required as input at model setup by printing the object in the console.
 
-    \item \textbf{Creating a \textit{model setup}:} The next step is to create a \textit{model setup} corresponding to the \textit{model object}. The \textit{model setup} object is an Xarray dataset that contains all provided parameters as well as the initialized labelled model dimensions and supplied metadata. It is created with a call to \texttt{xso.setup()} by supplying the following arguments:
-    \begin{itemize}
-        \item \texttt{model}. This argument takes the \textit{model object} created in the previous step. It provides the blueprint for the \textit{model setup} and the backend checks \textit{components} and variable labels against the provided \textit{model object}.
-        \item \texttt{solver}. The solver can be chosen from those implemented in the XSO backend via the appropriate string label. Additionally, the user can supply a custom solver implementation based on the abstract solver base class available within the XSO framework.
-        \item \texttt{input\_vars}. In order to fully initialize a model that can be solved, a user needs to supply a complete set of parameters and labels linking forcing and variables between \textit{components} to the \texttt{input\_vars} argument. The argument takes a dictionary where each component is referenced via the label supplied when the \textit{model object} was created. The parameters and variables are referenced via the attribute names defined when creating the \textit{component}. Multiple values for a specific parameter can be passed with an additional batch dimension. At model runtime the model can be solved for each set of parameters within the batch dimension.
-        \item \texttt{output\_vars}. The user can specify output variables, by default (if no input is provided) all values of variables, forcing and fluxes are stored after model runtime.
-        \item \texttt{time}. To specify the time-steps used for model execution, the user has to supply an array of time steps. The array can be created using Numpy functions such as \texttt{linspace} and is then passed  to the \texttt{time} argument.
-    \end{itemize}
-    At this stage the user can store the fully initialized \textit{model setup} for later use or for sharing with other users.
-    
-    \item \textbf{Running model simulations:} The \textit{model setup} created in the previous step contains all necessary information needed at model runtime. All that is required of the user at this stage is to call the \texttt{xsimlab.run()} method and provide a model object corresponding to the model setup. The runtime method is provided by the underlying Xarray-simlab framework with the following arguments.
-    \begin{itemize}
-        \item \texttt{model}. This argument takes the \textit{model object} created in the previous step.
-        \item \texttt{batch\_dim}. If defined at model setup, the label of the batch dimension has to be supplied to the \texttt{batch\_dim} argument.
-    \end{itemize}
-    The method returns model outputs as a new Xarray dataset, which can be used in the following steps.
-    
-    \item \textbf{Storing model output:} Simulation inputs and outputs can be kept in memory or saved on disk. The \texttt{to\_netcdf()} method stores the full model outputs including metadata and labelled dimensions to a NetCDF file at a location specified by the user.
-    
-    \item \textbf{Analyzing and visualizing model output:} The Xarray dataset created at model runtime is natively compatible with a wealth of packages for data analysis and visualization from the Python scientific ecosystem. Xarray provides built-in compatibility with the standard plotting library Matplotlib and more advanced data-visualization tools like Hvplot that make full use of the labelled dimensions for plotting multidimensional data. The data for a specific dimension can be extracted to Pandas data-frames (a popular package for data analysis) via the \texttt{to\_dataframes()} method. Specific variables can be indexed and extracted as Numpy arrays via their \textit{component} and variable labels. These methods provide a rich interface and full compatibility with advanced data analysis tools created by the open-source Python community.
-
-\end{enumerate}
-
-\end{comment}
 
  %% \ SECTION 3
 \section{Model applications} \label{Section:UseCases}
 
-To showcase the utility of the XSO framework and Phydra library, we present three marine ecosystem model applications of varying complexity. For each application we present the mathematical model, the implementation within the XSO framework and some model results. To highlight the modular nature of the framework, we also show how one aspect of each model is modified.
+To showcase the utility of the XSO framework and Phydra library, we present three marine ecosystem model applications of varying complexity. For each application we present the mathematical model, the implementation within the XSO framework and some model results. To highlight the flexible nature of the model implementations in the XSO framework, we also show how one aspect of each model is modified.
 
 For the first model application, we considered a simple model, whose implementation using the XSO framework is presented in full detail. For the presentation of the more complex models in use cases 2 and 3, we show only the \textit{component} structure and highlight additional technical aspects of the implementation. For all use cases the complete code, following the full development workflow from model creation to output visualization, is available publicly as interactive Jupyter notebooks in the Phydra repository (\url{https://github.com/ben1post/phydra/tree/master/examples}).
 
@@ -348,13 +320,13 @@ We first present a model of a phytoplankton population growing in a chemostat. C
 To showcase the flexibility and simplicity of the XSO framework, we considered two cases: (1) a constant nutrient input and (2) a sinusoidal nutrient input.
 
 \subsubsection{Description}
-The model is presented in Figure \ref{Figure:ModelSchematics_1}. It uses nitrogen as its currency (quantities are measured in units of $\mu mol$ N $m^{-3}$, or $\mu M$), with state variables for dissolved nutrients ($N$) and phytoplankton ($P$). The physical environment is a flow-through system corresponding to a laboratory chemostat setup. Growth medium with nutrient concentration $N_0$ flows into the system at a rate $d$. The model components ($N$ \& $P$) flow out of the system at that same rate.
+The model is presented in Figure \ref{Figure:ModelSchematics_1}. It uses nitrogen as its currency (quantities are measured in units of \unit{µM \ N}, i.e. $\mu mol$ N $m^{-3}$), with state variables for dissolved nutrients ($N$) and phytoplankton ($P$). The physical environment is a flow-through system corresponding to a laboratory chemostat setup. Growth medium with nutrient concentration $N_0$ (\unit{µM \ N}) flows into the system at a rate $d$ (\unit{d^{-1}}). The model components ($N$ \& $P$) flow out of the system at that same rate.
 
-Phytoplankton growth ($\mu$) is described by Monod kinetics \citep{Monod1942RecherchesBacteriennes}.
+Phytoplankton growth ($\mu$, \unit{d^{-1}}) is described by Monod kinetics \citep{Monod1942RecherchesBacteriennes}.
 \begin{equation}
     \mu = \mu_{max} \frac{N}{k + N} 
 \end{equation}
-where $k$ is the half-saturation nutrient concentration, defined as the concentration at which half the maximum growth rate is achieved, $N$ is the ambient nutrient concentration, and $\mu_{max}$ is the maximum growth rate achievable under perfect growth conditions.
+where $k$ (\unit{µM \ N}) is the half-saturation nutrient concentration, defined as the concentration at which half the maximum growth rate is achieved, $N$ is the ambient nutrient concentration, and $\mu_{max}$ (\unit{d^{-1}}) is the maximum growth rate achievable under perfect growth conditions.
 
 The model equations are:
 
@@ -389,18 +361,20 @@ In order to find a useful structuring of model components, we can separate the m
 %
 %t
 \begin{table*}[t]
-\caption{Model parameters used in application 1.}
+\caption{Description of variables and parameters in the model application 1, the chemostat model. In addition to the values and units, we provide the variable names to compare in figure \ref{Figure:CodeSchematics_1}}
 \begin{tabular}{l c c c r}
 \tophline
-Parameter & Code variable & Description & Value & Units \\
+Description & Symbol & Variable & Value & Units \\
 \middlehline
 
-$N$ & \texttt{N} & concentration of nitrogen in medium & t(0) = 1 & \unit{µM \ N} \\
-$P$ & \texttt{P} & concentration of phytoplankton in medium & t(0) = 0.1 & \unit{µM \ N} \\
-$N_0$ & \texttt{N0} & nutrient concentration of external medium & 0.1 & \unit{µM \ N} \\
-$\mu_{max}$ & \texttt{mu} & maximum growth rate & 1 & \unit{d^{-1}} \\
-$d$ & \texttt{rate} & dilution rate & 0.1 & \unit{d^{-1}}\\
-$k_N$ & \texttt{halfsat} & half-saturation nutrient concentration & 0.7 & \unit{µM \ N}\\
+Concentration of nitrogen in medium & $N$ & \texttt{N} & t(0) = 1 & \unit{µM \ N} \\
+Concentration of phytoplankton in medium & $P$ & \texttt{P} & t(0) = 0.1 & \unit{µM \ N} \\
+Nutrient concentration of external medium & $N_0$ & \texttt{N\_0} & 0.1 & \unit{µM \ N} \\
+Maximum growth rate & $\mu_{max}$ & \texttt{mu\_max} & 1 & \unit{d^{-1}} \\
+Dilution rate & $d$ & \texttt{rate} & 0.1 & \unit{d^{-1}}\\
+Half-saturation constant &  $k_N$ & \texttt{halfsat} & 0.7 & \unit{µM \ N}\\
+
+XXX Sinusoidal function (Mean, Period, Amplitude) &  $sin(x)$ & \texttt{xxx} & 2.7 & \unit{d^{-1}}\\
 
 \bottomhline
 \end{tabular}
@@ -410,9 +384,9 @@ $k_N$ & \texttt{halfsat} & half-saturation nutrient concentration & 0.7 & \unit{
 
 To explore the basic dynamics, we chose standard parameters values (Table \ref{Table:UseCase1Parameters}). Initial values for $N$ and $P$ were set at 1 \unit{µM \ N} and 0.1 \unit{µM \ N}, respectively. The model was run for 100 days with a time step of 0.1 days.
 
-In order to run the model with periodic forcing, we can simply exchange the forcing component from \texttt{ConstantForcing} to \texttt{SinusoidalForcing}. This specific component requires two more input parameters, but otherwise the model creation and setup remain the same. There is also the option to update the pre-existing model object and model setup object by simply supplying the \texttt{SinusoidalForcing} component for the \texttt{"N\_inflow"} component via the \texttt{model.update\_processes()} method and updating the corresponding parameters via \texttt{model\_setup.update\_vars()} functions supplied by the Xarray-Simlab framework that XSO extends. Such functionality allows straightforward modification and testing of models.
+In order to run the model with periodic forcing, we can simply exchange the forcing component from \texttt{ConstantForcing} to \texttt{SinusoidalForcing}. This specific component requires two more input parameters, but otherwise the model creation and setup remain the same. We can actually update the model object, by simply supplying the \texttt{SinusoidalForcing} component for the \texttt{"N\_inflow"} component via the \texttt{model.update\_processes()} method and updating the corresponding parameters via \texttt{model\_setup.update\_vars()} functions supplied by the Xarray-Simlab framework that XSO extends. Such functionality allows straightforward modification and testing of models.
 
-\subsubsection{Results}
+\subsubsection{Results & Discussion}
 
 %%f
 \begin{figure}[t]
@@ -421,53 +395,67 @@ In order to run the model with periodic forcing, we can simply exchange the forc
 \label{Figure:ResultsChemostat}
 \end{figure}
 
-Figure \ref{Figure:ResultsChemostat} shows the two model runs performed, comparing constant nutrient concentration and periodically variable external nutrient concentration. Under constant forcing, the model quickly reaches a steady state, as nutrient supply and the resulting phytoplankton growth balances with the loss of nutrient and phytoplankton due to the constant outflux of medium. The periodically variable nutrient concentration creates oscillations in $P$ centred around 0.9 \unit{µM \ N}).
+Figure \ref{Figure:ResultsChemostat} shows the two model runs performed, comparing constant nutrient concentration and periodically variable external nutrient concentration. Under constant forcing, the model quickly reaches a steady state, as nutrient supply and the resulting phytoplankton growth balances with the loss of nutrient and phytoplankton due to the constant outflux of medium. The periodically variable nutrient concentration creates oscillations in $P$ centred around 0.9 \unit{µM \ N}. In this highly simplified model, the results still show an interesting shift between the dynamics of nutrients and phytoplankton, as there is some time lag between the point in time, where all nutrients in the medium are consumed (due to a lack of replenishment from the variable nutrient source) and the peak in phytoplankton concentration.
 
 This first model application represents a basic proof-of-concept that our presented library and framework can create expected results within a very simple model setup.
+
+
+
+
 
 \subsection{Model application 2: NPZD slab model}
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_schematics/02_schematics_EMPOWER.pdf}
 \caption{Model schematic of the NPZD slab model presented as a second application. The model structure is adapted
-from \citet{Anderson2015c}. Boxes with black and white fonts represent state variables and external forcing, respectively. Arrows indicate fluxes between state variables. The upper layer box contains the ecosystem model. The curvy blue line represents the variable mixed layer depth that defines the boundary between the upper layer and the inert deep ocean. }
+from \citet{Anderson2015c}. Boxes with black and white labels represent state variables and external forcing, respectively. Arrows indicate fluxes between state variables. The upper layer box contains the ecosystem model. The curvy blue line represents the variable mixed layer depth that defines the boundary between the upper layer and the inert deep ocean.
+
+-add-more-}
 \label{Figure:ModelSchematics_2}
 \end{figure}
 
-The second application describe a classic Nutrient-Phytoplankton-Zooplankton-Detritus (NPZD) ecosystem model embedded in a slab-ocean physical setting \citep[e.g.,][]{Evans1985ACycles, Fasham1990a}. "Slab" refers to a simplified two-layer structure that provides a zero-dimensional description of physical processes affecting plankton ecosystems in the open ocean. This classic model structure provides an efficient physical setting for more complicated ecosystem descriptions and is often used for teaching marine ecosystem modelling \citep{Anderson2015c}. The presented application is an implementation of the EMPOWER model, as presented by \citet{Anderson2015c}. See Figure \ref{Figure:ModelSchematics_2} for a schematic of the model structure.
+The second model application describe a classic Nutrient-Phytoplankton-Zooplankton-Detritus (NPZD) ecosystem model embedded in a slab-ocean physical setting \citep[e.g.,][]{Evans1985ACycles, Fasham1990a}. "Slab" refers to a simplified zero-dimensional model of the upper mixed layer in the open ocean. This classic model structure provides an efficient physical setting for more complicated ecosystem descriptions and is often used for teaching marine ecosystem modelling. The application is an implementation of the EMPOWER model, as was beautifully presented by \citet{Anderson2015c}. See Figure \ref{Figure:ModelSchematics_2} for a schematic of the model structure.
 
+The NPZD slab model lends itself well to investigate the bulk nutrient dynamics in the upper ocean layer, as well as the export of biomass production. In the model, phytoplankton growth is affected by temperature, as well as light and nutrient availability. Phytoplankton are consumed by zooplankton predators, which are in turn subject to a higher order mortality (constituting grazing by higher trophic levels). Phytoplankton and zooplankton mortality, as well as grazing byproducts feed into a detrital pool, that is partially remineralised in the upper ocean. The movement and depth of the mixed layer has effects on all components. Nutrients are exchanged between the deep ocean and upper ocean across the mixed layer boundary. Phytoplankton, zooplankton and detritus experience a mixing loss term, with detritus additionally sinking at a constant rate out of the mixed layer.
 
-The NPZD slab model lends itself well to investigate the bulk nutrient dynamics in the upper ocean layer, as well as the export of biomass production. Model phytoplankton growth is tied to temperature, light and nutrients. Phytoplankton are consumed by zooplankton predators, which are in turn subject to a higher order mortality (constituting grazing by higher trophic levels). Phytoplankton and zooplankton mortality, as well as grazing byproducts feed into a detritus pool, which in turn is partially remineralised in the upper ocean. The movement and depth of the mixed layer has effects on all components. Nutrients are exchanged between the deep ocean and upper ocean across the mixed layer. Phytoplankton and zooplankton experience mixing loss, which Detritus does as well, in addition to a general sinking term.
-
-Many NPZD-type models have been published over the years, with a plethora of formulations for the functional responses of the ecosystem components. The EMPOWER model was presented with various formulations for the treatment of light. We followed the same approach by considering two different light-attenuation algorithms that can be easily exchanged in the modular framework. The published model code was written as an R script, with some modifications allowed via user supplied flags. We updated the model code to the modular and flexible XSO framework, allowing for greater adaptability and experimentation on this classic structure.
+Many NPZD-type models have been published over the years, with a plethora of formulations for the functional responses of the ecosystem components. The EMPOWER model was presented as an open-source model testbed, for example by providing various formulations for the treatment of light. \citet{Anderson2015c} provided a detailed disucssion of light calculation and treatment, as this is a crucial and rather complex component of marine models including phytoplankton. We follow their approach by considering two different light-attenuation algorithms that can be easily exchanged in our modular framework, to investigate the effects of more detailed treatment of light attenuation over water depth in comparison to a simplified integrated Lambert-Beer's law calculation. The EMPOWER model code was written as a monolithic R script, with some modifications allowed via user supplied flags, but no inherent modularity. We updated the model code to the modular and flexible XSO framework, allowing for greater adaptability and experimentation on this classic structure.
 
 \subsubsection{Description}
 % for EMPOWER move all description to supplementary, no need to explain everything again
 % use simple plain english paragraph describing model
-The model uses nitrogen as currency (quantities are measured in units of $\mu mol$ N $m^{-3}$), with state variables for dissolved nutrients ($N$), phytoplankton ($P$), zooplankton ($Z$) and detritus ($D$). The water column is represented by two layers, where a biologically inert deep ocean box is situated below a homogeneously mixed upper box of variable depth that contains the ecosystem. The model structure, locations, and parameters are adapted from the EMPOWER model \citep{Anderson2015c}.
+The model uses nitrogen as currency (quantities are measured in units of \unit{µM \ N}), with state variables for dissolved nutrients ($N$), phytoplankton ($P$), zooplankton ($Z$) and detritus ($D$). The water column is represented by two layers, where a biologically inert deep ocean box is situated below a homogeneously mixed upper box of variable depth that contains the ecosystem. The model structure, locations, and parameters are adapted from the EMPOWER model \citep{Anderson2015c}. For the definition of all symbols used here see Table \ref{appendix:table:usecase1symbols} and see \citet{Anderson2015c} for a more detailed discussion of model structure and formulation.
 
-The model is driven by external forcing describing the depth of the upper mixed layer ($H$; units), average temperature of the upper mixed layer ($T$; units), photosynthetically active radiation (PAR) at the surface ($I$; units), and nutrient concentration in the deep layer ($N_0$; units). 
+The model is driven by external forcing describing the depth of the upper mixed layer ($H$, \unit{m}), average temperature of the upper mixed layer ($T$, \unit{\degree C}), photosynthetically active radiation (PAR) at the surface ($I$; \unit{W m^{-2}}), and nutrient concentration in the deep layer ($N_0$, \unit{µM \ N}). 
 
 % Nutrient dynamics
-The deeper layer supplies nutrients to the upper layer, while other components are mixed to the deep layer and lost from the system. The magnitude of mixing is described by $K$ (units):
+The deeper layer supplies nutrients to the upper layer, while other components are mixed to the deep layer and lost from the system. The magnitude of mixing is described by $K$ (\unit{d^{−1}}):
 
 \begin{equation}
     K = \frac{h^{+} + \kappa}{H}
 \end{equation}
 
-Where $\kappa$ (units) represents constant diffusive mixing. Variable mixing is a function of the change in mixed layer depth (MLD) over time $h = \frac{dH}{dt}$. The function $h^{+}$ defines the effects of entrainment and detrainment due to the changes in MLD as $h^{+} = \max(0, \ h)$. When the mixed layer shallows, $h^{+}$ does not modify $K$, based on the assumption that detrainment of mass and the increase in concentration due to the reduced volume of the mixed layer are balanced \citep{Evans1985ACycles}. 
+Where $\kappa$ (\unit{m \ d^{−1}}) represents constant diffusive mixing. Variable mixing is a function of the change in mixed layer depth (MLD) over time $h = \frac{dH}{dt}$. The function $h^{+}$ (units are \unit{m \ d^{−1}}) defines the effects of entrainment and detrainment due to the changes in MLD as $h^{+} = \max(0, \ h)$. When the mixed layer shallows, $h^{+}$ does not modify $K$, based on the assumption that detrainment of mass and the increase in concentration due to the reduced volume of the mixed layer are balanced \citep{Evans1985ACycles}. 
 
 %\subsubsection{Nutrients}
-Dissolved nutrients in the mixed layer ($N$) are supplied via mixing, a fraction of zooplankton excretion, and remineralization of detritus. Nutrients are entrained from the bottom layer. Mixing of nutrients is a positive term, adding to $N$ according to the sign of the gradient between $N_0$ and $N$. The general direction of the nutrient flux is from a variable and nutrient-rich bottom layer to the upper layer. This nutrient flux supports phytoplankton growth, which is the only loss term for $N$.
+Dissolved nutrients in the mixed layer ($N$, \unit{µM \ N}) are supplied via mixing, a fraction of zooplankton excretion, and remineralization of detritus. Nutrients are entrained from the bottom layer. Mixing of nutrients is a positive term, adding to $N$ according to the sign of the gradient between $N_0$ and $N$. The general direction of the nutrient flux is from a variable and nutrient-rich bottom layer to the upper layer. This nutrient flux supports phytoplankton growth, which is the only loss term for $N$.
+
+%Nutrient
+\begin{equation}
+    \frac{d N}{d t} = 
+    K (N_0 - N) % Nutrient mixing
+    + \beta(1 - \epsilon)(G_P + G_D) % Unassimilated grazing by Z
+    + m_D \ D % Remineralisation of D
+    - \mu_{P} \ P % Phytoplankton gains
+\end{equation}
 
 %\subsubsection{Phytoplankton}
-The growth rate of phytoplankton $P$ ($\mu_{P}$) is the product of a temperature-dependent maximum growth rate ($\mu_P^{max}(T)$) and the growth-dependencies on light ($\gamma^{I}$) and nutrients ($\gamma^{N}$): 
+The growth rate of phytoplankton $P$ ($\mu_{P}$) is the product of a temperature-dependent maximum growth rate ($\mu_P^{max}(T)$) and the growth-dependencies on light ($\gamma^{I}$) and nutrients ($\gamma^{N}$), all with units of \unit{d^{−1}}: 
 
 \begin{equation}
     \mu_{P} = \mu_P^{max}(T) \ \gamma^{I} \ \gamma^{N}
 \end{equation}
 
-$T$ is the temperature of the upper mixed layer in \unit{\degree C}, as supplied from external forcing. Under the assumption of balanced growth, the maximum growth rate of phytoplankton $\mu_P^{max}(T)$ is equivalent to the temperature-dependent maximum photosynthetic rate $V_P^{max}(T)$. The function is parameterized via the maximum photosynthetic rate at 0 \unit{\degree C}, represented as $V_P^{max}(0)$. Temperature dependence is calculated via the Eppley curve \citep{Eppley1972TemperatureSea}.
+$T$ is the temperature of the upper mixed layer in \unit{\degree C}, as supplied from external forcing. Under the assumption of balanced growth, the maximum growth rate of phytoplankton $\mu_P^{max}(T)$ (\unit{d^{−1}}) is equivalent to the temperature-dependent maximum photosynthetic rate $V_P^{max}(T)$ (\unit{g C (g chl)^{-1} h^{-1}}), when converted in units by multiplying by 24 \unit{h} and the assumed fixed Carbon-to-Chlorophyll ratio of 75 \citet{Sathyendranath2009Carbon-to-chlorophyllSea}. The function is parameterized via the maximum photosynthetic rate at 0 \unit{\degree C}, represented as $V_P^{max}(0)$ (\unit{g C (g chl)^{-1} h^{-1}}). Temperature dependence is calculated via the Eppley curve \citep{Eppley1972TemperatureSea}.
 
 \begin{equation}
     V_P^{max}(T) = V_P^{max}(0) \ 1.066^T
@@ -479,9 +467,9 @@ Nutrient limitation of phytoplankton growth $\gamma^N$ is described by the Micha
     \gamma^N = \frac{N}{k_N + N}
 \end{equation}
 
-where $k_N$ is the half-saturation nutrient concentration. $N$ is the ambient nutrient concentration.
+where $k_N$ (\unit{µM \ N}) is the half-saturation nutrient concentration. $N$ is the ambient nutrient concentration.
 
-The term $\gamma_{I}$ represents growth-dependence on total light ($I$) available to phytoplankton through the whole upper mixed layer. We use the formulation of Smith (add citation) to calculate the photosynthetic rate \citep{smit}:
+The term $\gamma_{I}$ represents growth-dependence on total light ($I$) available to phytoplankton through the whole upper mixed layer. We use the Smith function to calculate the photosynthetic rate \citep{Anderson1993APhotosynthesis}:
 
 \begin{equation}
     V_P = \frac{\alpha ~ I ~ V_P^{max}}{\sqrt{(V_P^{max})^2 + \alpha^2 I^2}}
@@ -492,7 +480,7 @@ Where $V_P^{max}$ is the maximum photosynthetic rage, $\alpha$ is the slope of t
 $I$ decays exponentially with depth $z$ in the mixed layer:
 
 \begin{equation}
-    I(z) = I \ \exp{(-k_{PAR} \ z)}
+    I(z) = I \ \e{(-k_{PAR} \ z)}
 \end{equation}
 
 The attenuation coefficient $k_{PAR}$ is the sum of light attenuation due to water, $k_w$, and due to the presence of phytoplankton (self-shading), accounted for with a term proportional to the concentration of phytoplankton $k_c \cdot P$ (with $k_c$ constant of proportionality), thus:
@@ -501,7 +489,7 @@ The attenuation coefficient $k_{PAR}$ is the sum of light attenuation due to wat
     k_{PAR} = k_w + k_c \cdot P
 \end{equation}
 
-The numerical solution for the light-limitation on phytoplankton growth is calculated by combining the equations (give the numbers here) and integrating $I(z)$ through the upper mixed layer.
+The numerical solution for the light-limitation on phytoplankton growth is calculated by combining equations 9 and 10 and integrating $I(z)$ through the upper mixed layer.
 
 In addition to this standard light attenuation procedure, we also considered light attenuation according to a three-layer model of the upper mixed layer  \citep{Anderson1993APhotosynthesis}. This alternative formulation calculates multiple $k_{PAR, i}$, with i = 1 for the top 5 \unit{m}, i = 2 for the depth range 5 - 23 \unit{m} and i = 3 for depths below 23 \unit{m}. The changing spectral properties of water are taken into account by polynomial coefficients ($b_{0,i}$ to $b_{5,i}$).
 \begin{equation}
@@ -510,6 +498,18 @@ In addition to this standard light attenuation procedure, we also considered lig
 where $C$ represents the pigment (chlorophyll) concentration. The values of the polynomial coefficients are given in the Appendix.
 
 Non-grazing mortality of phytoplankton is described by the sum of linear $m_P$ and quadratic $m_{P2}$ factors \citep{Yool2011Medusa-1.0:Domain}. The former accounts for natural mortality and excretion. The latter describes higher order loss processes, including for example viral infection. All non-grazing phytoplankton loss terms feed into the detritus pool.
+
+
+%PHYTOPLANKTON
+\begin{equation}
+    \frac{d P}{d t} =
+    \mu_{P} \ P  % Phytoplankton gains
+    - m_P \ P % Linear mortality
+    - m_{P2} \ P^2 % Quadratic mortality
+    - G_P % Z grazing
+    - K \ P % Phytoplankton mixing
+\end{equation}
+
 
 %\subsubsection{Zooplankton}
 Zooplankton graze upon phytoplankton and detritus. The grazing function is a Holling Type 3 grazing response \citep{Anderson2015c}:
@@ -531,33 +531,6 @@ Zooplankton food ingestion does not directly convert into biomass. The total bio
 
 Similar to phytoplankton mortality, a linear mortality factor $m_Z$ represents natural mortality and excretion and feeds into the pool of detritus. A quadratic factor $m_{Z2}$ describes higher order predation on zooplankton, for example from fish, and is removed from the system. 
 
-%\subsubsection{Detritus}
-The detritus concentration in the upper layer ($D$) is supplied by mortality of phytoplankton, linear zooplankton mortality, and zooplankton egestion (e.g. fecal pellets). The loss terms are remineralization, grazing, mixing, and additional sinking. 
-
-Detritus is remineralized at a constant rate $m_D$ to $N$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate $v_D$. 
-
-%\subsubsection{Model equations}
-The rates of change of the state variables are described by the following set of equations. For the definition of all symbols used here see Table \ref{appendix:table:usecase1symbols} and see \citet{Anderson2015c} for a more detailed discussion of model structure and formulation.
-
-%Nutrient
-\begin{equation}
-    \frac{d N}{d t} = 
-    K (N_0 - N) % Nutrient mixing
-    + \beta(1 - \epsilon)(G_P + G_D) % Unassimilated grazing by Z
-    + m_D \ D % Remineralisation of D
-    - \mu_{P} \ P % Phytoplankton gains
-\end{equation}
-
-%PHYTOPLANKTON
-\begin{equation}
-    \frac{d P}{d t} =
-    \mu_{P} \ P  % Phytoplankton gains
-    - m_P \ P % Linear mortality
-    - m_{P2} \ P^2 % Quadratic mortality
-    - G_P % Z grazing
-    - K \ P % Phytoplankton mixing
-\end{equation}
-
 %ZOOPLANKTON
 \begin{equation}
     \frac{d Z}{d t} =
@@ -566,6 +539,11 @@ The rates of change of the state variables are described by the following set of
     - m_{Z2} \ Z^2 % Quadratic mortality
     - K \ Z % Zooplankton mixing
 \end{equation}
+
+%\subsubsection{Detritus}
+The detritus concentration in the upper layer ($D$) is supplied by mortality of phytoplankton, linear zooplankton mortality, and zooplankton egestion (e.g. fecal pellets). The loss terms are remineralization, grazing, mixing, and additional sinking. 
+
+Detritus is remineralized at a constant rate $m_D$ to $N$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate $v_D$. 
 
 %DETRITUS
 \begin{equation}
@@ -593,29 +571,67 @@ The rates of change of the state variables are described by the following set of
 
 As shown for the previous model application, we first separate the model into state variables, forcing, and fluxes.  State variables include nutrient ($N$), phytoplankton ($P$), zooplankton ($Z$), and detritus ($D$). Forcing to the model are the upper mixed layer depth ($H$), nutrient concentration below the upper mixed layer ($N_0$), temperature in the upper mixed layer ($T$), and irradiance at surface ($I$). The model defines ten unique fluxes: Phytoplankton growth, zooplankton grazing, nutrient upwelling, mixing, sinking, remineralisation, and four mortality terms.
 
-The ecological description of our model system is adapted from the EMPOWER model, however the technical implementation using the XSO framework is quite different from the procedural R script of \citet{Anderson2015c}. Instead of using hard-coded flags to choose different ecological formulations, the XSO component structure provides open modularity and interchangeability. The XSO framework defines functions irrespective of the specific time-step used for evaluation and logically separates the solving algorithm from the model code into the XSO backend. This allows formulate the model irrespective of the complex nested for-loop structure used in the original R implementation. Adding and removing state variables is also simplified in our framework because allocating resources and storing variables in model output is handled based on the components defined at model creation.
 
-The amount of fluxes and interdependencies between the calculations in this application require a more elaborate component structure than in the chemostat. In model construction, we aim to find a balance between component refactoring and structural simplicity. Our goal is to allow for every ecologically relevant term to be exchangeable. For example, each growth-limiting term was defined by an individual component. The "group variable" feature of the XSO framework allows for such a setup. As long as a flux defined in a component matches the group label in another component, that individual flux can be used for calculating the bulk flux. The group variable can collect multiple fluxes to sum or multiply over, but it can also be used to split the calculation of a single flux between two components.
+%%% TWO-COLUMN TABLE
+%
+%t
+\begin{table*}[t]
+\caption{Model parameters used in runs for use case 2 for the four stations:}
+\begin{tabular}{l c c c c c r}
+\tophline
+Description & Parameter & BIOTRANS & India & Papa & KERFIX & Units \\
+\middlehline
 
-One particular example of this is the way we implemented a component calculating the mixing coefficient $K$, which is computed and passed along to calculate nutrient upwelling and the mixing fluxes of phytoplankton, zooplankton and detritus. Also, there is growth limitation, which is a multiplicative process of the growth limiting terms. Fluxes defined with a group label can in turn take a group variable as input, as was did with the temperature-dependent maximum photosynthetic rate, which is passed along to calculate light limitation and is used, in turn, to calculate the total growth flux. 
+Max. rate of photosynthesis at 0 \unit{\degree C} & $V_P^{max}(0)$ & 2.5 & 2.5 & 1.25 & 1.25 & \unit{g C (g chl)^{-1} h^{-1}}\\
+Initial slope of P-I curve & $\alpha$ & 0.15 & 0.15 & 0.075 & 0.075 & \unit{g C (g chl)^{-1} h^{-1}} (W m^{-2})^{-1}\\
+Half-saturation constant for N uptake & $k_N$ & 0.85  & 0.85  & 0.85  & 0.85 & \unit{µM \ N} \\
+Linear P mortality & $m_P$ & 0.015 & 0.015 & 0.015 & 0.015  & \unit{d^{−1}} \\
+Quadratic P mortality & $m_{P2}$ & 0.025 & 0.025 & 0.025 & 0.025 & \unit{(µM \ N)^{-1} d^{−1}} \\
+Z max. ingestion rate & $\mu_Z$ & 1.0 & 1.0 & 1.25 & 2.0 & \unit{d^{−1}} \\
+Z half-saturation for intake & $k_Z$ & 0.6 & 0.6 & 0.6 & 0.6 & \unit{µM \ N} \\
+Grazing preference: P & $\varphi_P$ & 0.67 & 0.67 & 0.67 & 0.67 & dimensionless\\
+Grazing preference: D & $\varphi_D$ & 0.33 & 0.33 & 0.33 & 0.33 & dimensionless\\
+Z absorption efficiency & $\beta_Z$ & 0.69 & 0.69 & 0.69 & 0.69 & dimensionless\\
+Z net production efficiency & $k_{NZ}$ & 0.75 & 0.75 & 0.75 &  0.75 & dimensionless\\
+Linear Z mortality & $m_Z$ & 0.02 & 0.0 & 0.02 & 0.02 & \unit{d^{−1}} \\
+Quadratic Z mortality & $m_{Z2}$ & 0.34 & 0.34 & 0.34 & 0.34 & \unit{(µM \ N)^{-1} d^{−1}}  \\
+D linear sinking rate & $v_D$ & 6.43 & 6.43 & 6.43 & 6.43 & \unit{m \ d^{−1}}\\
+D remineralisation rate & $m_D$ & 0.06 & 0.06 & 0.06 & 0.06 & \unit{d^{−1}} \\
+Constant mixing parameter & $\kappa$ & 0.13 & 0.13 & 0.13 & 0.13 & \unit{m \ d^{−1}}\\
+Carbon-to-Chlorophyll ratio & $\theta_{chl}$ &  75 & 75 & 75 & 75 & \unit{g \ g^{−1}} \\
 
-The model implementation and structure built from Phydra components in explained in more detail in Appendix \ref{Appendix:Implementation2}.
-% Probably the forcing plot can go in the appendix?
+\bottomhline
+\end{tabular}
+\label{Appendix:Table:EMPOWERparams}
+\belowtable{These parameters were adapted from \citet{Anderson2015c}} % Table Footnotes
+\end{table*}
+%
+
+The ecological description of our model system is adapted from the EMPOWER model, however the technical implementation using the XSO framework is quite different from the procedural R script of \citet{Anderson2015c}. Instead of using hard-coded flags to choose different ecological formulations, the XSO component structure provides open modularity and interchangeability. The XSO framework defines functions irrespective of the specific time-step used for evaluation and logically separates the solving algorithm from the model formulation into the XSO backend. This allows formulating the model irrespective of the rather complex nested for-loop structure used in the original R implementation. Adding and removing state variables is also simplified in our framework because allocating and storing variables of the model output does not need to be hard-coded, but is flexibly done based on the components defined at model setup.
+
+The amount of fluxes and interdependencies between the calculations in this application require a more elaborate component structure than in the chemostat model. In model construction with the XSO framework, we aim to find a balance between component refactoring and structural simplicity. Our goal is to allow for every ecologically relevant term to be exchangeable. For example, each growth-limiting term was defined by an individual component. The "group variable" feature of the XSO framework allows for such a setup. As long as a flux defined in a component matches the group label, that individual flux can be used for calculating the bulk flux in another component. The group variable can collect multiple fluxes to sum or multiply over, but it can also be used to split the calculation of a single flux between two components, allowing them to be interchangeable components.
+
+One particular example of this is the way we implemented a component calculating the mixing coefficient $K$, which is computed only once and passed along to calculate nutrient upwelling and the mixing fluxes of phytoplankton, zooplankton and detritus. Also, there is growth limitation, which is a multiplicative process of the growth limiting terms. Fluxes defined with a group label can in turn take a group variable as input, as was did with the temperature-dependent maximum photosynthetic rate, which is passed along to calculate light limitation and is used, in turn, to calculate the total growth flux. 
+
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_plots/02_EMPOWER_forcing.pdf}
-\caption{Forcing corresponding to the four locations considered for the model application 2. Mixed Layer Depth ($H$), Nitrate below the Mixed Layer ($N_0$), irradiance at surface ($I$), and temperature averaged through the upper mixed layer ($T$). As in \citet{Anderson2015c}, we use $$ADD SOURCES$$ for data. The mixed layer depth (MLD) and the temperature data are extracted from updated data sources corresponding to the original sources of Anderson et al. (2015). The blue dots indicate data extracted from a monthly climatology, the grey dots are derivatives of this data. Nutrient forcing is a function of depth for locations Biotrans and India and a constant value for Papa and Kerfix. Irradiance is calculated as a function of latitude.}
+\caption{Forcing corresponding to the four locations considered for the model application 2. Mixed Layer Depth ($H$), Nitrate below the Mixed Layer ($N_0$), irradiance at surface ($I$), and temperature averaged through the upper mixed layer ($T$). Forcing data is taken from the IFREMER MLD climatology \citep{DeBoyerMontegut2004} and WOA 2018 data \citep{Garcia2019WORLDSilicate}. The mixed layer depth (MLD) and the temperature data are extracted from updated data sources corresponding to the original sources of Anderson et al. (2015). The blue dots indicate data extracted from a monthly climatology, the grey dots are derivatives of this data. Nutrient forcing is a function of depth for locations Biotrans and India and a constant value for Papa and Kerfix. Irradiance is calculated as a function of latitude.}
 \label{Figure:EMPOWERforcing}
 \end{figure*}
 
-We run the model in the same locations as \citet{Anderson2015c}: BIOTRANS, India, Papa, and KERFIX. Say briefly where each station is, and why it is relevant, eg "Papa is located in the subpolar North Pacific and has strongly seasonal cycles in X, Y, and Z". In each location, the NPZD slab model is forced by four corresponding environmental factors (Figure \ref{Figure:EMPOWERforcing}). 
+We run the model in the same locations as \citet{Anderson2015c}: BIOTRANS, India, Papa, and KERFIX. 
+
+!Say briefly where each station is, and why it is relevant, eg "Papa is located in the subpolar North Pacific and has strongly seasonal cycles in X, Y, and Z".!
+
+In each location, the NPZD slab model is forced by four corresponding environmental factors (Figure \ref{Figure:EMPOWERforcing}). 
 The forcing for the Mixed Layer Depth ($H$) is taken from an updated version of the IFREMER MLD climatology  \citep{DeBoyerMontegut2004} including more data and using an optimized estimation of MLD (citation).
 The nutrient concentration below the mixed layer ($N_0$) is calculated from a combination of the MLD climatology and depth-resolved climatology for nitrate in the World Ocean Atlas (WOA) 2018 \citep{Garcia2019WORLDSilicate}. The temperature of the mixed layer ($T$) was similarly calculated using the MLD climatology and the temperature data of WOA 2018 \citep{Locarnini2019WorldTemperature}.
 The forcing for irradiance at surface ($I$) is calculated via a light submodel that employs trigonometric/astronomical equations to calculate light climatology for a location, given the latitude and cloud fraction as input parameters. The specific model used here and presented in \citet{Anderson2015c} was adapted from \citet{Shine1984ParametrizationAlbedo}.
 
-As detailed in section \ref{Section:ComponentBuildingBlocks}, forcing from data needs to be linearly interpolated to be compatible with an adaptive step-wise solver such as the SciPy's odeint algorithm used here. For comparability, we follow \citet{Anderson2015c} in linearly interpolating our forcing.
+%As detailed in section \ref{Section:ComponentBuildingBlocks}, forcing from data needs to be linearly interpolated to be compatible with an adaptive step-wise solver such as the SciPy's odeint algorithm used here. For comparability, we follow \citet{Anderson2015c} in linearly interpolating our forcing.
 
-Following \citet{Anderson2015c}, the model is compared to seasonal data for nitrate within the upper mixed layer and chlorophyll concentration $$converted! but how? add this here$$ at all four stations. We used updated versions of the original data sources to retrieve the verification data. Nitrate within the upper mixed layer is calculated from a combination of the WOA 2018 nitrate data and the IFREMER MLD Climatology used for the $N_0$ forcing. Chlorophyll data is from MODIS Aqua chlorophyll climatology \citep{NASAGoddardSpaceFlightCenterOceanEcologyLaboratoryOceanBiologyProcessingGroup}. We did not follow the approach of taking a median year for chlorophyll data because the forcing is also climatology data and because we do not assume to be able to replicate particular biomass peaks of certain years. The climatological data follows the general pattern shown in the chlorophyll data used as verification data in the original paper.
+Following \citet{Anderson2015c}, the model is compared to seasonal data for nitrate within the upper mixed layer and chlorophyll concentration at all four stations. In order to simplify the presentation, all units are given as concentration of Nitrogen \unit{µM N}. The chlorophyll concentration data was converted by a constant factor ($\theta_{chl}$, 75 \unit{g \ g^{−1}}) and the Redfield ratio (6.625 \unit{mol C (mol N)^{-1}}) as assumed C:N of phytoplankton to nitrogen concentration. We used updated versions of the original data sources to retrieve the verification data. Nitrate within the upper mixed layer is calculated from a combination of the WOA 2018 nitrate data and the IFREMER MLD Climatology used for the $N_0$ forcing. Phytoplankton concentration is compared to converted chlorophyll data from MODIS Aqua chlorophyll climatology \citep{NASAGoddardSpaceFlightCenterOceanEcologyLaboratoryOceanBiologyProcessingGroup}. We did not follow the approach of taking a median year for chlorophyll data because the forcing is also climatology data and because we do not assume to be able to replicate particular biomass peaks of certain years. The climatological data follows the general pattern shown in the chlorophyll data used as verification data in the original paper.
 
 
 The parameters used in model runs are adapted from \citet{Anderson2015c} and presented in Table \ref{Appendix:Table:EMPOWERparams}.
@@ -624,7 +640,7 @@ We used the batch dimension feature of the XSO model setup function, which we pr
 
 \citet{Anderson2015c} included a detailed discussion of the treatment of light in a slab model. From the formulations presented in the original paper we considered two implementations. These are: the simple Beer's law, which parameterizes light attenuation with a single attenuation coefficient for the whole upper mixed layer, and the more elaborated piecewise description, which evaluates light attenuation in three discrete depth intervals within the upper mixed layer, with specific polynomial coefficients for each interval. Model results for both formulations are shown below.
 
-\subsubsection{Results}
+\subsubsection{Results & Discussion}
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_plots/02_EMPOWER_lightcomp.pdf}
@@ -632,26 +648,26 @@ We used the batch dimension feature of the XSO model setup function, which we pr
 \label{Figure:ResultsEMPOWER}
 \end{figure*}
 
-% Here actually describe the seasonal cycles of the 4 stations!
+Here actually describe the seasonal cycles of the 4 stations!
 %[ANDREW]: For each location, describe the seasonal cycle of each parameter. Explain any major differences with data, when you have it. When you don't have data, just explain the patterns. This paragraph should be expanded to at least two paragraphs, or more.
 
 Model outputs for all state variables in the corresponding stations are shown in Figure \ref{Figure:ResultsEMPOWER}. The model results obtained with light attenuated according to the three-layer formulation show a better agreement with the data, particularly for station Papa. This could be caused by a greater light limitation of phytoplankton growth, as nutrient draw-down during growth periods is consistently lower when compared to the simple Beer's law. These results show that our framework can recreate correctly the results of the model proposed by \citet{Anderson2015c} within a flexible and modular environment, which allows further experimentation and testing of different model structures.
 
 
+
+
 \subsection{Model application 3: a size-based Nutrient-Phytoplankton-Zooplankton (NPZ) model}
 
-The next example describes a size-structured plankton community model in an idealized physical setting. Cell or organism size is used in this type of model as a "master trait" which constrains organism traits and interactions \citep{Litchman2008}. This model structure is an adaptation of the ASTroCAT model \citep{Banas2011b}. Whereas Banas (2011b) considered model dynamics under variable forcing or with stochastic grazing parameters, we focus here on the basic setup under constant forcing. The model, defined in the context of a chemostat, features an allometric description of multiple size-classes for phytoplankton (growing on a single nutrient) and zooplankton (grazing on phytoplankton). While trophic interactions between size classes are highly resolved, other ecological processes are neglected (e.g. there is no detrital or regeneration pathways).  
+Our third model application is a complex size-structured plankton community model in an idealized physical setting, similar to a chemostat. The presented model is an adaptation of the ASTroCAT model, developed by Neil Banas \citep{Banas2011b}. ASTroCAT was developed as a tool to investigate the complex trophic interactions between phytoplankton and zooplankton in a systematic simplified setting, resolving the plankton via a size spectrum. Cell or organism size is used in this type of model as a "master trait", defining the parameters of specific plankton types via allometric functions, taken from literature \citep{Litchman2008}. 
+Whereas Banas considered model dynamics under variable forcing or with stochastic grazing parameters, we focus here on the basic setup under constant forcing. The model, defined in the context of a chemostat, features an allometric description of multiple size-classes for phytoplankton growing on a single nutrient and zooplankton grazing on phytoplankton. While trophic interactions between size classes are highly resolved, other ecological processes are neglected (e.g. there is are detrital or regeneration pathways).  
 
-ANDREW: (model 3  -> energy flows, maintain diversity, seasonal cycle shows succession)
-
-
-The dimension functionality of the XSO framework and the built-in vectorisation of model equations constitute an ideal match for the implementation this model. Instead of defining state variables without dimensionality, as we did in the previous applications, we now add a dimension label to the \texttt{xso.variable} attribute within the component. This allows the user to initialise and use the variable as an array of size-classes, e.g. via \texttt{xso.variable(dims=("phyto"), ...)}. The number of size-classes is inherently variable and can be set at model setup. We showcase this feature by running the model with 2 to 50 size classes and comparing bulk phytoplankton biomass between runs.
+This model lends itself well to highlight the flexibility of the XSO framework. A single state variable \textit{component}, if dimensions are properly labeled across the model, can represent an entire spectrum of state variables depending on the values supplied at model setup. The built-in vectorization allows the model to compute correctly and efficiently, even with large numbers of state variables. In pracitce this means, that instead of simply defining state variables, as we did in the previous applications, we now add a dimension label to the \texttt{xso.variable} attribute within the component. This allows the user to initialise and use the variable as an array of size-classes, e.g. via \texttt{xso.variable(dims=("phyto"), ...)}. The number of size-classes is inherently variable and can be set at model setup. We showcase this feature by running the model with 2 to 50 size classes and comparing bulk phytoplankton biomass between runs.
 
 \subsubsection{Description}
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_schematics/03_schematics_ASTroCAT.pdf}
-\caption{Schematic of the size-resolved $NP_{i}Z_{j}$ trophic model. Model structure and parameterisation are adapted from \citet{Banas2011b}.}
+\caption{Schematic of the size-resolved $NP_{i}Z_{j}$ trophic model. Model structure and parameterisation are adapted from \citet{Banas2011b}. }
 \label{Figure:ModelSchematics_3}
 \end{figure}
 
@@ -723,12 +739,12 @@ Make sure to cite the table with model parameters and definitions. Same for Exam
 \label{Figure:CodeSchematics_3}
 \end{figure*}
 
-We separate the model into state variables, forcing, and fluxes. State variables are the nutrient ($N$), multiple size-classes of phytoplankton ($P_i$), and multiple size-classes of zooplankton ($Z_j$). The only forcing is the external nutrient input ($N_0$). At least 5 fluxes can be defined: The inflow of the external medium, $P_i$ growing on $N$, $Z_j$ grazing on $P_i$, and mortality terms for $P_i$ and $Z_j$.
-The model was implemented using 10 XSO components (Figure \ref{Figure:CodeSchematics_3}). We simplify the schematic by only showing the components with their respective labels. A detailed description of each component can be found in the Phydra repository on GitHub.
+We separate the model into state variables, forcing, and fluxes. State variables are the nutrient ($N$), multiple size-classes of phytoplankton ($P_i$), and multiple size-classes of zooplankton ($Z_j$). The only forcing is the external nutrient input ($N_0$). At least 5 fluxes (of variable dimensionality based on the number of Zooplankton and Phytoplankton) can be defined: The inflow of the external medium, $P_i$ growing on $N$, $Z_j$ grazing on $P_i$, and mortality terms for $P_i$ and $Z_j$.
+The model was implemented using 10 XSO components (Figure \ref{Figure:CodeSchematics_3}). We simplify the schematic by only showing the components with their respective labels.
+
+- Add quick discussion of more details here, no Appendix
 
 The original ASTroCAT model was implemented with an interactive graphical user interface showing animations of model outputs. Our implementation in the XSO framework is technically quite similar to the original model code, with major differences being the modular component structure and the use of vectorization (instead of for-loops) to define functions computing the \textit{fluxes} acting on arrays of size-classes.
-
-The implementation is presented in more detail in appendix \ref{Appendix:Implementation3}.
 
 \citet{Banas2011b} presented a detailed analysis of model output for variable metrics of ecosystem complexity. We recreated a part of the analysis with a simple comparison of model dynamics for a variable number of phytoplankton and zooplankton size classes. The number of state variables can be varied at model setup by supplying a list of initial values with the desired dimensions. We ran the model for the range of 2 to 50 size classes.
 
@@ -740,15 +756,19 @@ The implementation is presented in more detail in appendix \ref{Appendix:Impleme
 \label{Figure:ResultsASTroCAT_1}
 \end{figure}
 
-Running the model with 40 size classes of phytoplankton and zooplankton recreates the dynamics presented by \citet{Banas2011b}. See Figure \ref{Figure:ResultsASTroCAT_1} for the time evolution of $N$, $P_i$ and $Z_j$ over a ten-year run. The size-resolved food-web shows oscillatory changes in biomass with periods from days to years. Describe what the banding means, and the relevance of this result to diversity and foodwebs. Add 2-4 sentences laying out the meaning of this model run.
+Running the model with 40 size classes of phytoplankton and zooplankton recreates the dynamics presented by \citet{Banas2011b}. See Figure \ref{Figure:ResultsASTroCAT_1} for the time evolution of $N$, $P_i$ and $Z_j$ over a ten-year run. The size-resolved food-web shows oscillatory changes in biomass with periods from days to years. 
+
+- Describe what the banding means, and the relevance of this result to diversity and foodwebs. 
+- Add 2-4 sentences laying out the meaning of this model run.
 
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_plots/03_ASTroCAT_sizeclassrange.pdf}
-\caption{Comparative runs of X of varying number of size-classes. (a) Mean biomass of phytoplankton in the last year of a ten-year run for a range of 2 to 50 size classes of phytoplankton and zooplankton. Standard deviation is plotted in red. Grey crosses mark runs not otherwise shown, colored dots correspond to exemplary runs. (b) Exemplary model runs. The sum of phytoplankton biomass is shown over a ten-year run.}
+\caption{Comparative runs of our implementation of the ASTroCAT model with varying numbers of size-classes of Phytoplankton and Zooplankton. (a) Mean biomass of phytoplankton in the last year of a ten-year run for a range of 2 to 50 size classes of phytoplankton and zooplankton. Standard deviation is plotted in red. Grey crosses mark runs not otherwise shown, colored dots correspond to exemplary runs. (b) Exemplary model runs. The sum of phytoplankton biomass is shown over a ten-year run.}
 \label{Figure:ResultsASTroCAT_2}
 \end{figure}
 
+To investigate the effect the number of resolved size classes on the model output, we conducted comparative model runs varying the number of Phytoplankton and Zooplankton between 2 and 50.
 Figure \ref{Figure:ResultsASTroCAT_2} shows the effect on bulk phytoplankton biomass when running the model with a variable number of size classes. A lower number of size classes (2-10) show highly variable outputs. Bulk dynamics seems to stabilize for numbers of size classes above 10. However, there are still deviations between runs in relation to the average phytoplankton biomass when more than 10 size classes are considered. The increased size resolution seems to reduce the perturbations carried on from initial model conditions, confirming the patterns observed by \citet{Baird2010IncreasingErrors}.
 
 
@@ -781,6 +801,9 @@ I would add a paragraph about why XSO and Phydra are needed, and the overarching
 
 % framework flexibility trade-off (design choices)
 <Add a short topic sentence.> In creating a modelling framework, the design choices have a profound effect on both the flexibility and usability, with an inherent trade-off between these two aspects. In developing the XSO Framework and Phydra library, we went through multiple iterations of a self-contained framework that provides the user with a few options to customize pre-built models. The Phydra library provides users with fully functional models that can be set up and run via a simple user interface. These models remain fully accessible and modifiable through the underlying XSO framework.
+
+There is a diversity of approaches to aquatic ecosystem models, and frameworks used
+\citep{Janssen2015ExploringPerspective} <- actually provides systematic list of frameworks used (!)
 
 
 
@@ -1072,40 +1095,6 @@ The model processes and their respective components are listed below, with a sho
 
 
 
-%%% TWO-COLUMN TABLE
-%
-%t
-\begin{table*}[t]
-\caption{Model parameters used in runs for use case 2 for the four stations:}
-\begin{tabular}{l c c c c c r}
-\tophline
-Parameter & Description & BIOTRANS & India & Papa & KERFIX & Units \\
-\middlehline
-
-$V_P^{max}$ & max. rate of photosynthesis at 0 \unit{\degree C} & 2.5 & 2.5 & 1.25 & 1.25 & \unit{g C (g chl)^{-1} h^{-1}}\\
-$\alpha$ & initial slope of P-I curve & 0.15 & 0.15 & 0.075 & 0.075 & \unit{g C (g chl)^{-1} h^{-1}}\\
-$k_N$ & half-sat. const: N uptake & 0.85  & 0.85  & 0.85  & 0.85 & \unit{µM \ N} \\
-$m_P$ & linear P mortality & 0.015 & 0.015 & 0.015 & 0.015  & \unit{d^{−1}} \\
-$m_{P2}$ & quadratic P mortality & 0.025 & 0.025 & 0.025 & 0.025 & \unit{(µM \ N)^{-1} d^{−1}} \\
-$\mu_Z$ & Z max. ingestion rate & 1.0 & 1.0 & 1.25 & 2.0 & \unit{d^{−1}} \\
-$k_Z$ & Z half-saturation for intake & 0.6 & 0.6 & 0.6 & 0.6 & \unit{µM \ N} \\
-$\varphi_P$ & grazing preference: P & 0.67 & 0.67 & 0.67 & 0.67 & \\
-$\varphi_D$ & grazing preference: D & 0.33 & 0.33 & 0.33 & 0.33 & \\
-$\beta_Z$ & Z absorption efficiency & 0.69 & 0.69 & 0.69 & 0.69 &\\
-$k_{NZ}$ & Z net production efficiency & 0.75 & 0.75 & 0.75 &  0.75 &\\
-$m_Z$ & linear Z mortality  & 0.02 & 0.0 & 0.02 & 0.02 & \unit{d^{−1}} \\
-$m_{Z2}$ & quadratic Z mortality & 0.34 & 0.34 & 0.34 & 0.34 & \unit{(µM \ N)^{-1} d^{−1}}  \\
-$v_D$ & D linear sinking rate & 6.43 & 6.43 & 6.43 & 6.43 & \unit{m \ d^{−1}}\\
-$m_D$ & D remineralisation rate & 0.06 & 0.06 & 0.06 & 0.06 & \unit{d^{−1}} \\
-$\kappa$ & constant mixing parameter & 0.13 & 0.13 & 0.13 & 0.13 & \unit{m \ d^{−1}}\\
-$\theta_{chl}$& constant mixing parameter & 75 & 75 & 75 & 75 & \unit{g \ g^{−1}} \\
-
-\bottomhline
-\end{tabular}
-\label{Appendix:Table:EMPOWERparams}
-\belowtable{These parameters were adapted from \citet{Anderson2015c}} % Table Footnotes
-\end{table*}
-%
 
 
 \subsection{Model use case 3} \label{Appendix:Implementation3}
@@ -1173,6 +1162,49 @@ $size_{opt}^j$ &  & $0.65 \left( \frac{size_{P}^i}{1\mu m} \right)^{0.56}$ & \ \
 \end{table*}
 %
 
+
+
+
+
+
+\begin{comment}
+    
+\subsection{Workflow for developing a model from pre-built components} \label{Section:ModelDevelopmentWorkflow}
+
+% Highlight (collaborative) modelling workflow
+The software presented here was designed to support collaborative model development. Scientists working with computational models do not always build the models themselves. Often, scientists use existing models and focus the work on parameterisation and analysis of results obtained with model applications to specific locations. This type of use is specifically supported in our software because we equipped the Phydra library with pre-built \textit{model objects} and \textit{components}. A user can start working with models without detailed knowledge of the underlying framework and learn the basic workflow before progressing to building custom models using the XSO framework. Additionally, more advanced users can easily share custom \textit{components} or \textit{model objects} via the respective Python objects. This particular design makes our software suitable for teaching. 
+
+We illustrate here the key steps of configuring and running an ecosystem model using the XSO framework. The workflow is presented in Figure \ref{Figure:PhydraXSOPackageSchematics}.
+
+\begin{enumerate}
+% this needs to be more user workflow, less backend explanation (leave that to previous framework explanation), instead focus on the actual functions and arguments, step by step
+    \item  \textbf{Creating a \textit{model object}:} 
+    A typical modelling workflow would begin with a \textit{model object}. The \textit{model object} can be imported from the Phydra library or assembled from the provided \textit{components}. The procedure for creating custom \textit{components} is explained in section \ref{Section:CreatingXSOComponent}. A \textit{model object} is created by calling the function \texttt{xso.model()} with a single argument: \texttt{model\_dict}. This argument is a dictionary of model \textit{components} with their respective labels. The supplied labels identify the \textit{components} for all future steps. The function call automatically includes processes handling model assembly and the solver backend. When creating a model, the XSO framework automatically orders the processes in their logical order of execution and returns the \textit{model object}. The user can interactively view all parameters required as input at model setup by printing the object in the console.
+
+    \item \textbf{Creating a \textit{model setup}:} The next step is to create a \textit{model setup} corresponding to the \textit{model object}. The \textit{model setup} object is an Xarray dataset that contains all provided parameters as well as the initialized labelled model dimensions and supplied metadata. It is created with a call to \texttt{xso.setup()} by supplying the following arguments:
+    \begin{itemize}
+        \item \texttt{model}. This argument takes the \textit{model object} created in the previous step. It provides the blueprint for the \textit{model setup} and the backend checks \textit{components} and variable labels against the provided \textit{model object}.
+        \item \texttt{solver}. The solver can be chosen from those implemented in the XSO backend via the appropriate string label. Additionally, the user can supply a custom solver implementation based on the abstract solver base class available within the XSO framework.
+        \item \texttt{input\_vars}. In order to fully initialize a model that can be solved, a user needs to supply a complete set of parameters and labels linking forcing and variables between \textit{components} to the \texttt{input\_vars} argument. The argument takes a dictionary where each component is referenced via the label supplied when the \textit{model object} was created. The parameters and variables are referenced via the attribute names defined when creating the \textit{component}. Multiple values for a specific parameter can be passed with an additional batch dimension. At model runtime the model can be solved for each set of parameters within the batch dimension.
+        \item \texttt{output\_vars}. The user can specify output variables, by default (if no input is provided) all values of variables, forcing and fluxes are stored after model runtime.
+        \item \texttt{time}. To specify the time-steps used for model execution, the user has to supply an array of time steps. The array can be created using Numpy functions such as \texttt{linspace} and is then passed  to the \texttt{time} argument.
+    \end{itemize}
+    At this stage the user can store the fully initialized \textit{model setup} for later use or for sharing with other users.
+    
+    \item \textbf{Running model simulations:} The \textit{model setup} created in the previous step contains all necessary information needed at model runtime. All that is required of the user at this stage is to call the \texttt{xsimlab.run()} method and provide a model object corresponding to the model setup. The runtime method is provided by the underlying Xarray-simlab framework with the following arguments.
+    \begin{itemize}
+        \item \texttt{model}. This argument takes the \textit{model object} created in the previous step.
+        \item \texttt{batch\_dim}. If defined at model setup, the label of the batch dimension has to be supplied to the \texttt{batch\_dim} argument.
+    \end{itemize}
+    The method returns model outputs as a new Xarray dataset, which can be used in the following steps.
+    
+    \item \textbf{Storing model output:} Simulation inputs and outputs can be kept in memory or saved on disk. The \texttt{to\_netcdf()} method stores the full model outputs including metadata and labelled dimensions to a NetCDF file at a location specified by the user.
+    
+    \item \textbf{Analyzing and visualizing model output:} The Xarray dataset created at model runtime is natively compatible with a wealth of packages for data analysis and visualization from the Python scientific ecosystem. Xarray provides built-in compatibility with the standard plotting library Matplotlib and more advanced data-visualization tools like Hvplot that make full use of the labelled dimensions for plotting multidimensional data. The data for a specific dimension can be extracted to Pandas data-frames (a popular package for data analysis) via the \texttt{to\_dataframes()} method. Specific variables can be indexed and extracted as Numpy arrays via their \textit{component} and variable labels. These methods provide a rich interface and full compatibility with advanced data analysis tools created by the open-source Python community.
+
+\end{enumerate}
+
+\end{comment}
 
 \noappendix       %% use this to mark the end of the appendix section. Otherwise the figures might be numbered incorrectly (e.g. 10 instead of 1).
 
