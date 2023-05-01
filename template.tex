@@ -222,9 +222,9 @@ We use the following terms with their respective definitions in this paper. We a
 \subsection{The XSO framework} \label{Section:XSOFramework}
 
 
-Xarray-simlab-ODE (XSO) is a Python framework that allows you to construct and customize models based on ordinary differential equations (ODEs) in a modular fashion. XSO was developed as the technical foundation of the Phydra library, but is not limited to any particular domain and can be used to create ODE-based models of any type. The typical steps of a model development workflow are presented in figure \ref{Figure:PhydraXSOPackageSchematics}.
+Xarray-simlab-ODE (XSO) is a Python framework that allows you to construct and customize models based on ordinary differential equations (ODEs) in a modular fashion. It is a non-opinionated framework, i.e. it does not provide a fixed notion of how the model should be implemented, instead it attempts to remove the redundant boiler-plate code, allowing a user to construct and work with ODE-based models in a flexible manner. XSO was developed as the technical foundation of the Phydra library, but is not limited to any particular domain and can be used to create ODE-based models of any type. The typical steps of a model development workflow are presented in figure \ref{Figure:PhydraXSOPackageSchematics}.
 
-The XSO framework is an extension of Xarray-simlab \citep{Bovy2018Xarray-simlab:Interactively, Bovy2021Benbovy/xarray-simlab:0.5.0}, which provides a generic and highly flexible model development framework in Python. It relies on advanced Python functionalities, such as compact data classes and decorators (see the online-documentation for more details). Xarray-simlab provides a succinct set of functions and attributes to construct Python objects, that can interact as processes of a larger model. In addition to this interface, Xarray-simlab provides powerful data handling capabilities, storing model input and output as labelled multidimensional Xarray datasets \citep{Hoyer2017Xarray:Python}. Model output is thus directly compatible with a wealth of other Python tools for data analysis or visualisation and can be readily exported to the NetCDF file standard (amongst others).
+The XSO framework is an extension of Xarray-simlab \citep{Bovy2018Xarray-simlab:Interactively, Bovy2021Benbovy/xarray-simlab:0.5.0}, which itself provides a generic and highly flexible model development framework in Python. It relies on advanced Python functionalities, such as compact data classes and decorators (see the online-documentation for more details). Xarray-simlab provides a succinct set of functions and attributes to construct Python objects, that can interact as processes of a larger model. In addition to this interface, Xarray-simlab provides powerful data handling capabilities, storing model input and output as labelled multidimensional Xarray datasets \citep{Hoyer2017Xarray:Python}. Model output is thus directly compatible with a wealth of other Python tools for data analysis or visualisation and can be readily exported to the NetCDF file standard (amongst others).
 
 Xarray-simlab has found fruitful applications, for example in landscape evolution modeling \citep{Bovy2021Fastscape-lem/fastscape:V0.1.0beta3} and plant growth modeling \citep{Vaillant2022TowardsDevelopment}. The Xarray-simlab framework is generic in that it provides only a step-wise execution of model processes and no concept of time. Our package, XSO, is technically a wrapper around Xarray-simlab, adding custom building blocks and backend code to allow a user to easily define and compute models based on differential equation.
 
@@ -418,7 +418,7 @@ The second model application describe a classic Nutrient-Phytoplankton-Zooplankt
 
 The NPZD slab model lends itself well to investigate the bulk nutrient dynamics in the upper ocean layer, as well as the export of biomass production. In the model, phytoplankton growth is affected by temperature, as well as light and nutrient availability. Phytoplankton are consumed by zooplankton predators, which are in turn subject to a higher order mortality (constituting grazing by higher trophic levels). Phytoplankton and zooplankton mortality, as well as grazing byproducts feed into a detrital pool, that is partially remineralised in the upper ocean. The movement and depth of the mixed layer has effects on all components. Nutrients are exchanged between the deep ocean and upper ocean across the mixed layer boundary. Phytoplankton, zooplankton and detritus experience a mixing loss term, with detritus additionally sinking at a constant rate out of the mixed layer.
 
-Many NPZD-type models have been published over the years, with a plethora of formulations for the functional responses of the ecosystem components. The EMPOWER model was presented as an open-source model testbed, for example by providing various formulations for the treatment of light. \citet{Anderson2015c} provided a detailed disucssion of light calculation and treatment, as this is a crucial and rather complex component of marine models including phytoplankton. We follow their approach by considering two different light-attenuation algorithms that can be easily exchanged in our modular framework, to investigate the effects of more detailed treatment of light attenuation over water depth in comparison to a simplified integrated Lambert-Beer's law calculation. The EMPOWER model code was written as a monolithic R script, with some modifications allowed via user supplied flags, but no inherent modularity. We updated the model code to the modular and flexible XSO framework, allowing for greater adaptability and experimentation on this classic structure.
+Many NPZD-type models have been published over the years, with a plethora of formulations for the functional responses of the ecosystem components. The EMPOWER model was presented as an open-source model testbed, for example by providing various formulations for the treatment of light. \citet{Anderson2015c} provided a detailed disucssion of light calculation and treatment, as this is a crucial and rather complex component of phytoplankton models. We follow their approach by considering two different light-attenuation algorithms that can be easily exchanged in our modular framework, to investigate the effects of more detailed treatment of light attenuation over water depth in comparison to a simplified integrated Lambert-Beer's law calculation. The EMPOWER model code was written as a monolithic R script, with some modifications allowed via user supplied flags, but no inherent modularity. We updated the model code to the modular and flexible XSO framework, allowing for greater adaptability and experimentation on this classic structure.
 
 \subsubsection{Description}
 % for EMPOWER move all description to supplementary, no need to explain everything again
@@ -475,15 +475,15 @@ The term $\gamma_{I}$ represents growth-dependence on total light ($I$) availabl
     V_P = \frac{\alpha ~ I ~ V_P^{max}}{\sqrt{(V_P^{max})^2 + \alpha^2 I^2}}
 \end{equation}
 
-Where $V_P^{max}$ is the maximum photosynthetic rage, $\alpha$ is the slope of the P-I curve, and $I$ is irradiance.
+Where $V_P^{max}$ (\unit{g C (g chl)^{-1} h^{-1}}) is the maximum photosynthetic rage, $\alpha$ (\unit{g C (g chl)^{-1} h^{-1} (W m^{-2})^{-1}}) is the slope of the P-I curve, and $I$ is irradiance.
 
-$I$ decays exponentially with depth $z$ in the mixed layer:
+$I$ decays exponentially with depth $z$ (\unit{m}) in the mixed layer:
 
 \begin{equation}
     I(z) = I \ \e{(-k_{PAR} \ z)}
 \end{equation}
 
-The attenuation coefficient $k_{PAR}$ is the sum of light attenuation due to water, $k_w$, and due to the presence of phytoplankton (self-shading), accounted for with a term proportional to the concentration of phytoplankton $k_c \cdot P$ (with $k_c$ constant of proportionality), thus:
+The attenuation coefficient $k_{PAR}$ (\unit{m^{-1}}) is the sum of light attenuation due to water, $k_w$ (0.04 \unit{m^{-1}}), and due to the presence of phytoplankton (self-shading), accounted for with a term proportional to the concentration of phytoplankton $k_c \cdot P$ (with $k_c$ as 0.03 \unit{(µM N m)^{-1}}), thus:
 
 \begin{equation}
     k_{PAR} = k_w + k_c \cdot P
@@ -491,14 +491,13 @@ The attenuation coefficient $k_{PAR}$ is the sum of light attenuation due to wat
 
 The numerical solution for the light-limitation on phytoplankton growth is calculated by combining equations 9 and 10 and integrating $I(z)$ through the upper mixed layer.
 
-In addition to this standard light attenuation procedure, we also considered light attenuation according to a three-layer model of the upper mixed layer  \citep{Anderson1993APhotosynthesis}. This alternative formulation calculates multiple $k_{PAR, i}$, with i = 1 for the top 5 \unit{m}, i = 2 for the depth range 5 - 23 \unit{m} and i = 3 for depths below 23 \unit{m}. The changing spectral properties of water are taken into account by polynomial coefficients ($b_{0,i}$ to $b_{5,i}$).
+In order to test various level of model complexity, we also considered light attenuation according to a three-layer model of the upper mixed layer  \citep{Anderson1993APhotosynthesis}. This alternative formulation calculates multiple $k_{PAR, i}$, with i = 1 for the top 5 \unit{m}, i = 2 for the depth range 5 - 23 \unit{m} and i = 3 for depths below 23 \unit{m}. The changing spectral properties of water are taken into account by polynomial coefficients ($b_{0,i}$ to $b_{5,i}$).
 \begin{equation}
     k_{PAR, i} = b_{0,i} + b_{1,i} C^{1/2} + b_{2,i} C + b_{3,i} C^{3/2} + b_{4,i} C^2 + b_{5,i} C^{5/2}
 \end{equation}
-where $C$ represents the pigment (chlorophyll) concentration. The values of the polynomial coefficients are given in the Appendix.
+where $C$ represents the chlorophyll pigment concentration (converted as described above from \unit{µM N} via $\theta_{chl}$ and the Redfield ratio). The values of the polynomial coefficients are given in the Appendix.
 
-Non-grazing mortality of phytoplankton is described by the sum of linear $m_P$ and quadratic $m_{P2}$ factors \citep{Yool2011Medusa-1.0:Domain}. The former accounts for natural mortality and excretion. The latter describes higher order loss processes, including for example viral infection. All non-grazing phytoplankton loss terms feed into the detritus pool.
-
+Non-grazing mortality of phytoplankton is described by the sum of linear $m_P$ (\unit{d^{-1}}) and quadratic $m_{P2}$ (\unit{(µM \ N)^{-1} d^{−1}}) factors \citep{Yool2011Medusa-1.0:Domain}. The former accounts for natural mortality and excretion. The latter describes higher order loss processes, including for example viral infection. All non-grazing phytoplankton loss terms feed into the detritus pool.
 
 %PHYTOPLANKTON
 \begin{equation}
@@ -511,25 +510,29 @@ Non-grazing mortality of phytoplankton is described by the sum of linear $m_P$ a
 \end{equation}
 
 
+
 %\subsubsection{Zooplankton}
-Zooplankton graze upon phytoplankton and detritus. The grazing function is a Holling Type 3 grazing response \citep{Anderson2015c}:
+Zooplankton graze upon phytoplankton and detritus. The grazing function is a sigmoidal (or Holling Type 3) grazing response \citep{Anderson2015c}:
+
+% Comment from Andrew: µ_Z is confusing, should use I for ingestion.
+% My response: I took this from Banas (ASTroCAT model), he uses µ for phytoplankton growth and ingestion. If I better use I, I need to change it there too... but I can do that, depending on what the other co-authors prefer.
 
 \begin{equation}
     G_P = \mu_Z \left( \frac{ \hat{\varphi}_P P}{(k_Z)^2 + \hat{\varphi}_D D +\hat{\varphi}_P P}  \right) Z
 \end{equation}
 where $\hat{\varphi}_P$ = $\varphi_P \ P$ and $\hat{\varphi}_D$ = $\varphi_D \ D$.
 
-This formulation describes the total biomass of phytoplankton that is grazed $G_P$. Parameter $\mu_Z$ is the maximum ingestion rate of the food source, in this case both phytoplankton and detritus. The grazing preference parameters $\varphi_P$ and $\varphi_D$ do not represent a discrete fraction of the amount grazed in the diet relative to the environment. Instead, this amount is represented by the ratio of $\hat{\varphi}_P$ and $\hat{\varphi}_D$. 
-The half-saturation constant for grazing $k_Z$ scales the density-dependent half-saturation constant $k_P$ for grazing on phytoplankton based on the choice of $\varphi_P$, with the relationship $k_P$ = $\sqrt{\frac{(k_Z)^2 }{\varphi_P}}$.
+This formulation describes the total biomass of phytoplankton that is grazed $G_P$ (\unit{µM \ N}). Parameter $\mu_Z$ (\unit{d^{-1}}) is the maximum ingestion rate of the food source, in this case both phytoplankton and detritus. The density-dependent grazing preference parameters $\varphi_P$ and $\varphi_D$ (both dimensionless) do not represent a discrete fraction of the amount grazed in the diet relative to the environment. Instead, this amount is represented by the ratio of $\hat{\varphi}_P$ and $\hat{\varphi}_D$.
+%The half-saturation constant for intake $k_Z$ (\unit{µM \ N}) scales the density-dependent half-saturation constant $k_P$ for grazing on phytoplankton based on the choice of $\varphi_P$, with the relationship $k_P$ = $\sqrt{\frac{(k_Z)^2 }{\varphi_P}}$. 
 
 Grazing on detritus is defined as
 \begin{equation}
     G_D = \mu_Z \left( \frac{ \hat{\varphi}_D D}{(k_Z)^2 + \hat{\varphi}_D D +\hat{\varphi}_P P}  \right) Z
 \end{equation}
 
-Zooplankton food ingestion does not directly convert into biomass. The total biomass grazed ($G_P + G_D$) is fractionated into zooplankton growth (to $Z$), excretion of dissolved nutrients (to $N$) and egestion of fecal matter \& particles (to $D$). Zooplankton growth is a product of total biomass grazed ($G_P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency ($\beta$) and net production efficiency ($\epsilon$). Adsorption efficiency $\beta$ describes the fraction of $G_P$ that is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$) and the rest is excreted as dissolved nutrient (to $N$: \ $\beta (1-\epsilon)$). GGE is the product of $\epsilon$ and $\beta$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton \citep{Straile1997GrossGroup}. The fraction of $G_P$ egested to $D$ (e.g. as fecal pellets) is calculated via $1-\beta$. 
+Zooplankton food ingestion does not directly convert into biomass. The total biomass grazed ($G_P + G_D$) is fractionated into zooplankton growth (to $Z$), excretion of dissolved nutrients (to $N$) and egestion of fecal matter \& particles (to $D$). Zooplankton growth is a product of total biomass grazed ($G_P$) and the gross growth efficiency (GGE) of zooplankton. The two parameters defining GGE in this model are absorption efficiency $\beta$ and net production efficiency $\epsilon$ (both dimensionless). Adsorption efficiency $\beta$ describes the fraction of $G_P$ that is absorbed in the gut, of which the fraction $\epsilon$ is actually assimilated into biomass (to $Z$: \ $\beta \epsilon$) and the rest is excreted as dissolved nutrient (to $N$: \ $\beta (1-\epsilon)$). GGE is the product of $\epsilon$ and $\beta$, for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton \citep{Straile1997GrossGroup}. The fraction of $G_P$ egested to $D$ (e.g. as fecal pellets) is calculated via $1-\beta$. See \citet{Anderson2015c} for a more detailed discussion of this grazing formulation.
 
-Similar to phytoplankton mortality, a linear mortality factor $m_Z$ represents natural mortality and excretion and feeds into the pool of detritus. A quadratic factor $m_{Z2}$ describes higher order predation on zooplankton, for example from fish, and is removed from the system. 
+Similar to phytoplankton mortality, a linear mortality factor $m_Z$ (\unit{d^{-1}}) represents natural mortality and excretion and feeds into the pool of detritus. A quadratic factor $m_{Z2}$ (\unit{(µM \ N)^{-1} d^{−1}}) describes higher order predation on zooplankton, for example from fish, and is removed from the system. 
 
 %ZOOPLANKTON
 \begin{equation}
@@ -540,10 +543,11 @@ Similar to phytoplankton mortality, a linear mortality factor $m_Z$ represents n
     - K \ Z % Zooplankton mixing
 \end{equation}
 
+
 %\subsubsection{Detritus}
 The detritus concentration in the upper layer ($D$) is supplied by mortality of phytoplankton, linear zooplankton mortality, and zooplankton egestion (e.g. fecal pellets). The loss terms are remineralization, grazing, mixing, and additional sinking. 
 
-Detritus is remineralized at a constant rate $m_D$ to $N$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate $v_D$. 
+Detritus is remineralized at a constant rate $m_D$ (\unit{d^{−1}}) to $N$. Similar to $P$ and $Z$, $D$ is affected by mixing through changes in MLD, described by the mixing coefficient $K$. In addition to $K$, detritus experiences losses due to gravitational sinking at a rate $v_D$ (\unit{m \ d^{−1}}). 
 
 %DETRITUS
 \begin{equation}
@@ -559,6 +563,8 @@ Detritus is remineralized at a constant rate $m_D$ to $N$. Similar to $P$ and $Z
 \end{equation}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsubsection{Implementation}
 % here present the implementation as is used in phydra
 
@@ -569,8 +575,11 @@ Detritus is remineralized at a constant rate $m_D$ to $N$. Similar to $P$ and $Z
 \label{Figure:CodeSchematics_2}
 \end{figure*}
 
-As shown for the previous model application, we first separate the model into state variables, forcing, and fluxes.  State variables include nutrient ($N$), phytoplankton ($P$), zooplankton ($Z$), and detritus ($D$). Forcing to the model are the upper mixed layer depth ($H$), nutrient concentration below the upper mixed layer ($N_0$), temperature in the upper mixed layer ($T$), and irradiance at surface ($I$). The model defines ten unique fluxes: Phytoplankton growth, zooplankton grazing, nutrient upwelling, mixing, sinking, remineralisation, and four mortality terms.
+The amount of fluxes and interdependencies between the calculations in this application require a more elaborate component structure. As for the previous model application, we first separate the model into state variables, forcing, and fluxes.  State variables include nutrient ($N$), phytoplankton ($P$), zooplankton ($Z$), and detritus ($D$). Forcing to the model are the upper mixed layer depth ($H$), nutrient concentration below the upper mixed layer ($N_0$), temperature in the upper mixed layer ($T$), and irradiance at surface ($I$). The model defines ten unique fluxes: Phytoplankton growth, zooplankton grazing, nutrient upwelling, mixing, sinking, remineralisation, and four mortality terms.
 
+In implementing this model within the XSO framework, we aim to find a balance between component refactoring and structural simplicity. Our goal is to allow for every ecologically relevant term to be exchangeable, whilst making full use of XSO's flexible dimensionality features.
+For example, each factor affecting phytoplankton growth was defined by an individual component. The "group to argument" feature of the XSO framework allows for such a setup to remain highly modular, since the output of each flux with the appropriate label is utilized in the product of growth limiting terms.
+As another example, the component calculating the mixing coefficient $K$, is computed only once and passed along to two other components, one to calculate nutrient upwelling and the other computing mixing loss fluxes of phytoplankton, zooplankton and detritus. A user could readily add more growth limiting terms or exchange the component calculating $K$ without necessitating complex changes to the code structure.
 
 %%% TWO-COLUMN TABLE
 %
@@ -583,7 +592,7 @@ Description & Parameter & BIOTRANS & India & Papa & KERFIX & Units \\
 \middlehline
 
 Max. rate of photosynthesis at 0 \unit{\degree C} & $V_P^{max}(0)$ & 2.5 & 2.5 & 1.25 & 1.25 & \unit{g C (g chl)^{-1} h^{-1}}\\
-Initial slope of P-I curve & $\alpha$ & 0.15 & 0.15 & 0.075 & 0.075 & \unit{g C (g chl)^{-1} h^{-1}} (W m^{-2})^{-1}\\
+Initial slope of P-I curve & $\alpha$ & 0.15 & 0.15 & 0.075 & 0.075 & \unit{g C (g chl)^{-1} h^{-1} (W m^{-2})^{-1}}\\
 Half-saturation constant for N uptake & $k_N$ & 0.85  & 0.85  & 0.85  & 0.85 & \unit{µM \ N} \\
 Linear P mortality & $m_P$ & 0.015 & 0.015 & 0.015 & 0.015  & \unit{d^{−1}} \\
 Quadratic P mortality & $m_{P2}$ & 0.025 & 0.025 & 0.025 & 0.025 & \unit{(µM \ N)^{-1} d^{−1}} \\
@@ -598,7 +607,7 @@ Quadratic Z mortality & $m_{Z2}$ & 0.34 & 0.34 & 0.34 & 0.34 & \unit{(µM \ N)^{
 D linear sinking rate & $v_D$ & 6.43 & 6.43 & 6.43 & 6.43 & \unit{m \ d^{−1}}\\
 D remineralisation rate & $m_D$ & 0.06 & 0.06 & 0.06 & 0.06 & \unit{d^{−1}} \\
 Constant mixing parameter & $\kappa$ & 0.13 & 0.13 & 0.13 & 0.13 & \unit{m \ d^{−1}}\\
-Carbon-to-Chlorophyll ratio & $\theta_{chl}$ &  75 & 75 & 75 & 75 & \unit{g \ g^{−1}} \\
+Carbon-to-Chlorophyll ratio & $\theta_{chl}$ &  75 & 75 & 75 & 75 & \unit{g C \ (g Chl)^{−1}} \\
 
 \bottomhline
 \end{tabular}
@@ -606,12 +615,6 @@ Carbon-to-Chlorophyll ratio & $\theta_{chl}$ &  75 & 75 & 75 & 75 & \unit{g \ g^
 \belowtable{These parameters were adapted from \citet{Anderson2015c}} % Table Footnotes
 \end{table*}
 %
-
-The ecological description of our model system is adapted from the EMPOWER model, however the technical implementation using the XSO framework is quite different from the procedural R script of \citet{Anderson2015c}. Instead of using hard-coded flags to choose different ecological formulations, the XSO component structure provides open modularity and interchangeability. The XSO framework defines functions irrespective of the specific time-step used for evaluation and logically separates the solving algorithm from the model formulation into the XSO backend. This allows formulating the model irrespective of the rather complex nested for-loop structure used in the original R implementation. Adding and removing state variables is also simplified in our framework because allocating and storing variables of the model output does not need to be hard-coded, but is flexibly done based on the components defined at model setup.
-
-The amount of fluxes and interdependencies between the calculations in this application require a more elaborate component structure than in the chemostat model. In model construction with the XSO framework, we aim to find a balance between component refactoring and structural simplicity. Our goal is to allow for every ecologically relevant term to be exchangeable. For example, each growth-limiting term was defined by an individual component. The "group variable" feature of the XSO framework allows for such a setup. As long as a flux defined in a component matches the group label, that individual flux can be used for calculating the bulk flux in another component. The group variable can collect multiple fluxes to sum or multiply over, but it can also be used to split the calculation of a single flux between two components, allowing them to be interchangeable components.
-
-One particular example of this is the way we implemented a component calculating the mixing coefficient $K$, which is computed only once and passed along to calculate nutrient upwelling and the mixing fluxes of phytoplankton, zooplankton and detritus. Also, there is growth limitation, which is a multiplicative process of the growth limiting terms. Fluxes defined with a group label can in turn take a group variable as input, as was did with the temperature-dependent maximum photosynthetic rate, which is passed along to calculate light limitation and is used, in turn, to calculate the total growth flux. 
 
 %%f
 \begin{figure*}[t]
@@ -631,7 +634,7 @@ The forcing for irradiance at surface ($I$) is calculated via a light submodel t
 
 %As detailed in section \ref{Section:ComponentBuildingBlocks}, forcing from data needs to be linearly interpolated to be compatible with an adaptive step-wise solver such as the SciPy's odeint algorithm used here. For comparability, we follow \citet{Anderson2015c} in linearly interpolating our forcing.
 
-Following \citet{Anderson2015c}, the model is compared to seasonal data for nitrate within the upper mixed layer and chlorophyll concentration at all four stations. In order to simplify the presentation, all units are given as concentration of Nitrogen \unit{µM N}. The chlorophyll concentration data was converted by a constant factor ($\theta_{chl}$, 75 \unit{g \ g^{−1}}) and the Redfield ratio (6.625 \unit{mol C (mol N)^{-1}}) as assumed C:N of phytoplankton to nitrogen concentration. We used updated versions of the original data sources to retrieve the verification data. Nitrate within the upper mixed layer is calculated from a combination of the WOA 2018 nitrate data and the IFREMER MLD Climatology used for the $N_0$ forcing. Phytoplankton concentration is compared to converted chlorophyll data from MODIS Aqua chlorophyll climatology \citep{NASAGoddardSpaceFlightCenterOceanEcologyLaboratoryOceanBiologyProcessingGroup}. We did not follow the approach of taking a median year for chlorophyll data because the forcing is also climatology data and because we do not assume to be able to replicate particular biomass peaks of certain years. The climatological data follows the general pattern shown in the chlorophyll data used as verification data in the original paper.
+Following \citet{Anderson2015c}, the model is compared to seasonal data for nitrate within the upper mixed layer and chlorophyll concentration at all four stations. In order to simplify the presentation, all units are given as concentration of Nitrogen \unit{µM N}. The chlorophyll concentration data was converted by a constant factor ($\theta_{chl}$, 75 \unit{g C \ (g Chl)^{−1}}) and the Redfield ratio (6.625 \unit{mol C (mol N)^{-1}}) as assumed C:N of phytoplankton to nitrogen concentration. We used updated versions of the original data sources to retrieve the verification data. Nitrate within the upper mixed layer is calculated from a combination of the WOA 2018 nitrate data and the IFREMER MLD Climatology used for the $N_0$ forcing. Phytoplankton concentration is compared to converted chlorophyll data from MODIS Aqua chlorophyll climatology \citep{NASAGoddardSpaceFlightCenterOceanEcologyLaboratoryOceanBiologyProcessingGroup}. We did not follow the approach of taking a median year for chlorophyll data because the forcing is also climatology data and because we do not assume to be able to replicate particular biomass peaks of certain years. The climatological data follows the general pattern shown in the chlorophyll data used as verification data in the original paper.
 
 
 The parameters used in model runs are adapted from \citet{Anderson2015c} and presented in Table \ref{Appendix:Table:EMPOWERparams}.
@@ -651,8 +654,10 @@ We used the batch dimension feature of the XSO model setup function, which we pr
 Here actually describe the seasonal cycles of the 4 stations!
 %[ANDREW]: For each location, describe the seasonal cycle of each parameter. Explain any major differences with data, when you have it. When you don't have data, just explain the patterns. This paragraph should be expanded to at least two paragraphs, or more.
 
-Model outputs for all state variables in the corresponding stations are shown in Figure \ref{Figure:ResultsEMPOWER}. The model results obtained with light attenuated according to the three-layer formulation show a better agreement with the data, particularly for station Papa. This could be caused by a greater light limitation of phytoplankton growth, as nutrient draw-down during growth periods is consistently lower when compared to the simple Beer's law. These results show that our framework can recreate correctly the results of the model proposed by \citet{Anderson2015c} within a flexible and modular environment, which allows further experimentation and testing of different model structures.
+Model outputs for all state variables in the corresponding stations are shown in Figure \ref{Figure:ResultsEMPOWER}. The model results obtained with light attenuated according to the three-layer formulation show a better agreement with the data, particularly for station Papa. This could be caused by a greater light limitation of phytoplankton growth, as nutrient draw-down during growth periods is consistently lower when compared to the simple Beer's law. 
 
+These results show that our framework can recreate accurately of a more complex published marine ecosystem model within a flexible and modular environment, which allows further experimentation and testing of different model structures.
+The ecological description of our model system is adapted from the EMPOWER model, however the technical implementation using the XSO framework is quite different from the procedural R script of \citet{Anderson2015c}. Instead of using hard-coded flags to choose different ecological formulations, the XSO component structure provides open modularity and interchangeability. The XSO framework defines functions irrespective of the specific time-step used for evaluation and logically separates the solving algorithm from the model formulation into the XSO backend. This allows formulating the model irrespective of the rather complex nested for-loop structure used in the original R implementation.
 
 
 
@@ -871,7 +876,7 @@ The features that we plan to develop next are:
 
 \begin{itemize}
     \item Methods for model introspection, such as printing the system of equations and visualising the model structure.
-    \item Interface and methods for model parameter optimization.
+    \item Interface and methods for model parameter optimization and sensitivity analysis.
     \item Custom methods to expand model dimensionality, to allow straight-forward definition of boundary condition and exchange between model compartments.
     \item An expanded solver backend that supports larger, multi-dimensional models.
 \end{itemize}
