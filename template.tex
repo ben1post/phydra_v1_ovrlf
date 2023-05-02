@@ -567,6 +567,7 @@ Detritus is remineralized at a constant rate $m_D$ (\unit{d^{−1}}) to $N$. Sim
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsubsection{Implementation}
+\label{Section:EMPOWERImplementation}
 % here present the implementation as is used in phydra
 
 %%f
@@ -633,7 +634,7 @@ The forcing for the Mixed Layer Depth ($H$) is taken from an updated version of 
 The nutrient concentration below the mixed layer ($N_0$) is calculated from a combination of the MLD climatology and depth-resolved climatology for nitrate in the World Ocean Atlas (WOA) 2018 \citep{Garcia2019WORLDSilicate}. The temperature of the mixed layer ($T$) was similarly calculated using the MLD climatology and the temperature data of WOA 2018 \citep{Locarnini2019WorldTemperature}. The monthly climatological forcing data was interpolated to be used as model forcing. For comparability, we follow \citet{Anderson2015c} in linearly interpolating the forcing.
 The forcing for irradiance at surface ($I$) is calculated via a light submodel that employs trigonometric/astronomical equations to calculate light climatology for a location, given the latitude and cloud fraction as input parameters. The specific model used here and presented in \citet{Anderson2015c} was adapted from \citet{Shine1984ParametrizationAlbedo}.
 
-To highlight another technical aspect, we used the batch dimension feature of the XSO model setup function to run the model for all four stations in parallel. This feature allows us to define a new dimension at model setup and to supply a list of values for a specific parameter. In our case, this additional dimension defines the four stations via the specific forcing and the parameters $V_P^{max}$, $\alpha$, $\mu_Z$ and $m_Z$, which are varied between locations (see table \ref{Table:EMPOWERparams}). At runtime, the model is solved for each set of parameters in the supplied lists and outputs are returned in a single Xarray dataset. The model outputs for each station can then be easily retrieved via the supplied batch dimension label (in this case \texttt{"station"}). This feature is also useful for exploring parameter ranges, e.g. for sensitivity analysis.
+To highlight another technical aspect, we used the batch dimension feature of the XSO model setup function to run the model for all four stations in parallel. This feature allows us to define a new dimension at model setup and to supply a list of values for a specific parameter. In our case, this additional dimension defines the four stations via the specific forcing and the parameters $V_P^{max}$, $\alpha$, $\mu_Z$ and $m_Z$, which are varied between locations (see table \ref{Table:EMPOWERparams}). At runtime, the model is solved for each set of parameters in the supplied lists and outputs are returned in a single Xarray dataset. The model outputs for each station can then be easily retrieved via the supplied batch dimension label (in this case \texttt{"station"}). This feature is also very useful for exploring parameter ranges, e.g. for sensitivity analysis.
 
 We additionally show a modification of the model: \citet{Anderson2015c} included a detailed discussion of the treatment of light in a slab model. From the formulations presented in the original paper we considered two implementations. These were the simple Beer's law, which parameterizes light attenuation with a single attenuation coefficient for the whole upper mixed layer (see equation \ref{EQ:beerslaw}), and the more elaborated piecewise description, which evaluates light attenuation in three discrete depth intervals within the upper mixed layer, with specific polynomial coefficients for each interval (see equation \ref{EQ:piecewiselight}). Model results for both formulations are compared below.
 
@@ -641,23 +642,22 @@ We additionally show a modification of the model: \citet{Anderson2015c} included
 %%f
 \begin{figure*}[t]
 \includegraphics[width=15cm]{Figures/firstdraft_plots/02_EMPOWER_lightcomp.pdf}
-\caption{Results of the NPZD model (application 2) for locations BIOTRANS, India, Papa, and KERFIX. We show here the final year of a five-year run. The data for nitrogen in the upper mixed layer (dots) are taken from WOA 2018. Phytoplankton nitrogen biomass (dots) is calculated using fixed ratios from the monthly chlorophyll climatology from MODIS Aqua satellite data. See the }
+\caption{Results of the NPZD model (application 2) for locations (a) BIOTRANS, (b) India, (c) Papa, and (d) KERFIX. We show here the final year of a five-year run, allowing for ample model spin-up. Model output is shown for two model variants in the light attenuation algorithm used, with everything else being kept equal (see parameters in table \ref{Table:EMPOWERparams}). The dashed line shows model output using the simple Beer's law for light attenuation (calculated over the entire mixed layer). The solid line is output from the model variant that resolves light attenuation over three discrete depth layers. The data for nitrogen in the upper mixed layer (grey dots) are extracted from WOA 2018 data, using IFREMER MLD climatology. Phytoplankton nitrogen biomass (grey dots) is calculated via $\theta_{chl}$ and Redfield ratios from MODIS Aqua chlorophyll monthly climatologies for the specific locations. Due to the locations of stations Papa, India and KERFIX, there is no satellite data coverage for some months.}
 \label{Figure:ResultsEMPOWER}
 \end{figure*}
 
 
-Model outputs for all state variables in the corresponding stations are shown in Figure \ref{Figure:ResultsEMPOWER}.
-
-Here actually describe the seasonal cycles of the 4 stations!
-%[ANDREW]: For each location, describe the seasonal cycle of each parameter. Explain any major differences with data, when you have it. When you don't have data, just explain the patterns. This paragraph should be expanded to at least two paragraphs, or more.
-
---> Here discuss the change in light attnuation function! Refer all other points to Anderson since I didn't investigate any of it!
+Model outputs for all state variables at the four stations are shown in Figure \ref{Figure:ResultsEMPOWER}, with nutrient being compared to estimates of nitrogen concentration in the upper mixed layer, and phytoplankton concentration compared against estimates of Chlorophyll concentration from satellite data.
+There is a marked seasonal cycle visible with a clear spring phytoplankton bloom for stations BIOTRANS and India, as would be expected from their location in the temperate North Atlantic. Stations Papa and KERFIX show less pronounced seasonal cycles, but still some variation, with generally higher phytoplankton and zooplankton concentrations in summer (in their respective hemisphere). Zooplankton and detritus dynamics clearly follow phytoplankton concentrations, as would be expected.
 
 Following \citet{Anderson2015c}, the model output is compared to seasonal data for nitrate within the upper mixed layer and chlorophyll concentration at all four stations. In order to simplify the presentation, all units are given as concentration of Nitrogen \unit{µM N}. The chlorophyll concentration data was converted by a constant factor $\theta_{chl}$ (75 \unit{g C \ (g Chl)^{−1}}) and the Redfield ratio of 6.625 \unit{mol C (mol N)^{-1}} as assumed C:N of phytoplankton. We used updated versions of the original data sources to retrieve the verification data. Nitrate within the upper mixed layer is calculated from a combination of the WOA 2018 nitrate data and the IFREMER MLD Climatology used for the $N_0$ forcing. Phytoplankton concentration is compared to converted chlorophyll data from MODIS Aqua chlorophyll climatology \citep{NASAGoddardSpaceFlightCenterOceanEcologyLaboratoryOceanBiologyProcessingGroup}. We use climatology data, because we do not assume to be able to replicate particular biomass peaks of certain years with climatological forcing. The climatological data follows the general pattern shown in the chlorophyll data used as verification data in the original paper, which was taken from a specific representative year.
 
-The model results obtained with light attenuated according to the three-layer formulation show a better agreement with the data, particularly for station Papa. This could be caused by a greater light limitation of phytoplankton growth, as nutrient draw-down during growth periods is consistently lower when compared to the simple Beer's law. 
+In general the model output agrees relatively well with our verification data, which is not surprising, since we used already optimized parameters from \citet{Anderson2015c}. 
+Interestingly the change in light attenuation treatment has a pronounced effect on nutrient dynamics, as well as some effect on phytoplankton growth. The model results obtained with light attenuated according to the three-layer formulation show a better agreement with the data, particularly for station Papa. Nutrient draw-down during growth periods is consistently lower when compared to the simple Beer's law. This is caused by a greater effect of phytoplankton concentration on the resulting $k_{PAR}$ (light attenuation factor).
 
 These results show that our framework can recreate accurately of a more complex published marine ecosystem model within a flexible and modular environment, which allows further experimentation and testing of different model structures.
+Since our main aim with this model implementation was to recreate the results of \citet{Anderson2015c}, we will not go into further discussion, and gladly refer the reader to their publication for an in-depth analysis.
+
 
 
 
