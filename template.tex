@@ -145,6 +145,7 @@ To demonstrate the range of applicability and how Phydra and XSO can be used to 
 % Introductory paragraph, spelling out the issue, end with: therefore we present Phydra/XSO!
 Scientists have used mathematical models to advance our understanding of marine ecosystems for more than 80 years \citep{Sverdrup1953OnPhytoplankton, Fasham1990a, Follows2007EmergentOcean, Acevedo-Trejos2016, Gentleman2002a}. Early models comprising a few ordinary differential equations describing phytoplankton populations in a simplified physical setting \citep{Evans1985ACycles, Fasham1990a} have matured into detailed descriptions of multiple trophic levels that are run in complex three-dimensional general circulation models (GCMs) \citep[e.g.][]{Dutkiewicz2020DimensionsDiversity}. While plankton community models in some cases lack biological realism \citep{Smith2014}, and often suffer from poorly constrained model parameters and comparisons to observations \citep{Anderson2005}, they have been enormously important in developing our understanding of the mechanisms that shape plankton biogeography \citep[e.g.][]{Follows2007EmergentOcean}, phenology \citep[e.g.][]{Taylor1993SeasonalNitrogen}, and biodiversity \citep[e.g.][]{Barton2010b, Acevedo-Trejos2015c}, as well as links between ecosystems and biogeochemical cycles \citep[e.g.][]{Fasham1990a, Sarmiento1998SimulatedWarming, Dutkiewicz2009}.
 
+%% Benny: I am unsure with the following paragraph (or sentence snippets), as I am not sure what exactly I am trying to say. I feel like mentioning Fortran, and how unintuitive those models are, but perhaps that is unfair. This paragraph seems crucial as it should be as specific as possible about the problem we are trying to solve. Do you have any idea how to best structure it? Some of this could be better placed in the discussion perhaps, but then what stays in the Introduction?
 Despite this progress, we argue that plankton ecosystem models are often inflexible, overly complicated or inaccessible, which can obfuscate valuable research and present a high barrier of entry for non-specialists or students. Existing model code is rarely reused beyond the development teams \citep{Belete2017AnTesting}. Whilst many large models use legacy code that is difficult to integrate, resulting in "good knowledge bound in outdated code" \citep{Argent2004AnSemantics}. This particularly creates challenges when attempting to integrate models across domains, e.g. linking ecological models to sophisticated physical models \citep{Koralewski2019CouplingModels}, or when validating or calibrating models \citep{Steenbeek2021MakingPerspective}. 
 
 Following the integrated environmental modeling approach, we should create tools for marine ecosystem modeling that are interoperable (i.e. communicate directly) with tools for data analysis and model evaluation \citep{Laniak2013IntegratedFuture}. 
@@ -157,11 +158,13 @@ For example, the ERSEM marine ecosystem model implementation provides some flexi
 
 Modern, interpreted programming languages commonly used for data analysis applications (e.g. Python) have evolved the capabilities to efficiently support advanced numerical computations \citep{Lin2012}. This is showcased by Veros, a global circulation model (GCM) written in Python \citep{Hafner2018VerosPython}. The Python ecosystem and Jupyter Notebooks in particular \citep{Kluyver2016JupyterWorkflows}, have shown to be a useful tool for collaborative modeling workflows \citep[e.g. eWaterCycle platform,][]{Hut2022TheCollaboration}. 
 
+
 There is a diversity of approaches to aquatic ecosystem models, and frameworks used
 \citep{Janssen2015ExploringPerspective} <- actually provides systematic list of frameworks used (!)
 
-- make model formulation more accessible for non-specialists! XSO/Phydra no replacement, but an added tool simplifying model construction
 
+- make model formulation more accessible for non-specialists! XSO/Phydra no replacement, but an added tool simplifying model construction
+%%%%%
 
 
 
@@ -665,61 +668,44 @@ Since our main aim with this model implementation was to recreate the results of
 
 \subsection{Model application 3: a size-based Nutrient-Phytoplankton-Zooplankton (NPZ) model}
 
-Our third model application is a complex size-structured plankton community model in an idealized physical setting, similar to a chemostat. The presented model is an adaptation of the ASTroCAT model, developed by Neil Banas \citep{Banas2011b}. ASTroCAT was developed as a tool to investigate the complex trophic interactions between phytoplankton and zooplankton in a systematic simplified setting, resolving a diverse plankton community via a size spectrum. Cell or organism size is used in this type of model as a "master trait", defining the parameters of specific plankton types via allometric functions, taken from literature \citep{Litchman2008}. 
+Our third model application is a complex size-structured plankton community model in an idealized physical setting, similar to a chemostat. The presented model is an adaptation of the ASTroCAT model, developed by Neil Banas \citep{Banas2011b}. ASTroCAT was developed as a tool to investigate the complex trophic interactions between phytoplankton and zooplankton in a systematic simplified setting, resolving a diverse plankton community via a size spectrum. Cell or organism size is used in this type of model as a "master trait", defining the parameters of specific plankton types via allometric functions, taken from literature \citep{Litchman2008}. This allows for a functional and quantifiable model to investigate mechanisms affecting and sustaining phytoplankton diversity.
 Whereas Banas considered model dynamics under variable forcing or with stochastic grazing parameters, we focus here on the basic setup under constant forcing. The model, defined in the context of a chemostat, features an allometric description of multiple size-classes for phytoplankton growing on a single nutrient and zooplankton grazing on phytoplankton. While trophic interactions between size classes are highly resolved, other ecological processes are neglected (e.g. there are no detrital or regeneration pathways).  
 
-This model lends itself well to highlight the flexibility of the XSO framework. A single state variable \textit{component}, if dimensions are properly labeled across the model, can represent an entire spectrum of state variables depending on the values supplied at model setup. The built-in vectorization allows the model to compute correctly and efficiently, even with large numbers of state variables. In practice this means that instead of simply defining state variables, as we did in the previous applications, we now add a dimension label to the \texttt{xso.variable} attribute within the component. This allows the user to initialise and use the variable as an array of size-classes, e.g. via \texttt{xso.variable(dims=("phyto"), ...)}. The number of size-classes is inherently variable and can be set at model setup. We showcase this feature by running the model with 2 to 50 size classes and comparing bulk phytoplankton biomass between runs.
+This model lends itself well to highlight the flexibility of the XSO framework. A state variable defined within a \textit{component} can be defined with dimensions, so that it can represent an array of state variables of flexible size, as long as dimension labels match across interacting \textit{components}. The size of the state variable array depends on the number of values supplied at model setup. The built-in vectorization allows the model to compute correctly and efficiently, even with large numbers of state variables. We showcase this feature by running the model with 2 to 50 size classes and comparing bulk phytoplankton biomass between runs. The only modification necessary is varying the number of values supplied at model setup.
 
 \subsubsection{Description}
 %%f
 \begin{figure}[t]
 \includegraphics[width=8.3cm]{Figures/firstdraft_schematics/03_schematics_ASTroCAT.pdf}
-\caption{Schematic of the size-resolved $NP_{i}Z_{j}$ trophic model. Model structure and parameterisation are adapted from \citet{Banas2011b}. }
+\caption{Schematic of the size-resolved $NP_{i}Z_{j}$ trophic model. Model structure and parameterisation are adapted from \citet{Banas2011b}. 
+Boxes with black and white labels represent state variables and external forcing, respectively. Arrows indicate fluxes between state variables. The blue boundary contains the ecosystem model, with state variables for a nutrient, as well as multiple size classes of phytoplankton and zooplankton. Filled arrows represent exchanges between state variables, while open arrows represent fluxes that are lost from the model system.}
 \label{Figure:ModelSchematics_3}
 \end{figure}
 
-The model uses nitrogen as currency (state variables are expressed in units of $\mu mol$ N $m^{-3}$). The physical setting is analogous to a chemostat with constant nutrient inflow counterbalanced by permanent losses (outflow). The model describes a size-structured community of phytoplankton and zooplankton, which concentrations are expressed in terms of Equivalent Spherical Diameter (ESD). In line with \citet{Banas2011b}, we run simulations with 40 size classes of equally log-spaced $P$ (1 to 20 \unit{\mu m}), and 40 size classes of $Z$ (2.1 to 460  \unit{\mu m}). Additionally, we perform an experiment in which the number of size classes within these ranges is varied from 2 to 50. The model can be defined with any number of size classes within meaningful boundaries of allometric relationships. Size classes are denoted by the subscript $i$ for phytoplankton and $j$ for zooplankton.
+The model uses nitrogen as currency (state variables are expressed in units of \unit{µM \ N}). The physical setting is analogous to a chemostat with constant nutrient inflow counterbalanced by permanent losses. There is no constant outflow of state variables implemented, but mortality and egestion fluxes are simply lost from the system. 
+
+The model describes a size-structured community of phytoplankton and zooplankton, whose sizes are expressed in terms of Equivalent Spherical Diameter (ESD). In line with \citet{Banas2011b}, we run our initial simulations with 40 size classes of equally log-spaced $P$ (1 to 20 \unit{\mu m}), and 40 size classes of $Z$ (2.1 to 460  \unit{\mu m}). Additionally, we perform an experiment in which the number of size classes within these ranges is varied from 2 to 50. The model can be defined with any number of size classes within meaningful boundaries of allometric relationships. Size classes are denoted by the subscript $i$ for phytoplankton and $j$ for zooplankton.
 
 %\subsubsection{Nutrient}
-Model nutrient ($N$; units) is resupplied from an external source with concentration $N_0$ (units) delivered at a constant rate $f$ (units). In addition, a fraction of grazed biomass that is not assimilated by $Z$ (units) is returned to the nutrient pool. The only loss term for $N$ is phytoplankton nutrient uptake.
+Model nutrient $N$ (\unit{µM \ N}) is resupplied from an external source with concentration $N_0$ (\unit{µM \ N}) delivered at a constant rate $f$ (\unit{d^{-1}}). In addition, a fraction of grazed biomass that is not assimilated by $Z$ (units) is returned to the nutrient pool. The only loss term for $N$ is phytoplankton nutrient uptake.
+
+\begin{equation}
+    \frac{d N}{d t} = 
+    f \ N_0 % Nutrient mixing
+    +  (1- \epsilon - f_{eg}) \ \sum_{j} \sum_{i} G_P^{ij} % Unassimilated grazing by Z
+    - \sum_{i} ( \mu_{max}^i \ \gamma_i^N \ P_i) % Phytoplankton gains
+\end{equation}
 
 %\subsubsection{Phytoplankton}
-Each phytoplankton size class $P_i$ grows according to Michaelis-Menten kinetics:
+Each phytoplankton size class $P_i$ (\unit{µM \ N}) grows according to Michaelis-Menten kinetics:
 
 \begin{equation}
     \gamma_i^N =  \frac{N}{k_N^i + N} 
 \end{equation}
 
-where $\gamma_i^N$ is the limitation on phytoplankton growth due to nutrients, $k_N^i$ is the size-dependent half saturation nutrient concentration, and $N$ is the ambient nutrient concentration.
+where $\gamma_i^N$ is the limitation on phytoplankton growth due to nutrients, $k_N^i$ (\unit{µM \ N}) is the size-dependent half saturation nutrient concentration, and $N$ is the ambient nutrient concentration.
 
-Phytoplankton loss due to natural mortality and excretion is described with the factor $m^P$ (units) that is scaled by the maximum intrinsic growth rate $\mu_{max}^i$ (units), so that $m^P \mu_{max}^i$ yields the specific mortality rate for each size class.
-
-%\subsubsection{Zooplankton}
-The grazing of the zooplankton size class $Z_j$ on the phytoplankton size class $P_i$ is calculated by
-\begin{equation}
-    G_P^{ij} = \mu_j^Z \ \frac{ \varphi_{ij} \cdot P_i }{ k_Z + \sum_{i}(\varphi_{ij} \cdot P_i) } \ Z_j
-\end{equation}
-where $\mu_Z^j$ is the size-dependent maximum ingestion rate, $k_Z$ is the half-saturation level and $\varphi_{ij}$ is the relative preference of $Z_j$ for $P_i$.
-
-Prey preference is assumed to vary with phytoplankton size $size_{P}^i$ in a log-Gaussian distribution around an optimal prey size for each grazer $size_{opt}^j$.
-\begin{equation}
-    \varphi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size_P^i) - log_{10}(size_{opt}^j) }{ \Delta size_{P} } \right) \right]
-\end{equation}
-Where $\Delta size_{P}$ is the prey size tolerance parameter, in units of \unit{log_{10}(\mu m) ESD}, that controls the width of the Gaussian distribution.
-
-Zooplankton growth is calculated as the product between total biomass grazed ($G_P$) and net production efficiency ($\epsilon$), for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton \citep{Straile1997GrossGroup}. A fraction $f_{eg}$ of grazed biomass is assumed to be quickly excreted into $N$ and another fraction ($\epsilon$) that would feed into a detrital pool is permanently lost out of the system. Following \citet{Banas2011b}, the grazing fractions are split equally  so that $\epsilon = f_{eg} = 1/3$.
-
-Zooplankton experience quadratic losses according to the parameter $m_{Z2}$. This term describes higher-order mortality and predation on zooplankton and is permanently removed from the system.
-
-%\subsubsection{Model equations}
-The temporal dynamics of the state variables are described by the following set of differential equations.
-
-\begin{equation}
-    \frac{d N}{d t} = 
-    f \ N_0 % Nutrient mixing
-    +  f_{eg} \ \sum_{j} \sum_{i} G_P^{ij} % Unassimilated grazing by Z
-    - \sum_{i} ( \mu_{max}^i \ \gamma_i^N \ P_i) % Phytoplankton gains
-\end{equation}
+Phytoplankton loss due to natural mortality and excretion is described with the factor $m^P$ (units) that is scaled by the maximum intrinsic growth rate $\mu_{max}^i$ (\unit{d^{-1}}), so that $m^P \mu_{max}^i$ yields the specific mortality rate for each size class.
 
 %PHYTOPLANKTON
 \begin{equation}
@@ -729,15 +715,30 @@ The temporal dynamics of the state variables are described by the following set 
     - \sum_{j} G_P^{ij} % Z grazing
 \end{equation}
 
+
+%\subsubsection{Zooplankton}
+The grazing of the zooplankton size class $Z_j$ (\unit{µM \ N}) on the phytoplankton size class $P_i$ is calculated by
+\begin{equation}
+    G_P^{ij} = \mu_j^Z \ \frac{ \varphi_{ij} \cdot P_i }{ k_Z + \sum_{i}(\varphi_{ij} \cdot P_i) } \ Z_j
+\end{equation}
+where $\mu_Z^j$ (\unit{d^{-1}}) is the size-dependent maximum ingestion rate, $k_Z$ (\unit{µM \ N}) is the half-saturation level and $\varphi_{ij}$ (dimensionless) is the relative preference of $Z_j$ for $P_i$.
+
+Prey preference is assumed to vary with phytoplankton size $size_{P}^i$ (\unit{µm}) in a log-Gaussian distribution around an optimal prey size for each grazer $size_{opt}^j$ (\unit{µm}).
+\begin{equation}
+    \varphi_{ij} = exp \left[ -\left( \ \frac{ log_{10}(size_P^i) - log_{10}(size_{opt}^j) }{ \Delta size_{P} } \right) \right]
+\end{equation}
+Where $\Delta size_{P}$ is the prey size tolerance parameter, with units of \unit{log_{10}(\mu m) ESD}, that controls the width of the Gaussian distribution.
+
+Zooplankton growth is calculated as the product between total biomass grazed ($G_P$) and gross growth efficiency ($\epsilon$), for which values between 0.2 and 0.3 have been observed for a wide range of zooplankton \citep{Straile1997GrossGroup}. A fraction $f_{eg}$ of grazed biomass is assumed to be quickly excreted to $N$ and another fraction ($\epsilon$) that would feed into a detrital pool is permanently lost out of the system. Following \citet{Banas2011b}, the grazing fractions are split equally  so that $\epsilon = f_{eg} = 1/3$.
+
+Zooplankton experience quadratic losses according to the parameter $m_{Z2}$. This term describes higher-order mortality and predation on zooplankton and is permanently removed from the system.
+
 %ZOOPLANKTON
 \begin{equation}
     \frac{d Z_j}{d t} =
     \epsilon \ \sum_{i} G_P^{ij} % Assimilated grazing
     - m_{Z2} \ Z_j \ \sum_{j} Z_j  % Quadratic mortality
 \end{equation}
-
-Make sure to cite the table with model parameters and definitions. Same for Examples 1 and 2.
-
 
 
 \subsubsection{Implementation}
@@ -753,27 +754,27 @@ Parameters were adapted from \citet{Banas2011b}, see table \ref{Table:usecase3pa
 \begin{table*}[t]
 \caption{Parameters and allometric functions used in use case 3.}
 \begin{tabular}{l c c r}
-Parameter & Description & Value & Units \\
+Description & Parameter & Value & Units \\
 \tophline
-$f$ & Flow rate of external nutrient & 1 & \unit{d^{-1}} \\
-$N_0$ & External nutrient concentration & 1 & \unit{µM \ N} \\
-$k_Z$ & Prey half-saturation constant & 3 & \unit{µM \ N}\\
-$\Delta size_{P}$ & Prey size tolerance & 0.25 &  \\
-$m_P$ & Mortality fraction of $\mu_{max}^i$ for $P_i$ & 0.1 & \unit{d^{-1}}\\
-$\epsilon$ & Zooplankton growth efficiency & 0.33 & \\
-$f_{eg}$ & Fraction of grazing egested & 0.33 & \\
+Flow rate of external nutrient & $f$ & 1 & \unit{d^{-1}} \\
+External nutrient concentration & $N_0$ & 1 & \unit{µM \ N} \\
+Prey half-saturation constant & $k_Z$ & 3 & \unit{µM \ N}\\
+Prey size tolerance & $\Delta size_{P}$ & 0.25 & \unit{log_{10} \ \mu m}\\
+Mortality fraction of $\mu_{max}^i$ for $P_i$ & $m_P$ & 0.1 & \unit{d^{-1}}\\
+Zooplankton growth efficiency & $\epsilon$ & 0.33 & dimensionless\\
+Fraction of grazing egested & $f_{eg}$ & 0.33 & dimensionless\\
 \\
 
-$\mu_{max}^i$ & Maximum growth rate of $P_i$ & $ 2.6 \left( \frac{size_i^{P}}{1\mu m} \right)^{-0.45}$  & \unit{d^{-1}} \\
-$k_N^i$ & Nutrient half-saturation constant of $P_i$ & $ 0.1 \left( \frac{size_i^{P}}{1\mu m} \right)$ & \unit{µM \ N} \\
+Maximum growth rate of $P_i$ &  $\mu_{max}^i$ & $ 2.6 \left( \frac{size_i^{P}}{1\mu m} \right)^{-0.45}$  & \unit{d^{-1}} \\
+Nutrient half-saturation constant of $P_i$ & $k_N^i$ &  $ 0.1 \left( \frac{size_i^{P}}{1\mu m} \right)$ & \unit{µM \ N} \\
 
-$\mu_Z^j$ & Maximum ingestion rate of $Z_j$ & $26 \left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ &\unit{µM \ N} \\
+Maximum ingestion rate of $Z_j$ &  $\mu_Z^j$ & $26 \left( \frac{size^i_{P}}{1\mu m} \right)^{-0.4}$ & \unit{d^{-1}} \\
 
-$size_{opt}^j$ &  & $0.65 \left( \frac{size_{P}^i}{1\mu m} \right)^{0.56}$ & \ \unit{µM \ N} \\
+Optimum prey size of $Z_j$ & $size_{opt}^j$ &  $0.65 \left( \frac{size_{P}^i}{1\mu m} \right)^{0.56}$ & \ \unit{µm} \\
 
 \bottomhline
 \end{tabular}
-\belowtable{Sources for allometric functions: \citep{Tang1995TheRespiration, Eppley1969HalfSaturationPhytoplankton, Hansen1997ZooplanktonRange, Hansen1994a}} % Table Footnotes
+\belowtable{Parameters adapted form \citet{Banas2011b}. Sources for allometric functions: \citep{Tang1995TheRespiration, Eppley1969HalfSaturationPhytoplankton, Hansen1997ZooplanktonRange, Hansen1994a}} % Table Footnotes
 \label{Table:usecase3parameters}
 \end{table*}
 %
@@ -781,8 +782,6 @@ $size_{opt}^j$ &  & $0.65 \left( \frac{size_{P}^i}{1\mu m} \right)^{0.56}$ & \ \
 
 We separate the model into state variables, forcing, and fluxes. State variables are the nutrient ($N$), multiple size-classes of phytoplankton ($P_i$), and multiple size-classes of zooplankton ($Z_j$). The only forcing is the external nutrient input ($N_0$). At least 5 fluxes (of variable dimensionality based on the number of Zooplankton and Phytoplankton) can be defined: The inflow of the external medium, $P_i$ growing on $N$, $Z_j$ grazing on $P_i$, and mortality terms for $P_i$ and $Z_j$.
 The model was implemented using 10 XSO components (Figure \ref{Figure:CodeSchematics_3}). We simplify the schematic by only showing the components with their respective labels.
-
-- Add quick discussion of more details here, no Appendix
 
 The original ASTroCAT model was implemented with an interactive graphical user interface showing animations of model outputs. Our implementation in the XSO framework is technically quite similar to the original model code, with major differences being the modular component structure and the use of vectorization (instead of for-loops) to define functions computing the \textit{fluxes} acting on arrays of size-classes.
 
@@ -796,10 +795,8 @@ The original ASTroCAT model was implemented with an interactive graphical user i
 \label{Figure:ResultsASTroCAT_1}
 \end{figure}
 
-Running the model with 40 size classes of phytoplankton and zooplankton recreates the dynamics presented by \citet{Banas2011b}. See Figure \ref{Figure:ResultsASTroCAT_1} for the time evolution of $N$, $P_i$ and $Z_j$ over a ten-year run. The size-resolved food-web shows oscillatory changes in biomass with periods from days to years. 
+Running the model with 40 size classes of phytoplankton and zooplankton recreates the dynamics presented by \citet{Banas2011b}. See Figure \ref{Figure:ResultsASTroCAT_1} for the time evolution of $N$, $P_i$ and $Z_j$ over a ten-year run. The size-resolved food-web shows oscillatory changes in biomass with periods from days to years, despite the much faster growth rates in the model. There appear to be tradeoffs between size classes, driven by the selective grazing interactions between zooplankton and phytoplankton. This however does not lead to chaotic behavior, but instead tends towards a stable state past 5 year of the model run. Interestingly, the general dynamics, as well as the stable state is highly clustered into some size classes. As \citet{Banas2011b} discussed, this "banding" seems to be a direct result of the prey preferences. A general conclusion one can draw, is that selective grazing interactions can be a strong factor in structuring diverse plankton communities.
 
-- Describe what the banding means, and the relevance of this result to diversity and foodwebs. 
-- Add 2-4 sentences laying out the meaning of this model run.
 
 %%f
 \begin{figure}[t]
@@ -808,117 +805,64 @@ Running the model with 40 size classes of phytoplankton and zooplankton recreate
 \label{Figure:ResultsASTroCAT_2}
 \end{figure}
 
-To investigate the effect the number of resolved size classes on the model output, we conducted comparative model runs varying the number of Phytoplankton and Zooplankton between 2 and 50.
+To investigate the effect of the number of resolved size classes on the model output, we conducted comparative model runs varying the number of Phytoplankton and Zooplankton between 2 and 50.
 Figure \ref{Figure:ResultsASTroCAT_2} shows the effect on bulk phytoplankton biomass when running the model with a variable number of size classes. A lower number of size classes (2-10) show highly variable outputs. Bulk dynamics seems to stabilize for numbers of size classes above 10. However, there are still deviations between runs in relation to the average phytoplankton biomass when more than 10 size classes are considered. The increased size resolution seems to reduce the perturbations carried on from initial model conditions, confirming the patterns observed by \citet{Baird2010IncreasingErrors}.
+
 
 
 \section{Discussion}
 % keep discussion simple! just mention a few important points!
 % what is absolutely necessary?
-\begin{comment}
 
-Open source development efforts in the marine modeling community are working to improve on these issues, and have lead to great advancements by providing tools for validation 
-\citep[e.g. BGCval,][]{DeMora2018BGC-val:Models} or the flexible coupling of physical and ecological models \citep[e.g. FABM,][]{Bruggeman2014a}.
+% Andrew: Paragraph about why XSO and Phydra are needed --> overarching philosophy
+We argue that plankton ecosystem model code is often built to run, but not built to be reused or understood, which is in part an issue with the programming languages and tools used to create them. This is in contrast to current tools for data analysis (e.g. in the Python and R programming language community), that are constantly developed further in a collaborative open-source effort and focus on modularity, usability, and clear documentation.
+The XSO framework is an effort to provide a tool that bridges this divide, by supporting highly flexible and reproducble ODE-based modeling workflows using Python. The first release of the Phydra library contains two published plankton ecosystem models, the Empower model by \citet{Anderson2015c} and the ASTRoCAT model by \citet{Banas2011b}, that can be readily explored and modified.
 
-In related domains, there have been efforts to create platforms, conducive to scientific collaboration utilizing Jupyter notebooks \citep[e.g.][]{Hut2022TheCollaboration}.
-
-
-The open-source ERSEM marine ecosystem model provides some flexibility to modify and experiment with model structures via markup language files or Python interfaces, but the general formulations are hard-coded in Fortran scripts \citep{Butenschon2016}. 
-
-Modern, interpreted programming languages commonly used for data analysis applications (e.g. Python) have evolved the capabilities to efficiently support advanced numerical computations \citep{Lin2012}. This is showcased by Veros, a global circulation model (GCM) written in Python \citep{Hafner2018VerosPython}. 
-
-Jupyter Notebooks have shown to be a useful tool for collaboration \citep[e.g.][]{Hut2022TheCollaboration}.
-
-There is the option to rewrite Fortran model code into a more modular structure, as was done in an update to the FABM-PCLake aquatic ecosystem model \citep[][]{Schnedler-Meyer2022WaterModel}. Another option is to utilize a separate modeling language, that provides some interface to a GUI or Python code \citep{Norling2021RapidV1.0}. 
-
-Modern, interpreted programming languages commonly used for data analysis applications (e.g. Python) have evolved the capabilities to efficiently support advanced numerical computations \citep{Lin2012}. This is showcased by Veros, a global circulation model (GCM) written in Python \citep{Hafner2018VerosPython}.
-
-\end{comment}
 
 \subsection{Structuring complex marine ecosystem models in a flexible framework}
 
-I would add a paragraph about why XSO and Phydra are needed, and the overarching philosophy. 
-
 % framework flexibility trade-off (design choices)
-<Add a short topic sentence.> In creating a modelling framework, the design choices have a profound effect on both the flexibility and usability, with an inherent trade-off between these two aspects. In developing the XSO Framework and Phydra library, we went through multiple iterations of a self-contained framework that provides the user with a few options to customize pre-built models. The Phydra library provides users with fully functional models that can be set up and run via a simple user interface. These models remain fully accessible and modifiable through the underlying XSO framework.
-
-There is a diversity of approaches to aquatic ecosystem models, and frameworks used
-\citep{Janssen2015ExploringPerspective} <- actually provides systematic list of frameworks used (!)
-
-
-
-"The model development effort is proportional to the desired complexity of the model application, so users can quickly implement simple models."
-XSO provides an interface for iterative modifications, both to more complex and simpler model constructs. This was achieved by providing \textit{variable types} which correspond directly to the fundamental mathematical components of ODE-based models (e.g. state variables, parameters, forcing, and partial equations). All aspects of the model must be defined at the level of \textit{variable types}. The \textit{components} of the model can be freely assembled from the available \textit{variable types}, allowing the user to wrap a logical component of the model as desired.
-
-The software presented here was designed to support collaborative model development. Scientists working with computational models do not always build the models themselves. Often, scientists use existing models and focus the work on parameterisation and analysis of results obtained with model applications to specific locations. This type of use is specifically supported in our software because we equipped the Phydra library with pre-built \textit{model objects} and \textit{components}. A user can start working with models without detailed knowledge of the underlying framework and learn the basic workflow before progressing to building custom models using the XSO framework. Additionally, more advanced users can easily share custom \textit{components} or \textit{model objects} via the respective Python objects. This particular design makes our software suitable for teaching. 
-
-% framework with Python backend and Python frontend
-<Add a short topic sentence.> In contrast to available tools that allow building differential equation based models from a set of customisable building blocks through a graphical interface or other frameworks that utilise a custom scripting language (e.g. via YAML files), the Phydra and XSO frontend and backend are fully implemented in a single programming language: Python. This might require a higher initial effort for users unfamiliar to Python, but we argue that the effort is worth the wealth of functionality provided by the Python scientific ecosystem. The XSO model development workflow is similar to writing standard Python codes, with the added benefit of a set of modular Python objects and attributes that automatically handle model inputs and outputs and that allow to computationally construct and run the model. 
-In common to other object-oriented modelling frameworks, functional model \textit{components} do not have to inherit from specific base classes. The functions defining \textit{forcings} and \textit{fluxes} within \textit{components} in XSO are not restrictive in their Python syntax and can make use of external Python packages, as long as the value that is finally supplied at model runtime is compatible with the chosen solver backend. Since XSO itself is a wrapper of Xarray-simlab without hiding the underlying functionality, this further expands the possibilities for custom applications and further development of the framework. The flexibility of the underlying framework should not dissuade users less interested in technical customisation, as the Phydra library provides fully functional pre-configured \textit{components} and \textit{model objects} that provide a solid foundation for marine ecosystem model development.
-
-An ecosystem model tracks chemical compounds as well as organisms via state variables. These state variables can define completely different components of a model, or represent a functional group. \textit{Components} within Phydra are defined at this higher level and can contain a single state variable or an array of state variables that share common fluxes with differing parameterisation that can be supplied as arrays at model setup. In the third model application, we presented such a case by using multiple state variables for phytoplankton and zooplankton as defined by size-based allometric functions. In addition to size, the \textit{components} and contained \textit{variable types} could be modified to include information on units or other parameters relevant to the model. The added flexible dimensionality of components was designed with the current issues in marine ecosystem model in mind. The effects of different levels of complexity in the number and definition of phytoplankton functional types (PFT), for example, is not routinely tested in marine ecosystem models. Phydra provides a framework that allows for easy testing through flexible modification of such model complexity at model setup.
+There has been an increasing move towards developing and using frameworks, that systematize or simplify at least one specific aspect of model development (e.g. FABM for model coupling, \citet{Bruggeman2014a}). However, their usage is quite scattered in the scientific community \citep{Janssen2015ExploringPerspective}. The design choices of a modeling framework have a profound effect on both the flexibility and usability, with an inherent trade-off between these two aspects. In developing the Phydra library, we went through many iterations, with the logical conclusion being the separation of the framework and library aspects.
 
 % flexibility in model construction
-%The XSO framework is currently limited to model applications based on ordinary differential equations. With this limitation, conceptual marine ecosystem models still vary greatly in complexity. Our goal in developing the framework was to allow users to build models without restricting the level of complexity, in particular in relation to the number of state variables and model processes. This was implemented in the framework by providing \textit{variable types}, which directly correspond to the basic mathematical components of models based on ordinary differential equations (e.g. state variables, parameters, forcing, and partial equations). Every aspect of the model needs to be defined at the level of \textit{variable types}. Model \textit{components} can be flexibly constructed from the provided set of \textit{variable types} and wrap a logical component of the model as users see fit. There are no limitations to the number of \textit{variable types} used within a component and no limitations to the levels of \textit{group} variables linking components to define a single ecosystem process. State variables, forcing and parameters need to be initialised in one \textit{component} and can be referenced across the model. The system of differential equations is constructed from the \textit{fluxes} contained in the model \textit{components} via the supplied labels at model setup. These design choices make the effort required to construct models proportional to the desired model complexity and \textit{components} can be easily modified to more complex formulations. We hope that this will foster experimentation and inter-comparison of model performance at variable levels of complexity. 
+Our goal in developing the framework was to allow users to build models without restricting the level of complexity, in particular in relation to the dimensionality, number of state variables and model processes. This was implemented in the framework by providing \textit{variable types}, which directly correspond to the basic mathematical components of models based on ordinary differential equations (e.g. state variables, parameters, forcing, and partial equations). Every aspect of the model needs to be defined at the level of \textit{variable types}. Model \textit{components} can be flexibly constructed from the provided set of \textit{variable types} and wrap a logical component of the model as users see fit. State variables, forcing and parameters need to be initialized in one \textit{component}, but can be referenced across the model. The system of differential equations is constructed from the \textit{fluxes} contained in the model \textit{components} via the supplied labels at model setup. These design choices make the effort required to construct models proportional to the desired model complexity, and \textit{components} can be easily modified to more complex formulations. In order to provide a template for utilizing this flexible framework, we present fully implemented models in the Phydra library. We hope that this will foster experimentation and inter-comparison of model performance at variable levels of complexity.
 
-Flexible Dimensionality! mention that
-% Most of the above can actually go to the introduction!
-% AND THEN HERE ACTUALLY DISCUSS THE DESING CHOICES AND COMPLEXITY of models; AND JUST THAT
+In addition to flexible model construction, we wanted to provide an interface for iterative modification and prototyping. An ecosystem model tracks chemical compounds as well as organisms via state variables. These state variables can define completely different components of a model, or represent a functional groups. In the third model application, we presented such a case by defining an array of variables for phytoplankton and zooplankton via size-based allometric functions. This flexible dimensionality of model components was designed with the current issues in marine ecosystem model in mind. The effects of different levels of complexity in the number and definition of phytoplankton functional types (PFT), for example, is not routinely tested in marine ecosystem models \citep{Franks2009}. Phydra provides a framework that allows for easy testing through flexible modification of such model complexity at model setup. 
+
+
+% framework with Python backend and Python frontend
+The choice of programming language has a great effect on the resulting framework. In contrast to available tools that allow building differential equation based models from a set of customizable building blocks through a graphical interface (e.g. Stella) or other frameworks that utilize a custom scripting language (e.g. via YAML files), the Phydra and XSO frontend and backend are fully implemented in a single programming language: Python. This might require a higher initial effort for users unfamiliar to Python, but we argue that the effort is worth the wealth of functionality provided by the Python scientific ecosystem. The XSO model development workflow is similar to writing standard Python codes, with the added benefit of a set of modular Python objects and attributes that automatically handle model inputs and outputs and that allow to computationally construct and run the model. This 
+
+Since the XSO framework simply utilizes object-oriented Python, functional model \textit{components} have a basic syntax, but are otherwise flexible. The functions defining \textit{forcings} and \textit{fluxes} within \textit{components} in XSO are not restrictive in their Python syntax and can make use of external Python packages, as long as the value that is finally supplied at model runtime is compatible with the chosen solver backend. Since XSO itself is a wrapper of Xarray-simlab without hiding the underlying functionality, this further expands the possibilities for custom applications and further development of the framework. The flexibility of the underlying framework should not dissuade users less interested in technical customization, as the Phydra library provides fully functional pre-configured \textit{components} and \textit{model objects} that provide a solid foundation for marine ecosystem model development. 
+
+
+% collaborative workflows:
+The software presented here was designed to support collaborative model development. Scientists working with computational models do not always build the models themselves. Often, scientists use existing models and focus the work on parameterization and analysis of results obtained with model applications to specific locations. This type of use is specifically supported in our software because we equipped the Phydra library with pre-built \textit{model objects} and \textit{components}. A user can start working with models without detailed knowledge of the underlying framework and learn the basic workflow before progressing to building custom models using the XSO framework. Additionally, more advanced users can easily share custom \textit{components} or \textit{model objects} via the respective Python objects. This particular design makes our software suitable for teaching. 
+
 
 
 \subsection{Current limitations of XSO and Phydra}
 % XSO limitations
 % XSO for ODEs only (by design)
-- No "spatial" Dimension yet!
-- Not making use of full xarray-simlab functionality
-- "weak" linkages via strings
 
-This first version of the XSO framework and Phydra library supports only mathematical models based on ordinary differential equations. There are no specific methods that help with setting up a system of partial differential equations, as would be needed for setting up a multi-dimensional model, but such functionality could be added in the future. Currently, there are no features implemented that go beyond constructing and solving a model. The framework structure would technically support advanced features for model introspection (e.g. printing the system of equations in LaTeX) or parameter optimization, but these features are still in an experimental phase and will be added to the XSO framework in later stages of development.
+The presented software packages are in the early stages of development, and as such have limited functionality. This first version of the XSO framework and Phydra library supports only mathematical models based on ordinary differential equations. In the first release, the framework functionality and library contents are strictly focused on zero-dimensional marine ecosystem models.
+The first version of XSO implements a limited set of solver algorithms. These are a simple step-wise solver, an adaptive step-size solver optimized for solving a system of ODES (Scipy's \texttt{odeint}). The simple step-wise solver is the only backend that currently supports multi-model parallelism when executing multiple sets of parameters via the \textit{batch} dimensionality feature. None of the implemented solvers currently support single model parallelism and are thus not optimized for very large models (i.e. > 200 state variables).
 
-The first version of XSO implements a limited set of solver algorithms. These are a simple step-wise solver, an adaptive step-size solver optimized for solving system of ODES (Scipy's \texttt{odeint}). The simple step-wise solver is the only backend that currently supports multi model parallelism when executing multiple sets of parameters via the \textit{batch} dimensionality feature. None of the implemented solvers currently support single model parallelism and are thus not optimized for very large models (i.e. > 200 state variables).
-
-% Current design paradigm rooted in flexible labeling to link components
-<Add a topic sentence.> The high level of flexibility in the current version of XSO is rooted in the model backend that links the defined \textit{variable types} in separate \textit{components} via the supplied string labels at model setup. This design choice was made to allow easy reuse of \textit{components}. For example, a \textit{component} that defines a linear mortality flux acting on a single state variable could be implemented multiple times in a model to act on different state variables referenced via the associated label at model setup. This workflow allows for rapid prototyping, so that \textit{components} can be easily modified or exchanged and the routing of \textit{fluxes} can be modified even after creating the \textit{model object}. This is manageable for the presented use cases, but not ideal for very complex models that will require many labels to be supplied at model setup. Although this functionality is not yet built into the XSO user interface, implicit links between \textit{components} are technically possible via the underlying Xarray-simlab framework. This functionality can be implemented in future versions of XSO and should be considered for constructing models that aim at a high level of complexity for which the main goal is to extend and experiment on a specific model setup.
-
-%\begin{comment}
-% a comment for now, because I am not sure if this will be worked out in the first version of XSO or still an existing caveat
-A caveat to the flexibility of \textit{components} is that currently the dimensions of \textit{variable types} need to be defined within a \textit{component} via a unique string label. The XSO framework checks at model setup that the dimension labels match in actual dimensionality across the model, e.g. that the mortality flux has the matching dimensionality to the referenced phytoplankton state variable that it acts upon. In order to allow full flexibility when exchanging \textit{components}, the user should be able to supply a specific dimension label at model setup, which is currently not supported by Xarray-simlab. A work-around is that the user modifies just that specific argument in the \textit{flux} within the \textit{component}.
-%\end{comment}
-
-%--> PHYDRA SHOULD DEFINE A STRICT SET OF DIMENSION LABELS THAT COULD BE USED WITHIN EACH COMPONENT SO THEY CAN ALL CO-OPERATE
-%only problem: How to diff between N, P, Z, D for example.. hm
-
-% Phydra focus on simple physical settings for ecosystem models (no dimensionality yet!)
-
-
+The completely flexible reuse of components is currently not yet possible. We have implemented very flexible variable naming and flux routing, via string labels supplied at model setup. This is heavily reliant on the user supplying appropriate string labels, and currently there is no hard-coded linkage between components possible. However, the dimensionality of variables and fluxes has to be defined when defining the component and can not be changed after creating the model object. This is a limitation of the underlying Xarray-simlab framework, that could be improved upon in future development.
 
 \subsection{Current usage and future developments}
 % How to install and run Phydra?
-- currently only installable via pip
-- but we are working on providing it via conda
 
-The Phydra library and the XSO framework are packages written in Python that can be easily installed via the Conda package management system. Conda is the ideal management system because it resolves and installs all necessary dependencies. Phydra and XSO are also available individually via the package installer for Python (pip). Detailed instructions about installation and resolution of dependencies can be found on the GitHub repository.
-
-Since Python and the dependencies of Phydra are constantly developed, we provide instructions to install a fully compatible virtual environment with the Conda package manager separate from a user standard Python installation. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter notebook environment that is available via Conda. For more complex and larger model runs on servers, Python scripts are preferable.
+Phydra and XSO are available individually via the package installer for Python (pip). Detailed instructions about installation and resolution of dependencies can be found in the online documentation. Since Python and the dependencies of Phydra are constantly developed, we provide instructions there on how to install a fully compatible virtual environment with the Conda package manager separate from a user standard Python installation. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter notebook environment that is available via Conda. For more complex and larger model runs on servers, Python scripts are preferable.
 
 % underyling packages are constantly developed, Phydra will grow with them
-<Add a topic sentence.> The Xarray-simlab package that provides the basis for the XSO framework is a relatively young project and continuously under development, and this represents fruitful ground for developing and improving to the functionalities of Phydra and XSO. The Phydra library does not have to be tied to the XSO framework in future development. The Phydra library could be expanded to provide a functional Python interface to backend code specifically suited to marine ecosystem model applications.
+The Xarray-simlab package that provides the basis for the XSO framework is a relatively young project and continuously under development, but this is a fruitful ground for developing and improving the functionalities of Phydra and XSO. As the XSO framework backend code is logically disconnected from the model definition and the solver backend is implemented in a flexible object-oriented manner.
 
 % future feature development
-The XSO framework in its current version allows building models quickly and dynamically from \textit{components} and provides a user interface to setup and run a model that is stored as a fully documented Xarray dataset. The Phydra library provides a set of \textit{components}, models and example applications that showcase the usability of the framework and provide a common library for marine ecosystem modelling applications. 
-
-The features that we plan to develop next are: 
-
-\begin{itemize}
-    \item Methods for model introspection, such as printing the system of equations and visualising the model structure.
-    \item Interface and methods for model parameter optimization and sensitivity analysis.
-    \item Custom methods to expand model dimensionality, to allow straight-forward definition of boundary condition and exchange between model compartments.
-    \item An expanded solver backend that supports larger, multi-dimensional models.
-\end{itemize}
-
+The XSO framework in its current version allows building models quickly and dynamically from \textit{components} and provides a user interface to setup and run a model that is stored as a fully documented Xarray dataset. The Phydra library provides a set of \textit{components}, models, and example applications that showcase the usability of the framework and provide a common library for marine ecosystem modelling applications. Since the XSO framework is embedded in the larger Python scientific ecosystem, there are many possibilities to provide advanced functionality on top of the basic model development workflow currently supported. Amongst our foremost development goals are developing the solving backend further to support large models and possibly spatially multi-dimensional models. This would also require adding that functionality to the XSO frontend, and could include some connection to other frameworks in the backend code. Another important aspect would be simplifying the process of parameter optimization and sensitivity analysis. We are also working on methods for model introspection, such as graphically representing the model structure and exporting the system of equations. 
 The Phydra library of \textit{components} and \textit{model objects} could be expanded beyond the three applications presented here and would allow easy comparability and reproducibility of specific model applications, as demonstrated here.
 
-Phydra and XSO are open-source projects. The source code is fully accessible on GitHub and can be freely used and modified according to a BSD-3 license. Contributions are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. More information on how interested users can contribute to the project is provided in the online documentation.
+Phydra and XSO are open-source projects. The source code is fully accessible on GitHub and can be freely used and modified according to a BSD-3 license. Contributions via the GitHub platform are welcome and in fact greatly appreciated. Users can contribute in many ways by reporting bugs, submitting feedback, contributing to the development of the code or the documentation. More information on how interested users can contribute to the project is provided in the online documentation.
 
 
 %%% added Section label for editing purposes, later simply use \conclusions
@@ -926,20 +870,13 @@ Phydra and XSO are open-source projects. The source code is fully accessible on 
 %\conclusions  %% \conclusions[modified heading if necessary]
 % Place this project in the wider open science ecosystem, summarize and conclude
 
-
-We presented two new Python packages that provide a flexible tool-set for marine ecosystem models based on differential equations. Phydra is a package that offers a library of pre-built models their individual building blocks (i.e. "components"), which can be combined or modified to create custom configurations. The XSO package, which is the technical foundation of Phydra, provides a user-friendly interface and a modular modeling framework for building and solving computational models based on differential equations. The XSO framework grants users detailed control over state variables, parameters, forcing, and mathematical functions, while allowing each model component to remain interchangeable. Additionally, Phydra utilizes the Xarray dataset format for structuring model input and output, including metadata, allowing for easy storage, sharing, and analysis of data.
+We presented two new Python packages that provide a flexible tool-set for marine ecosystem models based on differential equations. Phydra is a package that offers a library of pre-built models their individual building blocks (i.e. "components"), which can be combined or modified to create custom configurations. The XSO package, which is the technical foundation of Phydra, provides a user-friendly interface and a modular modeling framework for building and solving computational models based on differential equations. The XSO framework grants users granular control over state variables, parameters, forcing, and mathematical functions, while allowing each model component to remain interchangeable. Additionally, Phydra utilizes the Xarray dataset format for structuring model input and output, including metadata, allowing for easy storage, sharing, and analysis of data.
 
 This project aims to unify the computational tools used by scientists for data analysis and visualisation in Python with a functional, flexible, and open-source modelling framework. The technical architecture is built on other open-source efforts (Xarray-simlab, Xarray, SciPy and NumPy to name a few) and could be further developed to provide an interface to more advanced domain-specific modelling frameworks such as Veros-BGCM or the FABM framework.
 
 We presented three model applications of variable ecosystem complexity in zero-dimensional physical settings. These are contained in the first version of the Phydra library. A simple chemostat model of phytoplankton growing on a single nutrient showcases the workflow of implementing a model in the XSO framework in detail. The two following applications are implementations of previously published models that demonstrate the advanced functionality of the XSO framework. The second application is based on the EMPOWER model \citep{Anderson2015c}, a canonical open-ocean slab model that form the foundation of the field of marine ecosystem modelling. The third application is based on the ASTroCAT model \citep{Banas2011b}, which resolves complex trophic interactions within a size-resolved plankton model embedded in a simple physical flow-through setting. These three applications are contained in the Phydra library via their respective model \textit{components} and as fully assembled \textit{model objects}. Additionally, all scripts used to create the presented results are available in fully documented Jupyter notebooks in the model examples folder of the Phydra package. This should provide a foundation for users to start experimenting with the modelling framework. 
 
 The Phydra library can be a reference and learning resource for scientists interested in marine ecosystem modelling, a starting point for scientific exploration, and a valuable tool for teaching. The model development effort is proportional to the desired complexity of the model application, so users can quickly implement simple models.
-
-
-In contrast to efforts such as FABM and pyAEM, the XSO framework allows for granular control of model structure directly in the structure.
-
-It is in part an effort towards IEM, ...
-
 
 Creating such a fully integrated modeling environment for marine ecosystem models will require a diverse community of users and developers. We believe the programming language Python provides strong enough functionalities and a wide enough user base, and tried to approach the issue of granular model construction as one of earlier steps towards a wider ecosystem for integrated marine ecosystem modeling.
 
@@ -952,6 +889,25 @@ We hope Phydra and XSO contribute to the ongoing efforts in the community of dev
 
 
 
+
+\begin{comment}
+
+
+SAVED TEXT SNIPPETS::
+
+
+Open source development efforts in the marine modeling community are working to improve on these issues, and have lead to great advancements by providing tools for validation 
+\citep[e.g. BGCval,][]{DeMora2018BGC-val:Models} or the flexible coupling of physical and ecological models \citep[e.g. FABM,][]{Bruggeman2014a}.
+
+In related domains, there have been efforts to create platforms, conducive to scientific collaboration utilizing Jupyter notebooks \citep[e.g.][]{Hut2022TheCollaboration}.
+
+The open-source ERSEM marine ecosystem model provides some flexibility to modify and experiment with model structures via markup language files or Python interfaces, but the general formulations are hard-coded in Fortran scripts \citep{Butenschon2016}. 
+
+There is the option to rewrite Fortran model code into a more modular structure, as was done in an update to the FABM-PCLake aquatic ecosystem model \citep[][]{Schnedler-Meyer2022WaterModel}. Another option is to utilize a separate modeling language, that provides some interface to a GUI or Python code \citep{Norling2021RapidV1.0}. 
+
+Modern, interpreted programming languages commonly used for data analysis applications (e.g. Python) have evolved the capabilities to efficiently support advanced numerical computations \citep{Lin2012}. This is showcased by Veros, a global circulation model (GCM) written in Python \citep{Hafner2018VerosPython}.
+
+\end{comment}
 
 
 
