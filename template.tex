@@ -104,7 +104,7 @@
 %% If authors contributed equally, please mark the respective author names with an asterisk, e.g. "\Author[2,*]{Anton}{Aman}" and "\Author[3,*]{Bradley}{Bman}" and add a further affiliation: "\affil[*]{These authors contributed equally to this work.}".
 
 
-\correspondence{Benjamin Post (benjamin.post@leibniz-zmt.de)}
+\correspondence{Benjamin Post (benjaminpost@aoop.de)}
 
 
 \runningtitle{XSO and Phydra v0.1}
@@ -133,7 +133,7 @@ Plankton community modeling is a critical tool for understanding the processes t
 \end{abstract}
 
 
-\copyrightstatement{Phydra and XSO are published open-source with a BSD-3-Clause license for open access and fair usage.} %% This section is optional and can be used for copyright transfers.
+%\copyrightstatement{} %% This section is optional and can be used for copyright transfers.
 
 %%% added Section for editing purposes, later simply use \introduction
 \section{Introduction}
@@ -203,7 +203,8 @@ Our objective in developing the XSO framework was to enable users to construct O
 
 The system of differential equations is constructed from the \textit{fluxes} using the labels supplied during model setup. The number of values in a defined dimension is flexible, but they have to match across the model in order for the model to run. When executing the model by calling the \texttt{xsimlab.run()} method of the \textit{model setup} dataset and supplying the appropriate \textit{model object}, a “filled-out” Xarray dataset is returned containing model setup parameters, metadata, and output.
 
-The XSO framework currently provides two solver algorithms: an adaptive step-size solver from the SciPy package \texttt{solve\_ivp} \citep{Virtanen2020SciPyPython} and a simple step-wise solver that is built into the backend Xarray-simlab framework. The \texttt{solve\_ivp} algorithm is implemented to use the default \texttt{RK45} method, which is an explicit Runge-Kutta method of order 5(4) \citep{Dormand1980AFormulae}. Apart from the technical limitations of the solver algorithm used, there are no restrictions to the dimensionality and number of \textit{variable types} used within a \textit{component} and no limitations to the levels of \textit{group} variables linking \textit{components} to define a single ecosystem process. 
+The XSO framework currently provides two solver algorithms: an adaptive step-size solver from the SciPy package \texttt{solve\_ivp} \citep{Virtanen2020SciPyPython} and a simple step-wise solver that is built into the backend Xarray-simlab framework. 
+The \texttt{solve\_ivp} algorithm is implemented to use the default \texttt{RK45} method, which is an explicit Runge-Kutta method of order 5(4) \citep{Dormand1980AFormulae}. Apart from the technical limitations of the solver algorithm used, there are no restrictions to the dimensionality and number of \textit{variable types} used within a \textit{component} and no limitations to the levels of \textit{group} variables linking \textit{components} to define a single ecosystem process. The \texttt{xso} Python package is available via PyPI and Github \citep{Post2023Xarray-simlab-ODE}.
 
 \subsection{The Phydra library} \label{Section:PhydraLibrary}
 Phydra is a Python package that provides a library of modular plankton community models built using the XSO framework. Phydra establishes conventions and common usage for building models using XSO.
@@ -219,14 +220,14 @@ The plankton community models included in the Phydra package are available to th
     
 \end{enumerate}
 
-The open-source and extensible nature of Phydra and XSO enables users to customize and develop processes that accurately describe a particular ecosystem. In a collaborative effort aiming to promote efficient, transparent, and reproducible marine ecosystem modeling, Phydra encourages users to contribute their own \textit{components} and \textit{models} to the core library. The Phydra library could potentially offer a comprehensive, well-documented, and peer-reviewed codebase for the scientific exploration of plankton community models.
+The open-source and extensible nature of Phydra and XSO enables users to customize and develop processes that accurately describe a particular ecosystem. In a collaborative effort aiming to promote efficient, transparent, and reproducible marine ecosystem modeling, Phydra encourages users to contribute their own \textit{components} and \textit{models} to the core library. The Phydra library could potentially offer a comprehensive, well-documented, and peer-reviewed codebase for the scientific exploration of plankton community models. Phydra is available via Github \citep{Post2023Phydra}.
 
  %% \ SECTION 3
 \section{Model applications} \label{Section:UseCases}
 
 To showcase the utility of the XSO framework and Phydra library, we present three plankton community model applications of varying complexity. For each application, we present the mathematical model, the implementation within the XSO framework and the model results. To highlight the flexible nature of the model implementations, we also show how one aspect of each model can be modified.
 
-For the first application, we consider a simple chemostat model, whose implementation using the XSO framework is presented in full detail. For the presentation of the more complex models, we show only the \textit{component} structure and highlight additional technical aspects of the implementation. For all use cases, the complete codes, following the full development workflow from model creation to output visualization, are available publicly as interactive Jupyter notebooks in the Phydra repository (\url{https://github.com/ben1post/phydra/tree/master/notebooks}).
+For the first application, we consider a simple chemostat model, whose implementation using the XSO framework is presented in full detail. For the presentation of the more complex models, we show only the \textit{component} structure and highlight additional technical aspects of the implementation. For all use cases, the complete codes, following the full development workflow from model creation to output visualization, are available publicly as interactive Jupyter notebooks in the "notebooks" folder of the Phydra repository \citep{Post2023Phydra}.
 
 \subsection{Model application 1: phytoplankton growth in a chemostat}
 %%f
@@ -734,7 +735,7 @@ We argue that codes of plankton community models are often built to be run, but 
 
 % future feature development
 The XSO framework in its current version allows building models quickly and dynamically from \textit{components} and provides a user interface to setup and run a model that is stored as a fully documented Xarray dataset. The Phydra library provides a set of \textit{components}, models, and example applications that showcase the usability of the framework and provide a common library for marine ecosystem modelling applications. 
-The first release of the Phydra library, presented here, contains variants of two published plankton ecosystem models, the EMPOWER model by \citet{Anderson2015c} and the ASTRoCAT model by \citet{Banas2011b}.
+The first release of the Phydra library, presented here, contains implementations of two published plankton ecosystem models, the EMPOWER model by \citet{Anderson2015c} and the ASTroCAT model by \citet{Banas2011b}.
 
 
 \subsection{Structuring complex marine ecosystem models in a flexible framework}
@@ -764,12 +765,13 @@ The software presented here was specifically designed to support collaborative m
 
 The presented software packages are in the early stages of development, and as such have limited functionality. This first version of the XSO framework supports mathematical models based on ordinary differential equations. In the first release, the framework functionality and library contents are focused on zero-dimensional physical settings for marine plankton models. The first version of XSO implements two numerical solvers. These are (1) a simple step-wise solver and (2) an adaptive step-size solver optimized for solving a system of ODEs (\texttt{solve\_ivp} from the SciPy package). 
 The simple step-wise solver is the only backend that currently supports multi-model parallelism when executing multiple sets of parameters via the \textit{batch} dimensionality feature. None of the implemented solvers currently support single model parallelism and are thus not optimized for very large models (i.e., more than 200 state variables). There are also limits to the flexibility of the framework, particularly for reusing components between models, since the dimensionality of a flux or state variable is hard-coded in the component and can not be altered after creating a \textit{model object}.
+clarify more here about what this means!
 
 
 \subsection{Current usage and future developments}
 % How to install and run Phydra?
 
-XSO is available via the package installer for Python (pip). Detailed instructions about installation and resolution of dependencies can be found in the online documentation. Since Python and the dependencies of Phydra are constantly developed, we provide instructions there on how to install a fully compatible virtual environment with the Conda manager separated from a user's standard Python installation. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter notebook environment that is available via Conda. For more complex and larger model runs on servers or clusters, Python scripts are preferable.
+XSO is available via the package installer for Python (pip). Detailed instructions about installation and resolution of dependencies can be found in the online documentation \citep{Post2023Xarray-simlab-ODE}. Since Python and the dependencies of Phydra are constantly developed, we provide instructions there on how to install a fully compatible virtual environment with the Conda manager separated from a user's standard Python installation \citep{Post2023Phydra}. For interactive coding and prototyping of models using Phydra, we recommend using the Jupyter notebook environment that is available via Conda. For more complex and larger model runs on servers or clusters, Python scripts are preferable.
 
 % underyling packages are constantly developed, Phydra will grow with them
 The Xarray-simlab package that provides the basis for the XSO framework is a relatively young project, but has found robust usage in, for example, the Fastscape package \citep{Bovy2021Fastscape-lem/fastscape:V0.1.0beta3} which is continuously developed and used. Since XSO provides a flexible wrapper around Xarray-simlab, and the XSO solver backend is implemented in an adaptable object-oriented manner, further developments can proceed without necessarily impacting already implemented models.
@@ -799,21 +801,21 @@ The Phydra library can be a reference and learning resource for scientists inter
 %% The following commands are for the statements about the availability of data sets and/or software code corresponding to the manuscript.
 %% It is strongly recommended to make use of these sections in case data sets and/or software code have been part of your research the article is based on.
 
-\codeavailability{XSO and Phydra packages are open source and available under a BSD-3 license on GitHub.
-- add actual links to Repos + Citation via Zenodo here - 
+\codeavailability{Xarray-simlab-ODE (XSO) and Phydra are fully open source and available under a BSD-3 license on GitHub.
+The XSO framework is available via \citet{Post2023Xarray-simlab-ODE}, DOI: \url{https://doi.org/10.5281/zenodo.8178616}, and the Phydra library is available via \citet{Post2023Phydra} DOI: \url{https://doi.org/10.5281/zenodo.8178694}
 } %% use this section when having only software code available
 
 
-\dataavailability{TEXT} %% use this section when having only data sets available
+%\dataavailability{TEXT} %% use this section when having only data sets available
 
 
-\codedataavailability{TEXT} %% use this section when having data sets and software code available
+%\codedataavailability{TEXT} %% use this section when having data sets and software code available
 
 
-\sampleavailability{TEXT} %% use this section when having geoscientific samples available
+%\sampleavailability{TEXT} %% use this section when having geoscientific samples available
 
 
-\videosupplement{TEXT} %% use this section when having video supplements available
+%\videosupplement{TEXT} %% use this section when having video supplements available
 
 
 \appendix
@@ -869,10 +871,10 @@ $b_{5,1}$ = −0.00018059 & $b_{5,2}$ = −0.00051944 & $b_{5,3}$ = −0.0004947
 
 \competinginterests{The contact author has declared that none of the authors has any competing interests.} %% this section is mandatory even if you declare that no competing interests are present
 
-\disclaimer{TEXT} %% optional section
+%\disclaimer{} %% optional section
 
 \begin{acknowledgements}
-We want to thank the open-source developers, that made this work possible. In particular, we want to thank Benoît Bovy for writing Xarray-simlab, which this work is based upon, and initial advice on some aspects of the code structure.
+We want to thank the open-source developers, that made this work possible. In particular, we want to thank Benoît Bovy for advice on some aspects of the code structure, and for developing Xarray-simlab.
 \end{acknowledgements}
 
 
