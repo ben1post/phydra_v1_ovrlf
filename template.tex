@@ -162,7 +162,7 @@ In the next sections, we present the XSO framework and structure of the Phydra l
 %
 %%f
 \begin{figure*}[t]
-\includegraphics[width=12cm]{Figures/firstdraft_schematics/00_schematics_Package.pdf}
+\includegraphics[width=12cm]{Figures/00_schematics_Package.pdf}
 \caption{Schematic of a typical workflow utilizing XSO and Phydra. XSO provides the framework. Phydra is a library of functional \textit{components} and pre-built \textit{model objects}, that can be used, extended, and modified. A typical workflow would consist of five steps. (1) Choose a pre-existing model, potentially remove or add \textit{components} or create a new model using \texttt{xso.create()}. (2) Create a \textit{model setup} by supplying the appropriate labels, parameters and solver to \texttt{xso.setup()}. The \textit{model setup} is an Xarray dataset. (3) To run the model, call the \textit{xsimlab.run()} method on the \textit{model setup}. Output is returned as a Xarray dataset containing all metadata. (4) These datasets can be easily stored or shared. (5) Xarray datasets are fully compatible for being analyzed and visualized with the wealth of tools provided by the Python scientific ecosystem.}
 \label{Figure:PhydraXSOPackageSchematics}
 \end{figure*}
@@ -231,7 +231,7 @@ For the first application, we consider a simple chemostat model, whose implement
 \subsection{Model application 1: phytoplankton growth in a chemostat}
 %%f
 \begin{figure}[t]
-\includegraphics[width=8.3cm]{Figures/firstdraft_schematics/01_schematics_Chemostat.pdf}
+\includegraphics[width=8.3cm]{Figures/01_schematics_Chemostat.pdf}
 \caption{Schematic of model application 1: Phytoplankton $P$ consuming a single nutrient $N$ in a flow-through chemostat system. The chemostat system is supplied with external medium with nutrient concentration $N_0$. The medium flows into the system and both $N$ and $P$ flow out of the system at a constant rate, $d$.}
 \label{Figure:ModelSchematics_1}
 \end{figure}
@@ -263,7 +263,7 @@ The model equations are:
 
 %%f
 \begin{figure*}[t]
-\includegraphics[width=15cm]{Figures/firstdraft_schematics/code_schematics/Chemostat.pdf}
+\includegraphics[width=15cm]{Figures/01_code_schematic_Chemostat.pdf}
 \caption{Schematic representation of the chemostat model using the XSO framework and included in the Phydra library. Model setup with constant forcing (a) and with sinusoidal forcing (b). Structures in solid black are hard-coded into components. Labels of the different components are supplied at model creation. Gray boxes and the resulting links between components (shown as thick colored arrows and dashed lines) are defined at model setup, via the supplied labels and parameters. The asterisks in the flux function input arguments references the variables, forcing and parameters defined within the same component, these local variables can be used in all functions (e.g. fluxes or forcing setup functions) within that same component.}
 \label{Figure:CodeSchematics_1}
 \end{figure*}
@@ -305,7 +305,7 @@ In order to run the model with periodic forcing, we simply exchange the forcing 
 
 %%f
 \begin{figure}[t]
-\includegraphics[width=8.3cm]{Figures/firstdraft_plots/01_chemostat_output.pdf}
+\includegraphics[width=8.3cm]{Figures/Plot_01_chemostat_output.pdf}
 \caption{Model outputs for the two chemostat scenarios: (a) Constant forcing and (b) Sinusoidal forcing. In both cases, the concentration of nutrient ($N$, purple) and phytoplankton ($P$, green) are shown through time.}
 \label{Figure:ResultsChemostat}
 \end{figure}
@@ -320,7 +320,7 @@ By producing expected results with a very simple model setup, this first applica
 \subsection{Model application 2: Nutrient-Phytoplankton-Zooplankton-Detritus (NPZD) model}
 %%f
 \begin{figure}[t]
-\includegraphics[width=8.3cm]{Figures/firstdraft_schematics/02_schematics_EMPOWER.pdf}
+\includegraphics[width=8.3cm]{Figures/02_schematics_EMPOWER.pdf}
 \caption{Schematic of model application 2: the Nutrient-Phytoplankton-Zooplankton-Detritus (NPZD) slab model. The model structure is adapted from \citet{Anderson2015c}. Boxes with black and white labels represent, respectively, state variables and external forcing. Arrows indicate fluxes between state variables. Filled colored arrows represent exchanges between state variables and forcings, open arrows represent fluxes that are lost from the model system. The upper layer box contains the ecosystem model, with state variables for nutrient, phytoplankton, zooplankton, and detritus. The oscillating blue line represents the seasonally variable mixed layer depth (MLD) that defines the boundary between the upper layer and the abiotic deep ocean.}
 \label{Figure:ModelSchematics_2}
 \end{figure}
@@ -492,7 +492,7 @@ The detritus concentration in the upper layer ($D$) is fueled by mortality of ph
 
 %%f
 \begin{figure*}[t]
-\includegraphics[width=15cm]{Figures/firstdraft_schematics/code_schematics/EMPOWER.pdf}
+\includegraphics[width=15cm]{Figures/02_code_schematic_EMPOWER.pdf}
 \caption{Schematic representation of how the NPZD slab-ocean model is implemented with the XSO framework and included in the Phydra library. To simplify visualization, we show only the XSO components with their labels and links. Each component contains various variables, forcings, or parameters. Solid arrows indicate the flow of fluxes between state variables. Dashed arrows indicate fluxes passed along as group variables. Dashed lines connecting processes indicate variables and forcings referenced in another component via their label.}
 \label{Figure:CodeSchematics_2}
 \end{figure*}
@@ -534,7 +534,7 @@ Carbon-to-Chlorophyll ratio & $\theta_{chl}$ &  75 & 75 & 75 & 75 & \unit{g C \ 
 
 %%f
 \begin{figure*}[t]
-\includegraphics[width=15cm]{Figures/firstdraft_plots/02_EMPOWER_forcing.pdf}
+\includegraphics[width=15cm]{Figures/Plot_02_EMPOWER_forcing.pdf}
 \caption{Forcing corresponding to the four locations considered for the NPZD model application. Mixed Layer Depth ($H$), Nitrate below the Mixed Layer ($N_0$), irradiance at surface ($I$), and temperature averaged through the upper mixed layer ($T$). Forcing data is calculated from the IFREMER MLD climatology and WOA 2018 data. The mixed layer depth (MLD) is extracted from a global MLD climatology \citep{DeBoyer2022} and used to extract the temperature of the mixed layer from WOA 2018 climatology data \citep{Garcia2019WORLDSilicate}. The blue dots indicate data extracted from monthly climatology, the gray dots are calculated values from this data. Nutrient forcing $N_0$ is a function of depth for locations Biotrans and India and a constant value for Papa and Kerfix. Irradiance is calculated as a function of latitude, following \citet{Anderson2015c}.}
 \label{Figure:EMPOWERforcing}
 \end{figure*}
@@ -562,7 +562,7 @@ We additionally show a modification of the model: \citet{Anderson2015c} included
 \subsubsection{Results }
 %%f
 \begin{figure*}[t]
-\includegraphics[width=15cm]{Figures/firstdraft_plots/02_EMPOWER_lightcomp.pdf}
+\includegraphics[width=15cm]{Figures/Plot_02_EMPOWER_lightcomp.pdf}
 \caption{Results of the NPZD model (application 2) for locations (a) BIOTRANS, (b) India, (c) Papa, and (d) KERFIX. We show here the final year of a five-year run, allowing for model spin-up. Model output is shown for two model variants in relation to the light attenuation algorithm used, with everything else being kept equal (see parameters in Table \ref{Table:EMPOWERparams}). The dashed lines show model outputs using the simple Beer's law for light attenuation (calculated over the entire mixed layer). The solid lines are outputs from the model variant that resolves light attenuation over three discrete depth layers. The data for nitrogen in the upper mixed layer (grey dots) are extracted from WOA 2018, using IFREMER MLD climatology. Phytoplankton nitrogen biomass (grey dots) is calculated via $\theta_{chl}$ and Redfield ratios from MODIS Aqua chlorophyll monthly climatologies for the specific locations. For some months,  no satellite data is available for stations Papa, India and KERFIX.}
 \label{Figure:ResultsEMPOWER}
 \end{figure*}
@@ -587,7 +587,7 @@ This model lends itself well to highlight the flexibility of the XSO framework. 
 \subsubsection{Description}
 %%f
 \begin{figure}[t]
-\includegraphics[width=8.3cm]{Figures/firstdraft_schematics/03_schematics_ASTroCAT.pdf}
+\includegraphics[width=8.3cm]{Figures/03_schematics_ASTroCAT.pdf}
 \caption{Schematic of the size-resolved $NP_{i}Z_{j}$ trophic model. Model structure and parameterization are adapted from \citet{Banas2011b}. 
 Boxes with black and white labels represent, respectively, state variables and external forcing. Arrows indicate fluxes between state variables. The blue boundary contains the ecosystem model, with state variables for a nutrient and multiple size classes of phytoplankton and zooplankton. Filled colored arrows represent exchanges between state variables, open black arrows represent fluxes that are lost from the model system.}
 \label{Figure:ModelSchematics_3}
@@ -658,7 +658,7 @@ Zooplankton experience quadratic losses according to the parameter $m_{Z2}$, sca
 \subsubsection{Implementation}
 %%f
 \begin{figure*}[t]
-\includegraphics[width=15cm]{Figures/firstdraft_schematics/code_schematics/ASTroCAT.pdf}
+\includegraphics[width=15cm]{Figures/03_code_schematic_ASTroCAT.pdf}
 \caption{Schematic representation of how model application 3 is implemented in the XSO framework and included in the Phydra library. For simplicity, only the XSO components with corresponding labels and links are shown. Each component consists of a number of variables, forcing, or parameters. Solid arrows indicate the fluxes between state variables. Dashed arrows indicate fluxes passed along as group variables. Dashed lines connecting processes indicate variables and forcing passed along via their label. Arrows with multiple lines indicate values with dimensions that are passed along.}
 \label{Figure:CodeSchematics_3}
 \end{figure*}
@@ -706,14 +706,14 @@ The original ASTroCAT model was implemented with an interactive graphical user i
 \subsubsection{Results}
 %%f
 \begin{figure}[t]
-\includegraphics[width=9cm]{Figures/firstdraft_plots/03_ASTroCAT_N50P50Z.pdf}
+\includegraphics[width=9cm]{Figures/Plot_03_ASTroCAT_N50P50Z.pdf}
 \caption{Nutrient concentration and plankton biomass under steady nutrient forcing obtained with model runs resolving 40 phytoplankton and zooplankton size classes. Size classes are log-spaced in the range of 1 to 20 \unit{µ m} for phytoplankton and 2.16 to 420 \unit{µ m} for zooplankton. (a) Nutrient concentration over time. (b) Phytoplankton biomass by size class over 10 years of model time evolution. (c) Zooplankton biomass over the same period.}
 \label{Figure:ResultsASTroCAT_1}
 \end{figure}
 
 %%f
 \begin{figure}[t]
-\includegraphics[width=11cm]{Figures/firstdraft_plots/03_ASTroCAT_sizeclassrange.pdf}
+\includegraphics[width=11cm]{Figures/Plot_03_ASTroCAT_sizeclassrange.pdf}
 \caption{Comparative runs of our implementation of the ASTroCAT model with varying numbers of size-classes of Phytoplankton and Zooplankton. (a) Mean biomass of phytoplankton in the last year of a ten-year run for a range of 2 to 50 size classes of phytoplankton and zooplankton. Standard deviation is plotted in red. Grey crosses mark runs not otherwise shown, colored dots correspond to exemplary runs. (b) Exemplary model runs. The sum of phytoplankton biomass is shown over a ten-year run.}
 \label{Figure:ResultsASTroCAT_2}
 \end{figure}
